@@ -126,20 +126,30 @@ class Settings(BaseModel):
                 "changeme",
                 "talentra-dev-secret-key-32-bytes-minimum-length-req",
             )
-            if self.jwt_secret_key in insecure_keys:
-                raise RuntimeError("CRITICAL: Production cannot use default or insecure JWT_SECRET_KEY!")
+            if not self.jwt_secret_key or self.jwt_secret_key in insecure_keys or len(self.jwt_secret_key) < 32:
+                raise RuntimeError("CRITICAL: Production cannot use default, empty, or short JWT_SECRET_KEY!")
             if not self.cookie_secure:
                 raise RuntimeError("CRITICAL: Production must enforce cookie_secure=True!")
             if self.enable_demo_auth:
                 raise RuntimeError("CRITICAL: Production cannot have ENABLE_DEMO_AUTH enabled!")
             if self.repository_backend == "in_memory":
                 raise RuntimeError("CRITICAL: Production cannot use in-memory repositories! PostgreSQL required.")
+            if not self.database_url or "sqlite" in self.database_url:
+                raise RuntimeError("CRITICAL: Production requires a real PostgreSQL DATABASE_URL!")
+            if not self.mongodb_url:
+                raise RuntimeError("CRITICAL: Production requires a valid MONGODB_URL!")
             if self.object_storage_provider == "local":
                 raise RuntimeError("CRITICAL: Production must use S3-compatible object storage provider, not local!")
             if self.s3_access_key_id in ("minioadmin", "admin") or self.s3_secret_access_key in ("minioadmin", "admin"):
                 raise RuntimeError("CRITICAL: Production cannot use default S3 credentials!")
-            if self.identifier_lookup_pepper == "talentra-identifier-lookup-pepper-v1":
-                raise RuntimeError("CRITICAL: Production must supply a unique IDENTIFIER_LOOKUP_PEPPER!")
+            if not self.identifier_lookup_pepper or self.identifier_lookup_pepper == "talentra-identifier-lookup-pepper-v1":
+                raise RuntimeError("CRITICAL: Production must supply a unique, non-default IDENTIFIER_LOOKUP_PEPPER!")
+            if not self.cv_verification_token_pepper or self.cv_verification_token_pepper == "talentra-cv-token-pepper-v1":
+                raise RuntimeError("CRITICAL: Production must supply a unique, non-default CV_VERIFICATION_TOKEN_PEPPER!")
+            if not self.public_app_url or "localhost" in self.public_app_url:
+                raise RuntimeError("CRITICAL: Production requires a valid non-localhost PUBLIC_APP_URL!")
+            if "*" in self.allowed_origins:
+                raise RuntimeError("CRITICAL: Production CORS cannot allow wildcard origins (*)! Must be explicit domains.")
 
 settings = Settings()
 # Execute initial production safety check

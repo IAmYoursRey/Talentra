@@ -3,6 +3,11 @@ import sys
 import asyncio
 import pytest
 
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "integration_real: tests requiring real PostgreSQL, MongoDB, and MinIO daemons"
+    )
+
 # Ensure test environment variables are established before app imports
 os.environ["APP_ENV"] = "test"
 os.environ["REPOSITORY_BACKEND"] = "in_memory"

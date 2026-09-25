@@ -35,6 +35,15 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/verify/:token*',
+        headers: [
+          {
+            key: 'Referrer-Policy',
+            value: 'no-referrer',
+          },
+        ],
+      },
     ];
   },
 };

@@ -30,6 +30,7 @@ htmlcov/
 uploads/
 storage/
 local_storage/
+backend/storage_data/
 generated_cvs/
 *.db
 *.sqlite
