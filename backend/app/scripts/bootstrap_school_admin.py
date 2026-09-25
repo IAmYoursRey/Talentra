@@ -13,6 +13,13 @@ import secrets
 import sys
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
+
+# Ensure backend root is on sys.path regardless of execution CWD
+backend_dir = str(Path(__file__).resolve().parent.parent.parent)
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
