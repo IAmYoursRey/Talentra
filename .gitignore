@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+env/
+
+# Next.js & Build
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.staging.example
+
+# Local storage and file uploads
+uploads/
+storage/
+local_storage/
+generated_cvs/
+*.db
+*.sqlite
+*.sqlite3
+
+# Certificates & keys
+*.pem
+*.key
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db

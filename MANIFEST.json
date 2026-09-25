@@ -1,0 +1,29 @@
+{
+  "name": "TALENTRA.ID Antigravity Agent Kit",
+  "generated_for": "Google Antigravity + Gemini 3.8 Flash",
+  "agents": [
+    ".agents/agents/talentra-intelligence/agent.md",
+    ".agents/agents/talentra-orchestrator/agent.md",
+    ".agents/agents/talentra-platform/agent.md",
+    ".agents/agents/talentra-reviewer/agent.md",
+    ".agents/agents/talentra-ui/agent.md"
+  ],
+  "skills": [
+    ".agents/skills/talentra-auth-rbac/SKILL.md",
+    ".agents/skills/talentra-context/SKILL.md",
+    ".agents/skills/talentra-cv-verify/SKILL.md",
+    ".agents/skills/talentra-data-api/SKILL.md",
+    ".agents/skills/talentra-phase/SKILL.md",
+    ".agents/skills/talentra-portfolio/SKILL.md",
+    ".agents/skills/talentra-review/SKILL.md",
+    ".agents/skills/talentra-talent-engine/SKILL.md",
+    ".agents/skills/talentra-ui/SKILL.md"
+  ],
+  "rules": [
+    ".agents/rules/00-core.md",
+    ".agents/rules/10-security.md",
+    ".agents/rules/20-frontend.md"
+  ],
+  "entry_agent": "talentra-orchestrator",
+  "start_phase": 1
+}
