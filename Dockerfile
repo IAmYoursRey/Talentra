@@ -42,6 +42,6 @@ USER nextjs
 EXPOSE 3000
 
 HEALTHCHECK --interval=20s --timeout=5s --start-period=15s --retries=3 \
-    CMD wget -q --spider http://localhost:3000/api/health || exit 0
+    CMD wget -q --spider http://localhost:3000/login || exit 1
 
 CMD ["npm", "run", "start"]
