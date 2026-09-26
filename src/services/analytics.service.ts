@@ -10,7 +10,7 @@ import {
 import { MOCK_SCHOOL_METRICS, MOCK_TALENT_HEATMAP, MOCK_TALENT_TRENDS, MOCK_CLASSES } from '../mocks/analytics.mock';
 import { mockAppState } from './mock-state';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface AnalyticsFilterParams {
   academicYear?: string;

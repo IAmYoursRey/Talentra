@@ -10,7 +10,7 @@ export interface IRecommendationService {
   getProfessionalDescription(portfolioId: string): Promise<ProfessionalDescriptionResponse>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class HTTPRecommendationService implements IRecommendationService {
   public async getStudentRecommendations(forceRefresh = false): Promise<RecommendationResponse> {

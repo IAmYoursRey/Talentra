@@ -14,7 +14,7 @@ export interface IPortfolioService {
   getEvidenceDownloadAccess?(portfolioId: string, storageObjectId: string): Promise<{ downloadUrl: string }>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 function mapDocToPortfolioItem(doc: any): PortfolioItem {
   const evidenceRefs = doc.evidence_refs || [];

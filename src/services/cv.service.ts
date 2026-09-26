@@ -13,7 +13,7 @@ export interface ICVService {
   revokeCV(snapshotId: string, reason?: string): Promise<{ status: string; snapshotId: string }>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class HTTPCVService implements ICVService {
   public async getCVBuilderContext(): Promise<CVBuilderContext> {

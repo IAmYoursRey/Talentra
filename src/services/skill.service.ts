@@ -7,7 +7,7 @@ export interface ISkillService {
   subscribeSkills(callback: () => void): () => void;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class HTTPSkillService implements ISkillService {
   private subscribers: Array<() => void> = [];

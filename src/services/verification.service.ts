@@ -4,7 +4,7 @@ export interface IVerificationService {
   verifyToken(token: string): Promise<PublicVerificationResult>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class HTTPVerificationService implements IVerificationService {
   public async verifyToken(token: string): Promise<PublicVerificationResult> {

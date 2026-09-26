@@ -8,7 +8,7 @@ import {
 } from '../types/admin.types';
 import { MOCK_ALL_USERS } from '../mocks/users.mock';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 function getCsrfToken(): string {
   if (typeof document !== 'undefined') {
