@@ -3,8 +3,19 @@ import re
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any, Tuple
 from abc import ABC, abstractmethod
+from sqlalchemy import select, update, delete, desc, asc, and_, or_, func
 
 from ..core.mongodb import mongo_manager
+from ..core.database import AsyncSessionLocal
+from ..core.config import settings
+from ..db.models import (
+    PortfolioItemModel,
+    PortfolioRevisionModel,
+    EvidenceTagSnapshotModel,
+    RecommendationSnapshotModel,
+    DerivedProfessionalDescriptionModel,
+    CVContentSnapshotModel,
+)
 from ..domain.documents import (
     PortfolioItemDocument,
     PortfolioRevisionDocument,
@@ -216,6 +227,738 @@ class PortfolioRepository(ABC):
         self, school_id: str, student_id: str, content_digest: str
     ) -> Optional[Dict[str, Any]]:
         pass
+
+
+class PostgresPortfolioRepository(PortfolioRepository):
+    """
+    Authoritative single-store PostgreSQL repository (optimized for Neon Serverless).
+    Preserves strict tenant isolation, immutable revision snapshots, and approved-only evidence contracts.
+    """
+
+    def __init__(self, session_factory=None):
+        self.session_factory = session_factory or AsyncSessionLocal
+
+    @staticmethod
+    def _item_to_dict(model: PortfolioItemModel) -> Dict[str, Any]:
+        return {
+            "portfolio_id": model.id,
+            "id": model.id,
+            "school_id": model.school_id,
+            "student_id": model.student_id,
+            "title": model.title,
+            "activity_type": model.activity_type,
+            "activity_date": model.activity_date,
+            "description": model.description,
+            "canonical_tag_ids": list(model.canonical_tag_ids or []),
+            "evidence_refs": list(model.evidence_refs or []),
+            "status": model.status,
+            "current_revision_id": model.current_revision_id,
+            "current_revision": model.current_revision,
+            "current_revision_number": model.current_revision_number,
+            "teacher_feedback": model.teacher_feedback,
+            "submitted_at": model.submitted_at,
+            "created_at": model.created_at,
+            "updated_at": model.updated_at,
+        }
+
+    @staticmethod
+    def _revision_to_dict(model: PortfolioRevisionModel) -> Dict[str, Any]:
+        return {
+            "revision_id": model.id,
+            "id": model.id,
+            "portfolio_id": model.portfolio_id,
+            "school_id": model.school_id,
+            "student_id": model.student_id,
+            "version": model.version,
+            "title_snapshot": model.title_snapshot,
+            "activity_type_snapshot": model.activity_type_snapshot,
+            "description_snapshot": model.description_snapshot,
+            "tag_snapshot": list(model.tag_snapshot or []),
+            "evidence_refs": list(model.evidence_refs or []),
+            "submitted_at": model.submitted_at,
+            "created_at": model.created_at,
+        }
+
+    @staticmethod
+    def _snapshot_to_dict(model: EvidenceTagSnapshotModel) -> Dict[str, Any]:
+        return {
+            "snapshot_id": model.id,
+            "id": model.id,
+            "school_id": model.school_id,
+            "student_id": model.student_id,
+            "portfolio_id": model.portfolio_id,
+            "revision_id": model.revision_id,
+            "validation_decision_id": model.validation_decision_id,
+            "canonical_tag_ids": list(model.canonical_tag_ids or []),
+            "canonical_tag_codes": list(model.canonical_tag_codes or []),
+            "approved_at": model.approved_at,
+            "projection_version": model.projection_version,
+            "created_at": model.created_at,
+        }
+
+    @staticmethod
+    def _recommendation_to_dict(model: RecommendationSnapshotModel) -> Dict[str, Any]:
+        return {
+            "snapshot_id": model.id,
+            "id": model.id,
+            "school_id": model.school_id,
+            "student_id": model.student_id,
+            "source_fingerprint": model.source_fingerprint,
+            "catalog_version": model.catalog_version,
+            "scoring_version": model.scoring_version,
+            "mapping_version": model.mapping_version,
+            "evidence_confidence": dict(model.evidence_confidence or {}),
+            "career_results": list(model.career_results or []),
+            "study_results": list(model.study_results or []),
+            "supporting_approval_ids": list(model.supporting_approval_ids or []),
+            "generated_at": model.generated_at,
+        }
+
+    @staticmethod
+    def _description_to_dict(model: DerivedProfessionalDescriptionModel) -> Dict[str, Any]:
+        return {
+            "document_id": model.id,
+            "id": model.id,
+            "school_id": model.school_id,
+            "student_id": model.student_id,
+            "portfolio_id": model.portfolio_id,
+            "revision_id": model.revision_id,
+            "source_hash": model.source_hash,
+            "original_title": model.original_title,
+            "professional_text": model.professional_text,
+            "translator_version": model.translator_version,
+            "mode": model.mode,
+            "generated_at": model.generated_at,
+        }
+
+    @staticmethod
+    def _cv_snapshot_to_dict(model: CVContentSnapshotModel) -> Dict[str, Any]:
+        return {
+            "snapshot_id": model.id,
+            "id": model.id,
+            "school_id": model.school_id,
+            "student_id": model.student_id,
+            "snapshot_version": model.snapshot_version,
+            "renderer_version": model.renderer_version,
+            "status": model.status,
+            "profile": dict(model.profile or {}),
+            "approved_skills": list(model.approved_skills or []),
+            "teacher_validated_competencies": list(model.teacher_validated_competencies or []),
+            "selected_portfolios": list(model.selected_portfolios or []),
+            "optional_exploration_summary": dict(model.optional_exploration_summary) if model.optional_exploration_summary else None,
+            "content_digest": model.content_digest,
+            "pdf_storage_key": model.pdf_storage_key,
+            "generated_at": model.generated_at,
+        }
+
+    async def create_portfolio(
+        self,
+        school_id: str,
+        student_id: str,
+        title: str,
+        activity_type: str,
+        activity_date: str,
+        description: str,
+        canonical_tag_ids: List[str],
+        evidence_refs: List[EvidenceRef],
+    ) -> Tuple[PortfolioItemDocument, PortfolioRevisionDocument]:
+        portfolio_id = str(uuid.uuid4())
+        revision_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc)
+
+        doc = PortfolioItemDocument(
+            portfolio_id=portfolio_id,
+            school_id=school_id,
+            student_id=student_id,
+            title=title,
+            activity_type=activity_type,
+            activity_date=activity_date,
+            description=description,
+            canonical_tag_ids=canonical_tag_ids,
+            evidence_refs=evidence_refs,
+            status="draft",
+            current_revision_id=revision_id,
+            current_revision_number=1,
+            current_revision=1,
+            created_at=now,
+            updated_at=now,
+        )
+
+        rev = PortfolioRevisionDocument(
+            revision_id=revision_id,
+            portfolio_id=portfolio_id,
+            school_id=school_id,
+            student_id=student_id,
+            version=1,
+            title_snapshot=title,
+            activity_type_snapshot=activity_type,
+            description_snapshot=description,
+            tag_snapshot=canonical_tag_ids,
+            evidence_refs=evidence_refs,
+            created_at=now,
+        )
+
+        ev_dicts = [ref.model_dump() if hasattr(ref, "model_dump") else dict(ref) for ref in evidence_refs]
+
+        item_model = PortfolioItemModel(
+            id=portfolio_id,
+            school_id=school_id,
+            student_id=student_id,
+            title=title,
+            activity_type=activity_type,
+            activity_date=activity_date,
+            description=description,
+            canonical_tag_ids=list(canonical_tag_ids),
+            evidence_refs=ev_dicts,
+            status="draft",
+            current_revision_id=revision_id,
+            current_revision=1,
+            current_revision_number=1,
+            created_at=now,
+            updated_at=now,
+        )
+
+        rev_model = PortfolioRevisionModel(
+            id=revision_id,
+            portfolio_id=portfolio_id,
+            school_id=school_id,
+            student_id=student_id,
+            version=1,
+            title_snapshot=title,
+            activity_type_snapshot=activity_type,
+            description_snapshot=description,
+            tag_snapshot=list(canonical_tag_ids),
+            evidence_refs=ev_dicts,
+            created_at=now,
+        )
+
+        async with self.session_factory() as session:
+            session.add(item_model)
+            session.add(rev_model)
+            await session.commit()
+
+        return doc, rev
+
+    async def get_portfolio(
+        self, school_id: str, student_id: str, portfolio_id: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(PortfolioItemModel).where(
+                PortfolioItemModel.id == portfolio_id,
+                PortfolioItemModel.school_id == school_id,
+                PortfolioItemModel.student_id == student_id,
+            )
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._item_to_dict(model) if model else None
+
+    async def get_portfolio_by_id(
+        self, school_id: str, portfolio_id: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(PortfolioItemModel).where(
+                PortfolioItemModel.id == portfolio_id,
+                PortfolioItemModel.school_id == school_id,
+            )
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._item_to_dict(model) if model else None
+
+    async def get_revision_by_id(
+        self, revision_id: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(PortfolioRevisionModel).where(PortfolioRevisionModel.id == revision_id)
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._revision_to_dict(model) if model else None
+
+    async def list_portfolios(
+        self,
+        school_id: str,
+        student_id: str,
+        status: Optional[str] = None,
+        tag: Optional[str] = None,
+        activity_type: Optional[str] = None,
+        search: Optional[str] = None,
+        sort_by: str = "newest",
+        limit: int = 50,
+        offset: int = 0,
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        async with self.session_factory() as session:
+            conditions = [
+                PortfolioItemModel.school_id == school_id,
+                PortfolioItemModel.student_id == student_id,
+            ]
+            if status and status != "all":
+                conditions.append(PortfolioItemModel.status == status)
+            if activity_type and activity_type != "all":
+                conditions.append(PortfolioItemModel.activity_type == activity_type)
+            if search and search.strip():
+                term = f"%{search.strip().lower()}%"
+                conditions.append(
+                    or_(
+                        func.lower(PortfolioItemModel.title).like(term),
+                        func.lower(PortfolioItemModel.description).like(term),
+                    )
+                )
+
+            stmt = select(PortfolioItemModel).where(and_(*conditions))
+            if sort_by == "newest":
+                stmt = stmt.order_by(desc(PortfolioItemModel.created_at))
+            else:
+                stmt = stmt.order_by(asc(PortfolioItemModel.created_at))
+
+            res = await session.execute(stmt)
+            all_items = res.scalars().all()
+
+            if tag and tag != "all":
+                filtered = [m for m in all_items if tag in (m.canonical_tag_ids or [])]
+            else:
+                filtered = list(all_items)
+
+            total = len(filtered)
+            paged = filtered[offset : offset + limit]
+            return [self._item_to_dict(m) for m in paged], total
+
+    async def list_teacher_queue(
+        self,
+        school_id: str,
+        eligible_student_ids: List[str],
+        tag: Optional[str] = None,
+        search: Optional[str] = None,
+        sort_by: str = "oldest",
+        limit: int = 50,
+        offset: int = 0,
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        if not eligible_student_ids:
+            return [], 0
+
+        async with self.session_factory() as session:
+            conditions = [
+                PortfolioItemModel.school_id == school_id,
+                PortfolioItemModel.student_id.in_(eligible_student_ids),
+                PortfolioItemModel.status == "submitted",
+            ]
+            if search and search.strip():
+                term = f"%{search.strip().lower()}%"
+                conditions.append(
+                    or_(
+                        func.lower(PortfolioItemModel.title).like(term),
+                        func.lower(PortfolioItemModel.description).like(term),
+                    )
+                )
+
+            stmt = select(PortfolioItemModel).where(and_(*conditions))
+            if sort_by == "oldest":
+                stmt = stmt.order_by(asc(PortfolioItemModel.submitted_at))
+            else:
+                stmt = stmt.order_by(desc(PortfolioItemModel.submitted_at))
+
+            res = await session.execute(stmt)
+            all_items = res.scalars().all()
+
+            if tag and tag != "all":
+                filtered = [m for m in all_items if tag in (m.canonical_tag_ids or [])]
+            else:
+                filtered = list(all_items)
+
+            total = len(filtered)
+            paged = filtered[offset : offset + limit]
+            return [self._item_to_dict(m) for m in paged], total
+
+    async def update_draft(
+        self,
+        school_id: str,
+        student_id: str,
+        portfolio_id: str,
+        update_data: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(PortfolioItemModel).where(
+                PortfolioItemModel.id == portfolio_id,
+                PortfolioItemModel.school_id == school_id,
+                PortfolioItemModel.student_id == student_id,
+                PortfolioItemModel.status == "draft",
+            )
+            res = await session.execute(stmt)
+            item = res.scalar_one_or_none()
+            if not item:
+                return None
+
+            for key, val in update_data.items():
+                if key == "evidence_refs" and val is not None:
+                    item.evidence_refs = [r.model_dump() if hasattr(r, "model_dump") else dict(r) for r in val]
+                elif hasattr(item, key):
+                    setattr(item, key, val)
+
+            item.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+            return self._item_to_dict(item)
+
+    async def atomic_submit(
+        self,
+        school_id: str,
+        student_id: str,
+        portfolio_id: str,
+        expected_revision: int,
+        submission_data: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
+        now = datetime.now(timezone.utc)
+        async with self.session_factory() as session:
+            stmt = select(PortfolioItemModel).where(
+                PortfolioItemModel.id == portfolio_id,
+                PortfolioItemModel.school_id == school_id,
+                PortfolioItemModel.student_id == student_id,
+                PortfolioItemModel.status.in_(["draft", "revision_requested"]),
+            )
+            res = await session.execute(stmt)
+            item = res.scalar_one_or_none()
+            if not item:
+                return None
+
+            new_revision_id = str(uuid.uuid4())
+            new_rev_number = item.current_revision_number + 1
+
+            for key, val in submission_data.items():
+                if key == "evidence_refs" and val is not None:
+                    item.evidence_refs = [r.model_dump() if hasattr(r, "model_dump") else dict(r) for r in val]
+                elif hasattr(item, key):
+                    setattr(item, key, val)
+
+            item.status = "submitted"
+            item.current_revision_id = new_revision_id
+            item.current_revision_number = new_rev_number
+            item.submitted_at = now
+            item.updated_at = now
+
+            rev_model = PortfolioRevisionModel(
+                id=new_revision_id,
+                portfolio_id=portfolio_id,
+                school_id=school_id,
+                student_id=student_id,
+                version=new_rev_number,
+                title_snapshot=item.title,
+                activity_type_snapshot=item.activity_type,
+                description_snapshot=item.description,
+                tag_snapshot=list(item.canonical_tag_ids or []),
+                evidence_refs=list(item.evidence_refs or []),
+                submitted_at=now,
+                created_at=now,
+            )
+            session.add(rev_model)
+            await session.commit()
+            return self._item_to_dict(item)
+
+    async def atomic_transition_review(
+        self,
+        school_id: str,
+        portfolio_id: str,
+        expected_revision_id: str,
+        target_status: str,
+        feedback: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        now = datetime.now(timezone.utc)
+        async with self.session_factory() as session:
+            stmt = select(PortfolioItemModel).where(
+                PortfolioItemModel.id == portfolio_id,
+                PortfolioItemModel.school_id == school_id,
+                PortfolioItemModel.current_revision_id == expected_revision_id,
+                PortfolioItemModel.status == "submitted",
+            )
+            res = await session.execute(stmt)
+            item = res.scalar_one_or_none()
+            if not item:
+                return None
+
+            item.status = target_status
+            item.teacher_feedback = feedback
+            item.updated_at = now
+            await session.commit()
+            return self._item_to_dict(item)
+
+    async def begin_revision(
+        self,
+        school_id: str,
+        student_id: str,
+        portfolio_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(PortfolioItemModel).where(
+                PortfolioItemModel.id == portfolio_id,
+                PortfolioItemModel.school_id == school_id,
+                PortfolioItemModel.student_id == student_id,
+                PortfolioItemModel.status == "revision_requested",
+            )
+            res = await session.execute(stmt)
+            item = res.scalar_one_or_none()
+            if not item:
+                return None
+
+            item.status = "draft"
+            item.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+            return self._item_to_dict(item)
+
+    async def delete_draft(
+        self,
+        school_id: str,
+        student_id: str,
+        portfolio_id: str,
+    ) -> bool:
+        async with self.session_factory() as session:
+            stmt = select(PortfolioItemModel).where(
+                PortfolioItemModel.id == portfolio_id,
+                PortfolioItemModel.school_id == school_id,
+                PortfolioItemModel.student_id == student_id,
+                PortfolioItemModel.status == "draft",
+            )
+            res = await session.execute(stmt)
+            item = res.scalar_one_or_none()
+            if not item:
+                return False
+
+            await session.delete(item)
+            await session.commit()
+            return True
+
+    async def save_evidence_tag_snapshot(
+        self, snapshot: EvidenceTagSnapshotDocument
+    ) -> EvidenceTagSnapshotDocument:
+        model = EvidenceTagSnapshotModel(
+            id=snapshot.snapshot_id,
+            school_id=snapshot.school_id,
+            student_id=snapshot.student_id,
+            portfolio_id=snapshot.portfolio_id,
+            revision_id=snapshot.revision_id,
+            validation_decision_id=snapshot.validation_decision_id,
+            canonical_tag_ids=list(snapshot.canonical_tag_ids),
+            canonical_tag_codes=list(snapshot.canonical_tag_codes),
+            approved_at=snapshot.approved_at,
+            projection_version=snapshot.projection_version,
+            created_at=datetime.now(timezone.utc),
+        )
+        async with self.session_factory() as session:
+            session.add(model)
+            await session.commit()
+        return snapshot
+
+    async def get_evidence_tag_snapshots_for_student(
+        self, school_id: str, student_id: str
+    ) -> List[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(EvidenceTagSnapshotModel).where(
+                EvidenceTagSnapshotModel.school_id == school_id,
+                EvidenceTagSnapshotModel.student_id == student_id,
+            ).order_by(asc(EvidenceTagSnapshotModel.approved_at))
+            res = await session.execute(stmt)
+            return [self._snapshot_to_dict(m) for m in res.scalars().all()]
+
+    async def get_evidence_tag_snapshots_for_cohort(
+        self, school_id: str, student_ids: List[str]
+    ) -> List[Dict[str, Any]]:
+        if not student_ids:
+            return []
+        async with self.session_factory() as session:
+            stmt = select(EvidenceTagSnapshotModel).where(
+                EvidenceTagSnapshotModel.school_id == school_id,
+                EvidenceTagSnapshotModel.student_id.in_(student_ids),
+            ).order_by(asc(EvidenceTagSnapshotModel.approved_at))
+            res = await session.execute(stmt)
+            return [self._snapshot_to_dict(m) for m in res.scalars().all()]
+
+    async def delete_evidence_tag_snapshots_for_student(
+        self, school_id: str, student_id: str
+    ) -> int:
+        async with self.session_factory() as session:
+            stmt = delete(EvidenceTagSnapshotModel).where(
+                EvidenceTagSnapshotModel.school_id == school_id,
+                EvidenceTagSnapshotModel.student_id == student_id,
+            )
+            res = await session.execute(stmt)
+            await session.commit()
+            return res.rowcount or 0
+
+    async def get_snapshot_by_decision_id(
+        self, decision_id: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(EvidenceTagSnapshotModel).where(
+                EvidenceTagSnapshotModel.validation_decision_id == decision_id
+            )
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._snapshot_to_dict(model) if model else None
+
+    async def save_recommendation_snapshot(
+        self, snapshot: RecommendationSnapshotDocument
+    ) -> RecommendationSnapshotDocument:
+        model = RecommendationSnapshotModel(
+            id=snapshot.snapshot_id,
+            school_id=snapshot.school_id,
+            student_id=snapshot.student_id,
+            source_fingerprint=snapshot.source_fingerprint,
+            catalog_version=snapshot.catalog_version,
+            scoring_version=snapshot.scoring_version,
+            mapping_version=snapshot.mapping_version,
+            evidence_confidence=dict(snapshot.evidence_confidence),
+            career_results=list(snapshot.career_results),
+            study_results=list(snapshot.study_results),
+            supporting_approval_ids=list(snapshot.supporting_approval_ids),
+            generated_at=snapshot.generated_at,
+        )
+        async with self.session_factory() as session:
+            session.add(model)
+            await session.commit()
+        return snapshot
+
+    async def get_latest_recommendation_snapshot(
+        self, school_id: str, student_id: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(RecommendationSnapshotModel).where(
+                RecommendationSnapshotModel.school_id == school_id,
+                RecommendationSnapshotModel.student_id == student_id,
+            ).order_by(desc(RecommendationSnapshotModel.generated_at)).limit(1)
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._recommendation_to_dict(model) if model else None
+
+    async def save_professional_description(
+        self, doc: DerivedProfessionalDescriptionDocument
+    ) -> DerivedProfessionalDescriptionDocument:
+        async with self.session_factory() as session:
+            stmt = select(DerivedProfessionalDescriptionModel).where(
+                DerivedProfessionalDescriptionModel.portfolio_id == doc.portfolio_id,
+                DerivedProfessionalDescriptionModel.school_id == doc.school_id,
+                DerivedProfessionalDescriptionModel.student_id == doc.student_id,
+            )
+            res = await session.execute(stmt)
+            existing = res.scalar_one_or_none()
+            if existing:
+                existing.revision_id = doc.revision_id
+                existing.source_hash = doc.source_hash
+                existing.original_title = doc.original_title
+                existing.professional_text = doc.professional_text
+                existing.translator_version = doc.translator_version
+                existing.mode = doc.mode
+                existing.generated_at = doc.generated_at
+            else:
+                model = DerivedProfessionalDescriptionModel(
+                    id=doc.document_id,
+                    school_id=doc.school_id,
+                    student_id=doc.student_id,
+                    portfolio_id=doc.portfolio_id,
+                    revision_id=doc.revision_id,
+                    source_hash=doc.source_hash,
+                    original_title=doc.original_title,
+                    professional_text=doc.professional_text,
+                    translator_version=doc.translator_version,
+                    mode=doc.mode,
+                    generated_at=doc.generated_at,
+                )
+                session.add(model)
+            await session.commit()
+        return doc
+
+    async def get_professional_description(
+        self, school_id: str, student_id: str, portfolio_id: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(DerivedProfessionalDescriptionModel).where(
+                DerivedProfessionalDescriptionModel.portfolio_id == portfolio_id,
+                DerivedProfessionalDescriptionModel.school_id == school_id,
+                DerivedProfessionalDescriptionModel.student_id == student_id,
+            )
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._description_to_dict(model) if model else None
+
+    async def save_cv_snapshot(
+        self, snapshot: CVContentSnapshotDocument
+    ) -> CVContentSnapshotDocument:
+        model = CVContentSnapshotModel(
+            id=snapshot.snapshot_id,
+            school_id=snapshot.school_id,
+            student_id=snapshot.student_id,
+            snapshot_version=snapshot.snapshot_version,
+            renderer_version=snapshot.renderer_version,
+            status=snapshot.status,
+            profile=dict(snapshot.profile),
+            approved_skills=list(snapshot.approved_skills),
+            teacher_validated_competencies=list(snapshot.teacher_validated_competencies),
+            selected_portfolios=list(snapshot.selected_portfolios),
+            optional_exploration_summary=dict(snapshot.optional_exploration_summary) if snapshot.optional_exploration_summary else None,
+            content_digest=snapshot.content_digest,
+            pdf_storage_key=None,
+            generated_at=snapshot.generated_at,
+        )
+        async with self.session_factory() as session:
+            session.add(model)
+            await session.commit()
+        return snapshot
+
+    async def get_cv_snapshot(
+        self, school_id: str, student_id: str, snapshot_id: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(CVContentSnapshotModel).where(
+                CVContentSnapshotModel.id == snapshot_id,
+                CVContentSnapshotModel.school_id == school_id,
+                CVContentSnapshotModel.student_id == student_id,
+            )
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._cv_snapshot_to_dict(model) if model else None
+
+    async def get_cv_snapshot_by_id(
+        self, snapshot_id: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(CVContentSnapshotModel).where(
+                CVContentSnapshotModel.id == snapshot_id
+            )
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._cv_snapshot_to_dict(model) if model else None
+
+    async def list_cv_snapshots_for_student(
+        self, school_id: str, student_id: str
+    ) -> List[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(CVContentSnapshotModel).where(
+                CVContentSnapshotModel.school_id == school_id,
+                CVContentSnapshotModel.student_id == student_id,
+            ).order_by(desc(CVContentSnapshotModel.generated_at))
+            res = await session.execute(stmt)
+            return [self._cv_snapshot_to_dict(m) for m in res.scalars().all()]
+
+    async def update_cv_snapshot_status(
+        self, snapshot_id: str, status: str
+    ) -> bool:
+        async with self.session_factory() as session:
+            stmt = select(CVContentSnapshotModel).where(CVContentSnapshotModel.id == snapshot_id)
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            if not model:
+                return False
+            model.status = status
+            await session.commit()
+            return True
+
+    async def get_cv_snapshot_by_digest(
+        self, school_id: str, student_id: str, content_digest: str
+    ) -> Optional[Dict[str, Any]]:
+        async with self.session_factory() as session:
+            stmt = select(CVContentSnapshotModel).where(
+                CVContentSnapshotModel.school_id == school_id,
+                CVContentSnapshotModel.student_id == student_id,
+                CVContentSnapshotModel.content_digest == content_digest,
+                CVContentSnapshotModel.status != "revoked",
+            ).order_by(desc(CVContentSnapshotModel.generated_at)).limit(1)
+            res = await session.execute(stmt)
+            model = res.scalar_one_or_none()
+            return self._cv_snapshot_to_dict(model) if model else None
 
 
 
@@ -1212,4 +1955,16 @@ class InMemoryPortfolioRepository(PortfolioRepository):
             reverse=True,
         )
         return matches[0]
+
+
+def get_portfolio_repository() -> PortfolioRepository:
+    """
+    Factory resolving the authoritative portfolio repository.
+    Returns InMemoryPortfolioRepository in test / in_memory mode.
+    Returns PostgresPortfolioRepository for production / PostgreSQL (Neon).
+    """
+    if settings.app_env == "test" or settings.repository_backend == "in_memory":
+        return InMemoryPortfolioRepository()
+    return PostgresPortfolioRepository()
+
 

@@ -12,8 +12,9 @@ def get_engine(url: str | None = None) -> AsyncEngine:
     kwargs = {"echo": False}
     if db_url.startswith("postgresql"):
         kwargs.update({
-            "pool_size": 10,
-            "max_overflow": 20,
+            "pool_size": 5,
+            "max_overflow": 2,
+            "pool_recycle": 300,
             "pool_pre_ping": True,
         })
     return create_async_engine(db_url, **kwargs)

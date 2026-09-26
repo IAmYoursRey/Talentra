@@ -11,8 +11,12 @@ from ..core.database import AsyncSessionLocal
 from ..db.models import OutboxEventModel
 from ..domain.enums import AuditEventType
 from ..domain.documents import PortfolioItemDocument, PortfolioRevisionDocument, EvidenceRef
-from ..repositories.portfolio import PortfolioRepository, MongoPortfolioRepository, InMemoryPortfolioRepository
+from ..repositories.portfolio import (
+    PortfolioRepository,
+    get_portfolio_repository,
+)
 from ..repositories.storage_metadata import StorageMetadataRepository
+from ..repositories.upload_intent import BlobUploadIntentRepository
 from ..repositories.skill_tag import SkillTagRepository
 from ..repositories.validation import TeacherValidationRepository
 from ..storage import get_object_storage
@@ -69,19 +73,14 @@ class PortfolioService:
         skill_tag_repo: Optional[SkillTagRepository] = None,
         object_storage: Optional[ObjectStorage] = None,
         validation_repo: Optional[TeacherValidationRepository] = None,
+        intent_repo: Optional[BlobUploadIntentRepository] = None,
     ):
-        if portfolio_repo:
-            self.portfolio_repo = portfolio_repo
-        else:
-            # Prefer MongoDB when configured, otherwise InMemory
-            if settings.app_env == "test":
-                self.portfolio_repo = InMemoryPortfolioRepository()
-            else:
-                self.portfolio_repo = MongoPortfolioRepository()
+        self.portfolio_repo = portfolio_repo or get_portfolio_repository()
 
         self.storage_meta_repo = storage_meta_repo or StorageMetadataRepository()
         self.skill_tag_repo = skill_tag_repo or SkillTagRepository()
         self.validation_repo = validation_repo or TeacherValidationRepository()
+        self.intent_repo = intent_repo or BlobUploadIntentRepository()
         self.storage = object_storage or get_object_storage()
         self.scanner = DevelopmentNoopScanner()
 
@@ -366,6 +365,19 @@ class PortfolioService:
                 detail={"code": "UPLOAD_TYPE_NOT_ALLOWED", "message": str(e)},
             )
 
+        # Check free-tier storage quota soft limit
+        if getattr(settings, "free_tier_mode", True):
+            current_usage = await self.storage_meta_repo.get_total_used_storage(school_id=school_id)
+            soft_limit = getattr(settings, "storage_soft_limit_bytes", 200 * 1024 * 1024)
+            if current_usage + declared_size_bytes > soft_limit:
+                raise HTTPException(
+                    status_code=status.HTTP_507_INSUFFICIENT_STORAGE,
+                    detail={
+                        "code": "STORAGE_QUOTA_REACHED",
+                        "message": "Kapasitas penyimpanan sekolah telah mencapai batas kuota gratis (soft limit). Hubungi administrator.",
+                    },
+                )
+
         storage_object_id = str(uuid.uuid4())
         safe_key = generate_safe_object_key(
             school_id=school_id,
@@ -376,7 +388,7 @@ class PortfolioService:
 
         # Create pending row in PostgreSQL
         provider = settings.object_storage_provider
-        bucket = settings.s3_bucket if provider == "s3" else "local"
+        bucket = settings.s3_bucket if provider == "s3" else ("vercel-blob" if provider == "vercel_blob" else "local")
         await self.storage_meta_repo.create_pending_upload(
             id=storage_object_id,
             school_id=school_id,
@@ -388,6 +400,17 @@ class PortfolioService:
             content_type=content_type,
             declared_size=declared_size_bytes,
             checksum=checksum,
+        )
+
+        # Create short-lived opaque upload intent
+        intent_model, intent_token = await self.intent_repo.create_intent(
+            school_id=school_id,
+            student_id=student_id,
+            portfolio_id=portfolio_id,
+            pathname=safe_key,
+            expected_content_type=content_type,
+            max_bytes=declared_size_bytes,
+            ttl_seconds=settings.presigned_url_ttl_seconds,
         )
 
         upload_url = self.storage.create_upload_url(
@@ -407,6 +430,8 @@ class PortfolioService:
         return {
             "storageObjectId": storage_object_id,
             "uploadUrl": upload_url,
+            "intentToken": intent_token,
+            "pathname": safe_key,
             "expiresInSeconds": settings.presigned_url_ttl_seconds,
             "objectKey": safe_key,
         }

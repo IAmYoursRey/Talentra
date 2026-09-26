@@ -10,7 +10,10 @@ from ..domain.enums import AuditEventType
 from ..domain.documents import RecommendationSnapshotDocument
 from ..domain.models import CareerPath, StudyPath
 from ..repositories.catalog import CareerCatalogRepository
-from ..repositories.portfolio import PortfolioRepository, MongoPortfolioRepository, InMemoryPortfolioRepository
+from ..repositories.portfolio import (
+    PortfolioRepository,
+    get_portfolio_repository,
+)
 from .projection_service import StudentSkillProjectionService
 
 SCORING_VERSION = "recommendation-v1"
@@ -40,13 +43,7 @@ class RecommendationEngineService:
         catalog_repo: Optional[CareerCatalogRepository] = None,
         projection_service: Optional[StudentSkillProjectionService] = None,
     ):
-        if portfolio_repo:
-            self.portfolio_repo = portfolio_repo
-        else:
-            if settings.app_env == "test":
-                self.portfolio_repo = InMemoryPortfolioRepository()
-            else:
-                self.portfolio_repo = MongoPortfolioRepository()
+        self.portfolio_repo = portfolio_repo or get_portfolio_repository()
 
         self.catalog_repo = catalog_repo or CareerCatalogRepository()
         self.projection_service = projection_service or StudentSkillProjectionService(portfolio_repo=self.portfolio_repo)

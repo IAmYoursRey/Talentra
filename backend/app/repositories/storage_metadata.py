@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Dict, Any
-from sqlalchemy import select, update, and_
+from sqlalchemy import select, update, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from ..core.database import AsyncSessionLocal
@@ -149,3 +149,16 @@ class StorageMetadataRepository:
                 keys_to_purge.append(m.object_key)
             await session.commit()
             return keys_to_purge
+
+    async def get_total_used_storage(self, school_id: Optional[str] = None) -> int:
+        """Calculates total byte size of available non-deleted storage objects for free-tier soft limit."""
+        async with self.session_factory() as session:
+            conditions = [
+                StorageObjectModel.status == "available",
+                StorageObjectModel.deleted_at.is_(None),
+            ]
+            if school_id:
+                conditions.append(StorageObjectModel.school_id == school_id)
+            stmt = select(func.coalesce(func.sum(StorageObjectModel.size_bytes), 0)).where(and_(*conditions))
+            result = await session.execute(stmt)
+            return int(result.scalar_one() or 0)

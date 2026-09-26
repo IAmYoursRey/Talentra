@@ -16,8 +16,7 @@ from ..db.models import (
 )
 from ..repositories.portfolio import (
     PortfolioRepository,
-    MongoPortfolioRepository,
-    InMemoryPortfolioRepository,
+    get_portfolio_repository,
 )
 from ..repositories.validation import TeacherValidationRepository
 from .projection_service import RADAR_DIMENSIONS
@@ -35,13 +34,7 @@ class SchoolAnalyticsService:
         validation_repo: Optional[TeacherValidationRepository] = None,
     ):
         self.session_factory = session_factory or AsyncSessionLocal
-        if portfolio_repo:
-            self.portfolio_repo = portfolio_repo
-        else:
-            if settings.app_env == "test":
-                self.portfolio_repo = InMemoryPortfolioRepository()
-            else:
-                self.portfolio_repo = MongoPortfolioRepository()
+        self.portfolio_repo = portfolio_repo or get_portfolio_repository()
         self.validation_repo = validation_repo or TeacherValidationRepository(session_factory=self.session_factory)
 
     async def _resolve_eligible_students(

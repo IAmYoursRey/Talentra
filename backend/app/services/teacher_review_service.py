@@ -9,7 +9,7 @@ from ..core.config import settings
 from ..core.audit import audit_logger
 from ..core.idempotency import idempotency_manager
 from ..domain.enums import AuditEventType
-from ..repositories.portfolio import PortfolioRepository, MongoPortfolioRepository, InMemoryPortfolioRepository
+from ..repositories.portfolio import PortfolioRepository, get_portfolio_repository, InMemoryPortfolioRepository
 from ..repositories.validation import TeacherValidationRepository
 from ..repositories.storage_metadata import StorageMetadataRepository
 from ..storage import get_object_storage
@@ -43,13 +43,7 @@ class TeacherReviewService:
         object_storage: Optional[ObjectStorage] = None,
         projection_service: Optional[StudentSkillProjectionService] = None,
     ):
-        if portfolio_repo:
-            self.portfolio_repo = portfolio_repo
-        else:
-            if settings.app_env == "test":
-                self.portfolio_repo = InMemoryPortfolioRepository()
-            else:
-                self.portfolio_repo = MongoPortfolioRepository()
+        self.portfolio_repo = portfolio_repo or get_portfolio_repository()
 
         self.validation_repo = validation_repo or TeacherValidationRepository()
         self.storage_meta_repo = storage_meta_repo or StorageMetadataRepository()

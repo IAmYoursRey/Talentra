@@ -8,7 +8,11 @@ const nextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: `${BACKEND_URL}/api/v1/:path*`,
+        destination: process.env.API_BASE_URL
+          ? `${process.env.API_BASE_URL}/api/v1/:path*`
+          : process.env.NODE_ENV === 'development'
+          ? 'http://127.0.0.1:8000/api/v1/:path*'
+          : '/api/',
       },
     ];
   },

@@ -172,6 +172,7 @@ async def delete_portfolio_draft(
 
 
 @router.post("/{portfolio_id}/uploads", status_code=status.HTTP_201_CREATED)
+@router.post("/{portfolio_id}/uploads/intent", status_code=status.HTTP_201_CREATED)
 async def request_upload_intent(
     portfolio_id: str,
     payload: UploadIntentRequest,

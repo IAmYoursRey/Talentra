@@ -168,3 +168,37 @@ def test_s3_object_storage_mocked_urls():
     )
     assert download_url is not None
     assert "talentra-test-bucket" in download_url or "localhost:9000" in download_url
+
+
+def test_vercel_blob_storage_adapter():
+    """
+    Tests VercelBlobStorage URL generation, signature verification, and expiry.
+    """
+    from app.storage.vercel_blob import VercelBlobStorage
+    from app.storage import get_object_storage
+
+    storage = VercelBlobStorage(token="vercel_blob_mock_token_12345")
+    object_key = f"schools/sch-uuid/students/std-uuid/portfolio/port-uuid/{uuid.uuid4()}.pdf"
+
+    # 1. Upload URL generation
+    upload_url = storage.create_upload_url(object_key=object_key, content_type="application/pdf", expires_in=600)
+    assert "/api/blob/upload" in upload_url
+    assert object_key in upload_url
+    assert "sig=" in upload_url
+
+    # 2. Download URL generation
+    download_url = storage.create_download_url(object_key=object_key, expires_in=600)
+    assert "/api/v1/storage/download" in download_url
+    assert object_key in download_url
+    assert "sig=" in download_url
+
+    # 3. Signature verification
+    parsed = urlparse(download_url)
+    qs = parse_qs(parsed.query)
+    key = qs["key"][0]
+    expires = int(qs["expires"][0])
+    sig = qs["sig"][0]
+    assert storage.verify_signed_url("blob_download", key, expires, sig) is True
+    assert storage.verify_signed_url("blob_download", key, expires - 1000, sig) is False
+    assert storage.verify_signed_url("blob_download", "other-key", expires, sig) is False
+

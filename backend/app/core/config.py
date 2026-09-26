@@ -53,15 +53,26 @@ class Settings(BaseModel):
         )
     )
 
-    # Document Database (MongoDB)
-    mongodb_url: str = Field(
-        default_factory=lambda: os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+    # Free Tier Quota Configuration
+    free_tier_mode: bool = Field(
+        default_factory=lambda: os.getenv("FREE_TIER_MODE", "true").lower() in ("true", "1", "yes")
+    )
+    storage_soft_limit_bytes: int = Field(
+        default_factory=lambda: int(os.getenv("STORAGE_SOFT_LIMIT_BYTES", str(200 * 1024 * 1024)))  # 200 MB default soft limit
+    )
+    blob_read_write_token: str | None = Field(
+        default_factory=lambda: os.getenv("BLOB_READ_WRITE_TOKEN")
+    )
+
+    # Document Database (MongoDB — Optional / Legacy Compatibility only)
+    mongodb_url: str | None = Field(
+        default_factory=lambda: os.getenv("MONGODB_URL")
     )
     mongodb_database: str = Field(
         default_factory=lambda: os.getenv("MONGODB_DATABASE", "talentra_docs")
     )
 
-    # Object Storage (S3 / Local)
+    # Object Storage (Vercel Blob / Local / S3)
     object_storage_provider: str = Field(
         default_factory=lambda: os.getenv("OBJECT_STORAGE_PROVIDER", "local")
     )
@@ -118,7 +129,7 @@ class Settings(BaseModel):
     ]
 
     def validate_production_safety(self) -> None:
-        """Fail-fast validation for production security constraints."""
+        """Fail-fast validation for production security constraints on Vercel."""
         if self.app_env == "production":
             insecure_keys = (
                 "secret123",
@@ -136,12 +147,13 @@ class Settings(BaseModel):
                 raise RuntimeError("CRITICAL: Production cannot use in-memory repositories! PostgreSQL required.")
             if not self.database_url or "sqlite" in self.database_url:
                 raise RuntimeError("CRITICAL: Production requires a real PostgreSQL DATABASE_URL!")
-            if not self.mongodb_url:
-                raise RuntimeError("CRITICAL: Production requires a valid MONGODB_URL!")
             if self.object_storage_provider == "local":
                 raise RuntimeError("CRITICAL: Production must use S3-compatible object storage provider, not local!")
-            if self.s3_access_key_id in ("minioadmin", "admin") or self.s3_secret_access_key in ("minioadmin", "admin"):
-                raise RuntimeError("CRITICAL: Production cannot use default S3 credentials!")
+            if self.object_storage_provider == "vercel_blob" and not self.blob_read_write_token:
+                raise RuntimeError("CRITICAL: Production with OBJECT_STORAGE_PROVIDER=vercel_blob requires BLOB_READ_WRITE_TOKEN!")
+            if self.object_storage_provider == "s3":
+                if self.s3_access_key_id in ("minioadmin", "admin") or self.s3_secret_access_key in ("minioadmin", "admin"):
+                    raise RuntimeError("CRITICAL: Production cannot use default S3 credentials!")
             if not self.identifier_lookup_pepper or self.identifier_lookup_pepper == "talentra-identifier-lookup-pepper-v1":
                 raise RuntimeError("CRITICAL: Production must supply a unique, non-default IDENTIFIER_LOOKUP_PEPPER!")
             if not self.cv_verification_token_pepper or self.cv_verification_token_pepper == "talentra-cv-token-pepper-v1":

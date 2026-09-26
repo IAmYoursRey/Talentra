@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timezone
+from typing import Any
 from sqlalchemy import (
     String,
     Boolean,
@@ -11,6 +12,7 @@ from sqlalchemy import (
     UniqueConstraint,
     CheckConstraint,
     Index,
+    JSON,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..core.database import Base
@@ -459,5 +461,197 @@ class VerificationRecordModel(Base):
         Index("ix_verification_records_school_student_issued", "school_id", "student_id", "issued_at"),
         Index("ix_verification_records_status_expires", "status", "expires_at"),
     )
+
+
+class PortfolioItemModel(Base):
+    __tablename__ = "portfolio_items"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    school_id: Mapped[str] = mapped_column(String(36), ForeignKey("schools.id", ondelete="CASCADE"), nullable=False, index=True)
+    student_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    activity_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    activity_date: Mapped[str] = mapped_column(String(32), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    canonical_tag_ids: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    evidence_refs: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="draft", nullable=False, index=True)
+    current_revision_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    current_revision: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    current_revision_number: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    teacher_feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    __table_args__ = (
+        Index("ix_portfolio_items_school_student_status", "school_id", "student_id", "status"),
+        Index("ix_portfolio_items_school_status_created", "school_id", "status", "created_at"),
+    )
+
+
+class PortfolioRevisionModel(Base):
+    __tablename__ = "portfolio_revisions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    portfolio_id: Mapped[str] = mapped_column(String(36), ForeignKey("portfolio_items.id", ondelete="CASCADE"), nullable=False, index=True)
+    school_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    student_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    title_snapshot: Mapped[str] = mapped_column(String(255), nullable=False)
+    activity_type_snapshot: Mapped[str] = mapped_column(String(64), nullable=False)
+    description_snapshot: Mapped[str] = mapped_column(Text, nullable=False)
+    tag_snapshot: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    evidence_refs: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_portfolio_revisions_portfolio_version", "portfolio_id", "version"),
+    )
+
+
+class EvidenceTagSnapshotModel(Base):
+    __tablename__ = "evidence_tag_snapshots"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    school_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    student_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    portfolio_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    revision_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    validation_decision_id: Mapped[str] = mapped_column(String(36), unique=True, nullable=False, index=True)
+    canonical_tag_ids: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    canonical_tag_codes: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    projection_version: Mapped[str] = mapped_column(String(32), default="v1", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_evidence_tag_snapshots_student_approved", "student_id", "approved_at"),
+        Index("ix_evidence_tag_snapshots_school_student", "school_id", "student_id"),
+    )
+
+
+class RecommendationSnapshotModel(Base):
+    __tablename__ = "recommendation_snapshots"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: str(uuid.uuid4()))
+    school_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    student_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    source_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalog_version: Mapped[str] = mapped_column(String(64), default="career-catalog-v1", nullable=False)
+    scoring_version: Mapped[str] = mapped_column(String(64), default="recommendation-v1", nullable=False)
+    mapping_version: Mapped[str] = mapped_column(String(64), default="mapping-v1", nullable=False)
+    evidence_confidence: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    career_results: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    study_results: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    supporting_approval_ids: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_recommendation_snapshots_student_generated", "student_id", "generated_at"),
+    )
+
+
+class DerivedProfessionalDescriptionModel(Base):
+    __tablename__ = "derived_professional_descriptions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    school_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    student_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    portfolio_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    revision_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    source_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    original_title: Mapped[str] = mapped_column(String(255), default="", nullable=False)
+    professional_text: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    translator_version: Mapped[str] = mapped_column(String(64), default="industry-language-v1", nullable=False)
+    mode: Mapped[str] = mapped_column(String(32), default="deterministic", nullable=False)
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_derived_descriptions_portfolio_revision", "portfolio_id", "revision_id"),
+        Index("ix_derived_descriptions_student_portfolio", "student_id", "portfolio_id"),
+    )
+
+
+class CVContentSnapshotModel(Base):
+    __tablename__ = "cv_content_snapshots"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: str(uuid.uuid4()))
+    school_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    student_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    snapshot_version: Mapped[str] = mapped_column(String(32), default="cv-snapshot-v1", nullable=False)
+    renderer_version: Mapped[str] = mapped_column(String(32), default="cv-pdf-v1", nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="issued", nullable=False)
+    profile: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    approved_skills: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    teacher_validated_competencies: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    selected_portfolios: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    optional_exploration_summary: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    content_digest: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    pdf_storage_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_cv_content_snapshots_student_status", "student_id", "status"),
+        Index("ix_cv_content_snapshots_student_digest", "student_id", "content_digest"),
+    )
+
+
+class BlobUploadIntentModel(Base):
+    __tablename__ = "blob_upload_intents"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    school_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    student_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    portfolio_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    pathname: Mapped[str] = mapped_column(String(512), nullable=False)
+    expected_content_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    max_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="pending", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_blob_upload_intents_portfolio_status", "portfolio_id", "status"),
+    )
+
+
+class RateLimitBucketModel(Base):
+    __tablename__ = "rate_limit_buckets"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    key_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    scope: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    window_start: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("key_hash", "scope", "window_start", name="uq_rate_limit_bucket"),
+        Index("ix_rate_limit_expires", "expires_at"),
+    )
+
 
 

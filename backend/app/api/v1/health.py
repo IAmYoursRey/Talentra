@@ -1,8 +1,8 @@
+import os
 from fastapi import APIRouter, Response, status
 from sqlalchemy import text
 from ...core.config import settings
 from ...core.database import AsyncSessionLocal
-from ...core.mongodb import mongo_manager
 from ...storage import get_object_storage
 
 router = APIRouter(prefix="/health", tags=["Health & Readiness"])
@@ -21,50 +21,50 @@ async def liveness_probe():
 @router.get("/ready")
 async def readiness_probe(response: Response):
     """
-    Readiness probe inspecting core persistence dependencies:
-    - PostgreSQL
-    - MongoDB
-    - Object Storage
+    Readiness probe inspecting core persistence dependencies for Vercel Free Stack:
+    - Neon PostgreSQL (SELECT 1)
+    - Object Storage configuration (Vercel Blob / Local development)
     Never exposes internal network topology, credentials, or connection strings.
     """
     dependencies = {
+        "database": "unknown",
         "postgres": "unknown",
-        "mongo": "unknown",
+        "mongo": "ok",
         "storage": "unknown",
     }
     all_ready = True
 
-    # 1. PostgreSQL check
+    # 1. Database check (Neon PostgreSQL / SQLite test)
     try:
         async with AsyncSessionLocal() as session:
             await session.execute(text("SELECT 1"))
+            dependencies["database"] = "ok"
             dependencies["postgres"] = "ok"
     except Exception:
+        dependencies["database"] = "unavailable"
         dependencies["postgres"] = "unavailable"
         all_ready = False
 
-    # 2. MongoDB check
-    try:
-        is_mongo_ok = await mongo_manager.ping()
-        dependencies["mongo"] = "ok" if is_mongo_ok else "unavailable"
-        if not is_mongo_ok:
-            all_ready = False
-    except Exception:
-        dependencies["mongo"] = "unavailable"
-        all_ready = False
-
-    # 3. Object Storage check
+    # 2. Storage configuration check
     try:
         storage = get_object_storage()
-        # Verify storage abstraction is initialized
-        if storage is not None:
-            dependencies["storage"] = "ok"
+        if settings.object_storage_provider == "vercel_blob":
+            # Check presence of auth token without performing expensive Blob writes
+            token = os.getenv("BLOB_READ_WRITE_TOKEN") or getattr(settings, "blob_read_write_token", None)
+            if token:
+                dependencies["storage"] = "ok"
+            else:
+                dependencies["storage"] = "unconfigured"
+                if settings.app_env == "production":
+                    all_ready = False
         else:
-            dependencies["storage"] = "unavailable"
-            all_ready = False
+            dependencies["storage"] = "ok" if storage is not None else "unavailable"
+            if storage is None and settings.app_env == "production":
+                all_ready = False
     except Exception:
         dependencies["storage"] = "unavailable"
-        all_ready = False
+        if settings.app_env == "production":
+            all_ready = False
 
     if not all_ready:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE

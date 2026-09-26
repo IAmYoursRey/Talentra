@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .core.config import settings
-from .core.mongodb import mongo_manager
 from .core.database import engine
 from .api.v1.auth import router as auth_router
 from .api.v1.rbac_test import router as rbac_test_router
@@ -20,6 +19,7 @@ from .api.v1.admin_analytics import router as admin_analytics_router
 from .api.v1.student_cv import router as student_cv_router
 from .api.v1.admin_cv import router as admin_cv_router
 from .api.v1.public_verify import router as public_verify_router
+from .api.v1.storage import router as storage_router
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -36,19 +36,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup lifecycle
-    if settings.app_env != "test":
-        try:
-            await mongo_manager.connect()
-            await mongo_manager.initialize_indexes()
-        except Exception:
-            # Graceful startup if local mongo is not started yet in dev
-            pass
     yield
     # Shutdown lifecycle
-    try:
-        await mongo_manager.close()
-    except Exception:
-        pass
     try:
         await engine.dispose()
     except Exception:
@@ -135,6 +124,7 @@ def create_app() -> FastAPI:
     app.include_router(student_cv_router, prefix=settings.api_prefix)
     app.include_router(admin_cv_router, prefix=settings.api_prefix)
     app.include_router(public_verify_router, prefix=settings.api_prefix)
+    app.include_router(storage_router, prefix=settings.api_prefix)
 
     return app
 

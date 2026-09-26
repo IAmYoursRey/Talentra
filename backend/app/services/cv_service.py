@@ -21,8 +21,7 @@ from ..domain.documents import CVContentSnapshotDocument
 from ..db.models import StorageObjectModel, EnrollmentModel, ClassModel
 from ..repositories.portfolio import (
     PortfolioRepository,
-    MongoPortfolioRepository,
-    InMemoryPortfolioRepository,
+    get_portfolio_repository,
 )
 from ..repositories.postgres import PostgresIdentityRepository
 from ..repositories.validation import TeacherValidationRepository
@@ -49,13 +48,7 @@ class CVService:
         translator_service: Optional[IndustryTranslatorService] = None,
         projection_service: Optional[StudentSkillProjectionService] = None,
     ):
-        if portfolio_repo:
-            self.portfolio_repo = portfolio_repo
-        else:
-            if settings.app_env == "test":
-                self.portfolio_repo = InMemoryPortfolioRepository()
-            else:
-                self.portfolio_repo = MongoPortfolioRepository()
+        self.portfolio_repo = portfolio_repo or get_portfolio_repository()
 
         self.identity_repo = identity_repo or PostgresIdentityRepository()
 

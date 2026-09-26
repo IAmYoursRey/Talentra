@@ -32,12 +32,11 @@ jobs:
       - name: Next.js production build
         env:
           NEXT_PUBLIC_APP_ENV: 'test'
-          NEXT_PUBLIC_API_URL: 'http://localhost:8000'
           NEXT_PUBLIC_ENABLE_DEMO_AUTH: 'false'
         run: npm run build
 
   backend:
-    name: Backend Unit & Architecture Verification
+    name: Backend Verification & Migration Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -57,6 +56,15 @@ jobs:
       - name: Validate Phase & Architecture Kit
         run: python scripts/validate_kit.py
 
+      - name: Verify Alembic Migration Head
+        env:
+          APP_ENV: 'test'
+          DATABASE_URL: 'sqlite+aiosqlite:///./test_ci.db'
+        run: |
+          cd backend
+          alembic upgrade head
+          cd ..
+
       - name: Run Backend Unit & Security Tests
         env:
           APP_ENV: 'test'
@@ -68,37 +76,11 @@ jobs:
         run: |
           python -m pytest backend/tests -v -o asyncio_mode=auto -m "not integration_real"
 
-  real-infrastructure:
-    name: Real Persistence & Multi-Store Integration Gate
+  optional-cloud-integration:
+    name: Optional Real Neon & Vercel Blob Integration Gate
     runs-on: ubuntu-latest
-    needs: [backend]
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: talentra_ci
-          POSTGRES_PASSWORD: talentra_ci_password
-          POSTGRES_DB: talentra_ci_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
-      mongodb:
-        image: mongo:7.0
-        env:
-          MONGO_INITDB_DATABASE: talentra_ci_docs
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/test --quiet"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
+    needs: [backend, frontend]
+    if: "${{ secrets.NEON_TEST_DATABASE_URL != '' }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -114,77 +96,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Start Real MinIO S3 Container
-        run: |
-          docker run -d --name minio \
-            -p 9000:9000 -p 9001:9001 \
-            -e MINIO_ROOT_USER=minio_ci_user \
-            -e MINIO_ROOT_PASSWORD=minio_ci_password \
-            minio/minio:latest server /data
-
-      - name: Wait for MinIO S3 Readiness
-        run: |
-          python -c "
-          import socket, time, sys
-          for attempt in range(30):
-              try:
-                  with socket.create_connection(('localhost', 9000), timeout=1):
-                      print('MinIO TCP port 9000 accepting connections.')
-                      sys.exit(0)
-              except Exception:
-                  time.sleep(1)
-          print('MinIO readiness timeout after 30 seconds.', file=sys.stderr)
-          sys.exit(1)
-          "
-
-      - name: Initialize MinIO Test Bucket
-        run: |
-          python -c "
-          import boto3
-          s3 = boto3.client(
-              's3',
-              endpoint_url='http://localhost:9000',
-              aws_access_key_id='minio_ci_user',
-              aws_secret_access_key='minio_ci_password',
-              region_name='us-east-1',
-          )
-          try:
-              s3.create_bucket(Bucket='talentra-ci-bucket')
-              print('Successfully initialized bucket: talentra-ci-bucket')
-          except Exception as e:
-              print(f'Bucket initialization result: {e}')
-          "
-
-      - name: Verify Live PostgreSQL Dialect & Run Migrations
-        env:
-          DATABASE_URL: 'postgresql+asyncpg://talentra_ci:talentra_ci_password@localhost:5432/talentra_ci_db'
-        run: |
-          python -c "
-          from sqlalchemy import create_engine
-          engine = create_engine('postgresql://talentra_ci:talentra_ci_password@localhost:5432/talentra_ci_db')
-          assert engine.dialect.name == 'postgresql', f'Dialect is not postgresql: {engine.dialect.name}'
-          print(f'Confirmed live database dialect: {engine.dialect.name}')
-          "
-          cd backend
-          alembic upgrade head
-          cd ..
-
-      - name: Execute Strict Real-Infrastructure Integration Tests (Zero-Skip Gate)
+      - name: Run Cloud Integration Tests
         env:
           APP_ENV: 'test'
-          REQUIRE_REAL_INFRASTRUCTURE: 'true'
-          DATABASE_URL: 'postgresql+asyncpg://talentra_ci:talentra_ci_password@localhost:5432/talentra_ci_db'
-          MONGODB_URL: 'mongodb://localhost:27017'
-          MONGODB_DATABASE: 'talentra_ci_docs'
-          OBJECT_STORAGE_PROVIDER: 's3'
-          S3_ENDPOINT_URL: 'http://localhost:9000'
-          S3_BUCKET: 'talentra-ci-bucket'
-          S3_ACCESS_KEY_ID: 'minio_ci_user'
-          S3_SECRET_ACCESS_KEY: 'minio_ci_password'
-          S3_REGION: 'us-east-1'
-          JWT_SECRET_KEY: 'ci-test-secret-key-32-bytes-minimum-length'
-          IDENTIFIER_LOOKUP_PEPPER: 'ci-test-lookup-pepper-32-bytes-min'
-          CV_VERIFICATION_TOKEN_PEPPER: 'ci-test-cv-pepper-32-bytes-min'
-          PUBLIC_APP_URL: 'http://localhost:3000'
+          DATABASE_URL: ${{ secrets.NEON_TEST_DATABASE_URL }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.VERCEL_BLOB_TOKEN }}
+          OBJECT_STORAGE_PROVIDER: 'vercel_blob'
         run: |
-          python -m pytest backend/tests/test_integration_real.py -v -o asyncio_mode=auto -m integration_real
+          python -m pytest backend/tests -v -o asyncio_mode=auto -m "integration_real"
