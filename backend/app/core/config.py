@@ -102,10 +102,17 @@ class Settings(BaseModel):
     max_image_upload_bytes: int = 5 * 1024 * 1024       # 5 MB
     max_pdf_upload_bytes: int = 15 * 1024 * 1024        # 15 MB
     max_video_upload_bytes: int = 50 * 1024 * 1024      # 50 MB
+    cv_pdf_max_bytes: int = Field(
+        default_factory=lambda: int(os.getenv("CV_PDF_MAX_BYTES", str(4 * 1024 * 1024)))  # 4 MB max for CV PDF
+    )
     
     # Phase 8 CV & Public Verification Configuration
     public_app_url: str = Field(
-        default_factory=lambda: os.getenv("PUBLIC_APP_URL", "http://localhost:3000")
+        default_factory=lambda: (
+            os.getenv("PUBLIC_APP_URL")
+            or (f"https://{os.getenv('VERCEL_URL')}" if os.getenv("VERCEL_URL") else None)
+            or "http://localhost:3000"
+        )
     )
     cv_verification_token_pepper: str = Field(
         default_factory=lambda: os.getenv("CV_VERIFICATION_TOKEN_PEPPER", "talentra-cv-token-pepper-v1")

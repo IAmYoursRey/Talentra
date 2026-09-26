@@ -6,14 +6,35 @@ from backend.app.storage.vercel_blob import VercelBlobStorage
 
 
 def test_vercel_blob_auth_preference(monkeypatch):
-    monkeypatch.setenv("VERCEL_OIDC_TOKEN", "oidc-token-val")
-    monkeypatch.setenv("BLOB_READ_WRITE_TOKEN", "static-token-val")
-    storage = VercelBlobStorage()
-    assert storage.token == "oidc-token-val"
+    monkeypatch.delenv("BLOB_READ_WRITE_TOKEN", raising=False)
+    storage_prod = VercelBlobStorage()
+    # In production without static token, storage.token is empty and operations delegate to Node broker
+    assert storage_prod.token == ""
 
-    monkeypatch.delenv("VERCEL_OIDC_TOKEN", raising=False)
+    monkeypatch.setenv("BLOB_READ_WRITE_TOKEN", "static-token-val")
     storage_fallback = VercelBlobStorage()
     assert storage_fallback.token == "static-token-val"
+
+
+def test_vercel_blob_broker_inspection_mock():
+    storage = VercelBlobStorage(token="")  # No static token, forces broker route
+    with patch("httpx.Client.post") as mock_post:
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        import base64
+        mock_resp.json.return_value = {
+            "size": 1024,
+            "contentType": "application/pdf",
+            "magicBytesBase64": base64.b64encode(b"%PDF-1.4").decode("ascii"),
+        }
+        mock_post.return_value = mock_resp
+
+        head_info = storage.head_object("evidence/doc.pdf")
+        assert head_info["size_bytes"] == 1024
+        assert head_info["content_type"] == "application/pdf"
+
+        magic = storage.read_range("evidence/doc.pdf", offset=0, length=8)
+        assert magic == b"%PDF-1.4"
 
 
 def test_signed_url_scopes_and_verification():

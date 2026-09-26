@@ -358,6 +358,14 @@ class CVService:
             await self.portfolio_repo.update_cv_snapshot_status(snapshot_id, CVIssuanceStatus.FAILED.value)
             raise HTTPException(status_code=500, detail=f"Gagal me-render dokumen PDF: {str(e)}")
 
+        # Check CV PDF byte size limit
+        if len(pdf_bytes) > settings.cv_pdf_max_bytes:
+            await self.portfolio_repo.update_cv_snapshot_status(snapshot_id, CVIssuanceStatus.FAILED.value)
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ukuran dokumen PDF CV ({len(pdf_bytes)} bytes) melebihi batas keamanan maksimum ({settings.cv_pdf_max_bytes} bytes).",
+            )
+
         audit_logger.log_event(
             AuditEventType.CV_PDF_RENDERED,
             user_id=student_id,
