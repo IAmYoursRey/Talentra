@@ -114,7 +114,8 @@ class AdminClassServiceImpl implements IAdminClassService {
       });
 
       if (res.ok) {
-        return await res.json();
+        const body = await res.json();
+        return Array.isArray(body) ? body : (body.classes || []);
       }
     } catch {
       // Backend unavailable; fallback
