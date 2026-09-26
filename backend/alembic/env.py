@@ -71,16 +71,21 @@ def do_run_migrations(connection) -> None:
 
 async def run_async_migrations() -> None:
     configuration = config.get_section(config.config_ini_section) or {}
-    configuration["sqlalchemy.url"] = get_url()
+    target_url = get_url()
+    configuration["sqlalchemy.url"] = target_url
+
+    extra_kwargs = {}
+    if "postgresql" in target_url or "asyncpg" in target_url:
+        extra_kwargs["connect_args"] = {
+            "statement_cache_size": 0,
+            "prepared_statement_cache_size": 0,
+        }
 
     connectable = async_engine_from_config(
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        connect_args={
-            "statement_cache_size": 0,
-            "prepared_statement_cache_size": 0,
-        },
+        **extra_kwargs,
     )
 
     async with connectable.connect() as connection:
