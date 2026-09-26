@@ -1,8 +1,9 @@
 from typing import Optional, Any
-from pymongo import AsyncMongoClient
 try:
+    from pymongo import AsyncMongoClient
     from pymongo.asynchronous.database import AsyncDatabase
 except ImportError:
+    AsyncMongoClient = Any  # type: ignore
     AsyncDatabase = Any  # type: ignore
 from .config import settings
 
