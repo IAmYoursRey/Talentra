@@ -206,6 +206,8 @@ def get_internal_app_origin() -> str:
     Resolves trusted internal origin for function-to-function calls on Vercel or local.
     Prevents SSRF by strictly deriving from environment configuration.
     """
+    if os.getenv("VERCEL_ENV") == "production" and settings.public_app_url and "localhost" not in settings.public_app_url:
+        return settings.public_app_url.rstrip("/")
     vercel_url = os.getenv("VERCEL_URL")
     if vercel_url:
         return f"https://{vercel_url}".rstrip("/")

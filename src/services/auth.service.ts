@@ -181,6 +181,22 @@ class AuthService implements IAuthService {
   }
 
   public async demoLogin(role: UserRole): Promise<AuthResult> {
+    // 1. Attempt authoritative authenticated login using provisioned database credentials
+    const canonicalCredentials: Record<UserRole, { identifier: string; password: string }> = {
+      student: { identifier: '0081234567', password: 'PasswordSiswa123!' },
+      teacher: { identifier: '198501012010011001', password: 'PasswordGuru123!' },
+      admin: { identifier: 'raihanansari6678@gmail.com', password: 'raihanansari6678@gmail.com' },
+    };
+
+    const targetCred = canonicalCredentials[role];
+    if (targetCred) {
+      try {
+        return await this.login(targetCred.identifier, targetCred.password);
+      } catch {
+        // Fall through to legacy demo-login or mock fallback if offline
+      }
+    }
+
     try {
       const res = await fetch('/api/v1/auth/demo-login', {
         method: 'POST',
@@ -204,7 +220,7 @@ class AuthService implements IAuthService {
       // Fallback below
     }
 
-    // Standalone fallback for demo logins
+    // Standalone fallback for offline mock demos
     const fallbackUser =
       role === 'student' ? MOCK_STUDENT : role === 'teacher' ? MOCK_TEACHER : MOCK_ADMIN;
     this.inMemoryUser = { ...fallbackUser };

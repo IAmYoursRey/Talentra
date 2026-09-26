@@ -48,11 +48,21 @@ export default function LoginPage() {
   const handleQuickDemo = async (role: UserRole) => {
     setIsSubmitting(true);
     setErrorMsg('');
+    const demoCreds: Record<UserRole, { id: string; pwd: string }> = {
+      student: { id: '0081234567', pwd: 'PasswordSiswa123!' },
+      teacher: { id: '198501012010011001', pwd: 'PasswordGuru123!' },
+      admin: { id: 'raihanansari6678@gmail.com', pwd: 'raihanansari6678@gmail.com' },
+    };
+    const cred = demoCreds[role];
+    if (cred) {
+      setIdentifier(cred.id);
+      setPassword(cred.pwd);
+    }
     try {
       const res = await authService.demoLogin(role);
       router.push(res.redirectTo);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Gagal mengakses sesi demo.';
+      const msg = err instanceof Error ? err.message : 'Gagal mengakses akun demo.';
       setErrorMsg(msg);
       setIsSubmitting(false);
     }
@@ -237,12 +247,12 @@ export default function LoginPage() {
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-700 bg-brand-100/70 px-2 py-0.5 rounded">
                     <Sparkles className="w-3 h-3 text-brand-600" />
-                    AKSES DEMO PROTOTYPE (PHASE 1)
+                    AKSES DEMO & EVALUASI RESMI
                   </span>
-                  <span className="text-[10px] text-slate-400 font-mono">Mock Auth</span>
+                  <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">Live Server Auth</span>
                 </div>
                 <p className="text-xs text-slate-500">
-                  Pilih salah satu peran sintetis berikut untuk langsung mengevaluasi antarmuka dan alur kerja:
+                  Klik peran di bawah untuk otomatis mengisi kredensial resmi dan masuk ke platform:
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -253,7 +263,8 @@ export default function LoginPage() {
                   >
                     <User className="w-5 h-5 text-brand-500 mb-1 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-bold">Demo Siswa</span>
-                    <span className="text-[10px] text-slate-400">Alya Rahma</span>
+                    <span className="text-[10px] text-slate-500 font-medium">Alya Rahma</span>
+                    <span className="text-[9px] text-slate-400 font-mono mt-0.5">NISN: 0081234567</span>
                   </button>
 
                   <button
@@ -263,7 +274,8 @@ export default function LoginPage() {
                   >
                     <GraduationCap className="w-5 h-5 text-growth-600 mb-1 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-bold">Demo Guru</span>
-                    <span className="text-[10px] text-slate-400">Pak Budi Santoso</span>
+                    <span className="text-[10px] text-slate-500 font-medium">Pak Budi Santoso</span>
+                    <span className="text-[9px] text-slate-400 font-mono mt-0.5">NIP: 19850101...</span>
                   </button>
 
                   <button
@@ -273,7 +285,8 @@ export default function LoginPage() {
                   >
                     <ShieldCheck className="w-5 h-5 text-intelligence-600 mb-1 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-bold">Demo Admin</span>
-                    <span className="text-[10px] text-slate-400">Dra. Hj. Ratna</span>
+                    <span className="text-[10px] text-slate-500 font-medium">Raihan Ansari</span>
+                    <span className="text-[9px] text-slate-400 font-mono mt-0.5">raihanansari...</span>
                   </button>
                 </div>
               </div>
