@@ -84,6 +84,7 @@ class AdminUserRepository:
                 email=f"{user_id}@student.talentra.id",
             )
             session.add(user)
+            await session.flush()
 
             identity = AuthIdentityModel(
                 id=str(uuid.uuid4()),
@@ -166,6 +167,7 @@ class AdminUserRepository:
                 email=f"{user_id}@guru.talentra.id",
             )
             session.add(user)
+            await session.flush()
 
             identity = AuthIdentityModel(
                 id=str(uuid.uuid4()),
