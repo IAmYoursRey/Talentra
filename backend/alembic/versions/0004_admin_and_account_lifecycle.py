@@ -21,7 +21,7 @@ def upgrade() -> None:
     # 1. Add must_change_password column to auth_identities
     op.add_column(
         'auth_identities',
-        sa.Column('must_change_password', sa.Boolean(), nullable=False, server_default=sa.text('0'))
+        sa.Column('must_change_password', sa.Boolean(), nullable=False, server_default=sa.false())
     )
 
     # 2. Add performance & tenant isolation indexes for Phase 6 Admin and Analytics queries

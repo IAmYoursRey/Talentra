@@ -52,6 +52,10 @@ def get_engine(url: str | None = None) -> AsyncEngine:
     db_url = normalize_database_url(raw_url)
     kwargs = {"echo": False}
     if db_url.startswith("postgresql"):
+        kwargs["connect_args"] = {
+            "statement_cache_size": 0,
+            "prepared_statement_cache_size": 0,
+        }
         pool_mode = os.getenv("DB_POOL_CLASS", "queue").lower()
         if pool_mode == "nullpool":
             # NullPool: Opens connection on demand and releases immediately.
