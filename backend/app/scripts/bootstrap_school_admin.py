@@ -64,13 +64,16 @@ async def bootstrap_school_admin(
         if existing:
             raise ValueError(f"An account with identifier [{identifier_type}] already exists.")
 
-        # Create School
-        school = SchoolModel(
-            id=actual_school_id,
-            name=school_name.strip(),
-            status="active",
-        )
-        session.add(school)
+        # Create School if not exists
+        school = await session.get(SchoolModel, actual_school_id)
+        if not school:
+            school = SchoolModel(
+                id=actual_school_id,
+                name=school_name.strip(),
+                status="active",
+            )
+            session.add(school)
+            await session.flush()
 
         # Create Admin User
         user = UserModel(
@@ -82,6 +85,7 @@ async def bootstrap_school_admin(
             email=normalized_val if normalized_type == "email" else None,
         )
         session.add(user)
+        await session.flush()
 
         # Create Auth Identity with forced password change
         identity = AuthIdentityModel(
