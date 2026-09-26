@@ -149,8 +149,11 @@ class Settings(BaseModel):
                 raise RuntimeError("CRITICAL: Production requires a real PostgreSQL DATABASE_URL!")
             if self.object_storage_provider == "local":
                 raise RuntimeError("CRITICAL: Production must use S3-compatible object storage provider, not local!")
-            if self.object_storage_provider == "vercel_blob" and not self.blob_read_write_token:
-                raise RuntimeError("CRITICAL: Production with OBJECT_STORAGE_PROVIDER=vercel_blob requires BLOB_READ_WRITE_TOKEN!")
+            if self.object_storage_provider == "vercel_blob":
+                has_token = bool(self.blob_read_write_token or os.getenv("BLOB_READ_WRITE_TOKEN"))
+                has_oidc = bool(os.getenv("VERCEL_OIDC_TOKEN") or os.getenv("VERCEL"))
+                if not (has_token or has_oidc):
+                    raise RuntimeError("CRITICAL: Production with OBJECT_STORAGE_PROVIDER=vercel_blob requires Vercel Blob OIDC or BLOB_READ_WRITE_TOKEN!")
             if self.object_storage_provider == "s3":
                 if self.s3_access_key_id in ("minioadmin", "admin") or self.s3_secret_access_key in ("minioadmin", "admin"):
                     raise RuntimeError("CRITICAL: Production cannot use default S3 credentials!")

@@ -3,7 +3,7 @@ import hashlib
 import secrets
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Tuple
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from ..core.database import AsyncSessionLocal
@@ -68,18 +68,21 @@ class BlobUploadIntentRepository:
         token_hash = self.hash_token(raw_token)
         now = datetime.now(timezone.utc)
         async with self.session_factory() as session:
-            stmt = select(BlobUploadIntentModel).where(
-                and_(
-                    BlobUploadIntentModel.token_hash == token_hash,
-                    BlobUploadIntentModel.status == "pending",
-                    BlobUploadIntentModel.expires_at > now,
+            stmt = (
+                update(BlobUploadIntentModel)
+                .where(
+                    and_(
+                        BlobUploadIntentModel.token_hash == token_hash,
+                        BlobUploadIntentModel.status == "pending",
+                        BlobUploadIntentModel.expires_at > now,
+                    )
                 )
+                .values(status="consumed", consumed_at=now)
+                .returning(BlobUploadIntentModel)
             )
             result = await session.execute(stmt)
             intent = result.scalar_one_or_none()
             if not intent:
                 return None
-            intent.status = "consumed"
-            intent.consumed_at = now
             await session.commit()
             return intent

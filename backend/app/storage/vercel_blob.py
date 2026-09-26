@@ -21,7 +21,8 @@ class VercelBlobStorage(ObjectStorage):
         base_url: str = "https://blob.vercel-storage.com",
         timeout: float = 30.0,
     ):
-        self.token = token or os.getenv("BLOB_READ_WRITE_TOKEN") or ""
+        # Prefer Vercel Blob OIDC token, fallback to static BLOB_READ_WRITE_TOKEN
+        self.token = token or os.getenv("VERCEL_OIDC_TOKEN") or os.getenv("BLOB_READ_WRITE_TOKEN") or ""
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.secret = (settings.jwt_secret_key or "talentra-storage-secret").encode("utf-8")
@@ -98,6 +99,8 @@ class VercelBlobStorage(ObjectStorage):
         url = f"{self.base_url}/{object_key.lstrip('/')}"
         headers = self._get_headers()
         headers["range"] = f"bytes={offset}-{offset + length - 1}"
+        headers["cache-control"] = "no-cache"
+        headers["pragma"] = "no-cache"
         with httpx.Client(timeout=self.timeout) as client:
             res = client.get(url, headers=headers)
             if res.status_code in (200, 206):

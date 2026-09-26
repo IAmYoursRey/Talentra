@@ -1,9 +1,10 @@
 import hashlib
 import time
+import uuid
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from typing import Optional
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, delete
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from .database import AsyncSessionLocal
@@ -35,6 +36,7 @@ class DatabaseRateLimiter:
     ) -> bool:
         """
         Atomically checks rate limit and increments counter within current window.
+        Uses native atomic UPSERT to prevent race conditions under serverless concurrency.
         Returns True if rate limit is exceeded.
         """
         key_hash = self.hash_key(identifier, pepper)
@@ -44,38 +46,59 @@ class DatabaseRateLimiter:
         expires_at = now_dt + timedelta(seconds=window_seconds * 2)
 
         async with self.session_factory() as session:
-            stmt = select(RateLimitBucketModel).where(
-                and_(
-                    RateLimitBucketModel.key_hash == key_hash,
-                    RateLimitBucketModel.scope == scope,
-                    RateLimitBucketModel.window_start == window_start,
-                )
-            )
-            result = await session.execute(stmt)
-            bucket = result.scalar_one_or_none()
+            dialect_name = session.bind.dialect.name if session.bind else "sqlite"
+            bucket_id = str(uuid.uuid4())
 
-            if bucket:
-                if bucket.count >= max_requests:
-                    return True
-                bucket.count += 1
-                await session.commit()
-                return False
-            else:
-                new_bucket = RateLimitBucketModel(
+            if dialect_name == "postgresql":
+                from sqlalchemy.dialects.postgresql import insert as pg_insert
+                stmt = pg_insert(RateLimitBucketModel).values(
+                    id=bucket_id,
                     key_hash=key_hash,
                     scope=scope,
                     window_start=window_start,
                     count=1,
                     expires_at=expires_at,
                 )
-                session.add(new_bucket)
-                await session.commit()
-                return False
+                stmt = stmt.on_conflict_do_update(
+                    constraint="uq_rate_limit_bucket",
+                    set_={"count": RateLimitBucketModel.count + 1},
+                ).returning(RateLimitBucketModel.count)
+            else:
+                from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+                stmt = sqlite_insert(RateLimitBucketModel).values(
+                    id=bucket_id,
+                    key_hash=key_hash,
+                    scope=scope,
+                    window_start=window_start,
+                    count=1,
+                    expires_at=expires_at,
+                )
+                stmt = stmt.on_conflict_do_update(
+                    index_elements=["key_hash", "scope", "window_start"],
+                    set_={"count": RateLimitBucketModel.count + 1},
+                ).returning(RateLimitBucketModel.count)
+
+            result = await session.execute(stmt)
+            new_count = result.scalar_one()
+            await session.commit()
+
+            return new_count > max_requests
+
+    async def cleanup_expired(self, before: Optional[datetime] = None) -> int:
+        """
+        Cleans up expired rate limit buckets.
+        Request-driven / maintenance utility without requiring an always-on background worker.
+        """
+        cutoff = before or datetime.now(timezone.utc)
+        async with self.session_factory() as session:
+            stmt = delete(RateLimitBucketModel).where(RateLimitBucketModel.expires_at < cutoff)
+            result = await session.execute(stmt)
+            await session.commit()
+            return result.rowcount or 0
 
     async def reset(self, identifier: str, scope: str = "login", pepper: str = "talentra-rate-pepper-v1") -> None:
         key_hash = self.hash_key(identifier, pepper)
         async with self.session_factory() as session:
-            from sqlalchemy import delete
             stmt = delete(RateLimitBucketModel).where(
                 and_(
                     RateLimitBucketModel.key_hash == key_hash,

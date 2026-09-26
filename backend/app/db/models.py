@@ -14,8 +14,11 @@ from sqlalchemy import (
     Index,
     JSON,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..core.database import Base
+
+PortableJSON = JSON().with_variant(JSONB, "postgresql")
 
 
 class SchoolModel(Base):
@@ -473,8 +476,8 @@ class PortfolioItemModel(Base):
     activity_type: Mapped[str] = mapped_column(String(64), nullable=False)
     activity_date: Mapped[str] = mapped_column(String(32), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    canonical_tag_ids: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
-    evidence_refs: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    canonical_tag_ids: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
+    evidence_refs: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
     status: Mapped[str] = mapped_column(String(32), default="draft", nullable=False, index=True)
     current_revision_id: Mapped[str] = mapped_column(String(36), nullable=False)
     current_revision: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
@@ -508,8 +511,8 @@ class PortfolioRevisionModel(Base):
     title_snapshot: Mapped[str] = mapped_column(String(255), nullable=False)
     activity_type_snapshot: Mapped[str] = mapped_column(String(64), nullable=False)
     description_snapshot: Mapped[str] = mapped_column(Text, nullable=False)
-    tag_snapshot: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
-    evidence_refs: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    tag_snapshot: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
+    evidence_refs: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
@@ -529,8 +532,8 @@ class EvidenceTagSnapshotModel(Base):
     portfolio_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
     revision_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
     validation_decision_id: Mapped[str] = mapped_column(String(36), unique=True, nullable=False, index=True)
-    canonical_tag_ids: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
-    canonical_tag_codes: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    canonical_tag_ids: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
+    canonical_tag_codes: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
     approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     projection_version: Mapped[str] = mapped_column(String(32), default="v1", nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -553,10 +556,10 @@ class RecommendationSnapshotModel(Base):
     catalog_version: Mapped[str] = mapped_column(String(64), default="career-catalog-v1", nullable=False)
     scoring_version: Mapped[str] = mapped_column(String(64), default="recommendation-v1", nullable=False)
     mapping_version: Mapped[str] = mapped_column(String(64), default="mapping-v1", nullable=False)
-    evidence_confidence: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
-    career_results: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
-    study_results: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
-    supporting_approval_ids: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
+    evidence_confidence: Mapped[dict[str, Any]] = mapped_column(PortableJSON, default=dict, nullable=False)
+    career_results: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
+    study_results: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
+    supporting_approval_ids: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
     generated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
@@ -598,11 +601,11 @@ class CVContentSnapshotModel(Base):
     snapshot_version: Mapped[str] = mapped_column(String(32), default="cv-snapshot-v1", nullable=False)
     renderer_version: Mapped[str] = mapped_column(String(32), default="cv-pdf-v1", nullable=False)
     status: Mapped[str] = mapped_column(String(32), default="issued", nullable=False)
-    profile: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
-    approved_skills: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
-    teacher_validated_competencies: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
-    selected_portfolios: Mapped[list[Any]] = mapped_column(JSON, default=list, nullable=False)
-    optional_exploration_summary: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    profile: Mapped[dict[str, Any]] = mapped_column(PortableJSON, default=dict, nullable=False)
+    approved_skills: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
+    teacher_validated_competencies: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
+    selected_portfolios: Mapped[list[Any]] = mapped_column(PortableJSON, default=list, nullable=False)
+    optional_exploration_summary: Mapped[dict[str, Any] | None] = mapped_column(PortableJSON, nullable=True)
     content_digest: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     pdf_storage_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
     generated_at: Mapped[datetime] = mapped_column(

@@ -8,13 +8,15 @@ Create Date: 2026-09-26
 from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '0007_neon_single_store_architecture'
 down_revision: Union[str, None] = '0006_cv_verification'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+
+portable_json = sa.JSON().with_variant(postgresql.JSONB(), 'postgresql')
 
 
 def upgrade() -> None:
@@ -28,8 +30,8 @@ def upgrade() -> None:
         sa.Column('activity_type', sa.String(length=64), nullable=False),
         sa.Column('activity_date', sa.String(length=32), nullable=False),
         sa.Column('description', sa.Text(), nullable=False),
-        sa.Column('canonical_tag_ids', sa.JSON(), nullable=False),
-        sa.Column('evidence_refs', sa.JSON(), nullable=False),
+        sa.Column('canonical_tag_ids', portable_json, nullable=False),
+        sa.Column('evidence_refs', portable_json, nullable=False),
         sa.Column('status', sa.String(length=32), nullable=False, server_default='draft'),
         sa.Column('current_revision_id', sa.String(length=36), nullable=False),
         sa.Column('current_revision', sa.Integer(), nullable=False, server_default='1'),
@@ -56,8 +58,8 @@ def upgrade() -> None:
         sa.Column('title_snapshot', sa.String(length=255), nullable=False),
         sa.Column('activity_type_snapshot', sa.String(length=64), nullable=False),
         sa.Column('description_snapshot', sa.Text(), nullable=False),
-        sa.Column('tag_snapshot', sa.JSON(), nullable=False),
-        sa.Column('evidence_refs', sa.JSON(), nullable=False),
+        sa.Column('tag_snapshot', portable_json, nullable=False),
+        sa.Column('evidence_refs', portable_json, nullable=False),
         sa.Column('submitted_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     )
@@ -75,8 +77,8 @@ def upgrade() -> None:
         sa.Column('portfolio_id', sa.String(length=36), nullable=False),
         sa.Column('revision_id', sa.String(length=36), nullable=False),
         sa.Column('validation_decision_id', sa.String(length=36), nullable=False, unique=True),
-        sa.Column('canonical_tag_ids', sa.JSON(), nullable=False),
-        sa.Column('canonical_tag_codes', sa.JSON(), nullable=False),
+        sa.Column('canonical_tag_ids', portable_json, nullable=False),
+        sa.Column('canonical_tag_codes', portable_json, nullable=False),
         sa.Column('approved_at', sa.DateTime(timezone=True), nullable=False),
         sa.Column('projection_version', sa.String(length=32), nullable=False, server_default='v1'),
         sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
@@ -98,10 +100,10 @@ def upgrade() -> None:
         sa.Column('catalog_version', sa.String(length=64), nullable=False, server_default='career-catalog-v1'),
         sa.Column('scoring_version', sa.String(length=64), nullable=False, server_default='recommendation-v1'),
         sa.Column('mapping_version', sa.String(length=64), nullable=False, server_default='mapping-v1'),
-        sa.Column('evidence_confidence', sa.JSON(), nullable=False),
-        sa.Column('career_results', sa.JSON(), nullable=False),
-        sa.Column('study_results', sa.JSON(), nullable=False),
-        sa.Column('supporting_approval_ids', sa.JSON(), nullable=False),
+        sa.Column('evidence_confidence', portable_json, nullable=False),
+        sa.Column('career_results', portable_json, nullable=False),
+        sa.Column('study_results', portable_json, nullable=False),
+        sa.Column('supporting_approval_ids', portable_json, nullable=False),
         sa.Column('generated_at', sa.DateTime(timezone=True), nullable=False),
     )
     op.create_index('ix_recommendation_snapshots_school_id', 'recommendation_snapshots', ['school_id'])
@@ -138,11 +140,11 @@ def upgrade() -> None:
         sa.Column('snapshot_version', sa.String(length=32), nullable=False, server_default='cv-snapshot-v1'),
         sa.Column('renderer_version', sa.String(length=32), nullable=False, server_default='cv-pdf-v1'),
         sa.Column('status', sa.String(length=32), nullable=False, server_default='issued'),
-        sa.Column('profile', sa.JSON(), nullable=False),
-        sa.Column('approved_skills', sa.JSON(), nullable=False),
-        sa.Column('teacher_validated_competencies', sa.JSON(), nullable=False),
-        sa.Column('selected_portfolios', sa.JSON(), nullable=False),
-        sa.Column('optional_exploration_summary', sa.JSON(), nullable=True),
+        sa.Column('profile', portable_json, nullable=False),
+        sa.Column('approved_skills', portable_json, nullable=False),
+        sa.Column('teacher_validated_competencies', portable_json, nullable=False),
+        sa.Column('selected_portfolios', portable_json, nullable=False),
+        sa.Column('optional_exploration_summary', portable_json, nullable=True),
         sa.Column('content_digest', sa.String(length=64), nullable=False),
         sa.Column('pdf_storage_key', sa.String(length=512), nullable=True),
         sa.Column('generated_at', sa.DateTime(timezone=True), nullable=False),

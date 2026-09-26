@@ -5,16 +5,18 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async rewrites() {
-    return [
-      {
-        source: '/api/v1/:path*',
-        destination: process.env.API_BASE_URL
-          ? `${process.env.API_BASE_URL}/api/v1/:path*`
-          : process.env.NODE_ENV === 'development'
-          ? 'http://127.0.0.1:8000/api/v1/:path*'
-          : '/api/',
-      },
-    ];
+    // Development-only proxy rewrite to local FastAPI server (:8000).
+    // In production, Next.js performs NO rewrites; Vercel routes /api/v1/* directly to api/index.py preserving the full path.
+    if (process.env.NODE_ENV === 'development') {
+      const backendUrl = process.env.API_BASE_URL || 'http://127.0.0.1:8000';
+      return [
+        {
+          source: '/api/v1/:path*',
+          destination: `${backendUrl}/api/v1/:path*`,
+        },
+      ];
+    }
+    return [];
   },
   async headers() {
     return [

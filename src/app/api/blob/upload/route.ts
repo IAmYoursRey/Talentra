@@ -11,9 +11,14 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid JSON request body.' }, { status: 400 });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  const hasBlobAuth = Boolean(
+    process.env.BLOB_READ_WRITE_TOKEN ||
+    process.env.VERCEL_OIDC_TOKEN ||
+    process.env.VERCEL
+  );
+  if (!hasBlobAuth) {
     return NextResponse.json(
-      { error: 'BLOB_READ_WRITE_TOKEN is not configured in environment.' },
+      { error: 'Vercel Blob authentication (OIDC or BLOB_READ_WRITE_TOKEN fallback) is not configured.' },
       { status: 503 }
     );
   }
