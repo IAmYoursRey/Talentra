@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, Header, Response
+from fastapi import APIRouter, Depends, Header, Response, Query, status
+from fastapi.responses import RedirectResponse
 
 from ...domain.enums import UserRole
 from ...api.dependencies import require_role, AuthContext
@@ -88,16 +89,46 @@ async def get_cv_detail(
     )
 
 
+@router.get("/{snapshot_id}/access")
+async def get_cv_download_access(
+    snapshot_id: str,
+    response: Response,
+    auth_ctx: AuthContext = Depends(require_role(UserRole.STUDENT)),
+    service: CVService = Depends(get_cv_service),
+) -> Dict[str, Any]:
+    """
+    Issues short-lived signed GET URL for student to download private CV PDF directly from Blob.
+    Never caches response.
+    """
+    response.headers["Cache-Control"] = "private, no-store"
+    return await service.get_cv_download_access(
+        school_id=auth_ctx.school_id, student_id=auth_ctx.user_id, snapshot_id=snapshot_id
+    )
+
+
 @router.get("/{snapshot_id}/download")
 async def download_cv_pdf(
     snapshot_id: str,
+    redirect: bool = Query(True),
     auth_ctx: AuthContext = Depends(require_role(UserRole.STUDENT)),
     service: CVService = Depends(get_cv_service),
 ):
     """
-    Streams PDF binary to the student owner.
     Enforces student ownership and audits download access.
+    In cloud/Blob mode, issues 307 temporary redirect to the signed GET URL.
     """
+    from ...storage.vercel_blob import VercelBlobStorage
+    if isinstance(service.storage, VercelBlobStorage) and redirect:
+        access_info = await service.get_cv_download_access(
+            school_id=auth_ctx.school_id, student_id=auth_ctx.user_id, snapshot_id=snapshot_id
+        )
+        if access_info.get("downloadUrl", "").startswith("http"):
+            return RedirectResponse(
+                url=access_info["downloadUrl"],
+                status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+                headers={"Cache-Control": "private, no-store"},
+            )
+
     pdf_bytes, filename = await service.download_cv_pdf(
         school_id=auth_ctx.school_id, student_id=auth_ctx.user_id, snapshot_id=snapshot_id
     )

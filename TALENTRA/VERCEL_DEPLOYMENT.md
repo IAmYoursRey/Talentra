@@ -42,7 +42,8 @@ Konfigurasikan variabel berikut pada menu **Project Settings > Environment Varia
 | Variabel | Lingkungan | Tujuan / Keterangan |
 | :--- | :--- | :--- |
 | `DATABASE_URL` | Production, Preview | Neon Pooled connection string (`postgresql+asyncpg://...pooler...`) |
-| `JWT_SECRET_KEY` | Production, Preview | Kunci rahasia minimal 32 karakter untuk enkripsi token sesi & HMAC internal |
+| `JWT_SECRET_KEY` | Production, Preview | Kunci rahasia minimal 32 karakter untuk enkripsi token sesi pengguna |
+| `BLOB_BROKER_HMAC_SECRET` | Production, Preview | Kunci rahasia minimal 32 karakter khusus otorisasi internal FastAPI ↔ Next.js Blob broker (terisolasi ketat dari `JWT_SECRET_KEY`) |
 | `IDENTIFIER_LOOKUP_PEPPER` | Production, Preview | Pepper HMAC untuk anonimisasi NISN / NIP di database |
 | `CV_VERIFICATION_TOKEN_PEPPER` | Production, Preview | Pepper rahasia untuk hash token verifikasi publik QR |
 
@@ -52,6 +53,8 @@ Konfigurasikan variabel berikut pada menu **Project Settings > Environment Varia
 | `APP_ENV` | `production` | Production, Preview | Mode lingkungan |
 | `REPOSITORY_BACKEND` | `postgres` | Production, Preview | Menggunakan PostgreSQL Neon |
 | `OBJECT_STORAGE_PROVIDER` | `vercel_blob` | Production, Preview | Provider storage |
+| `BLOB_BROKER_TOKEN_TTL_SECONDS` | `60` | Production, Preview | TTL token otorisasi broker internal (detik) |
+| `BLOB_DOWNLOAD_URL_TTL_SECONDS` | `300` | Production, Preview | TTL tautan unduh presigned blob langsung (detik) |
 | `FREE_TIER_MODE` | `true` | Production, Preview | Mengaktifkan proteksi kuota free-tier |
 | `STORAGE_SOFT_LIMIT_BYTES` | `209715200` | Production, Preview | Soft limit storage (200 MB) |
 | `CV_PDF_MAX_BYTES` | `4194304` | Production, Preview | Batas aman payload CV PDF (4 MB) |

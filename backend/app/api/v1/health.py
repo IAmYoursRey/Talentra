@@ -49,9 +49,9 @@ async def readiness_probe(response: Response):
     try:
         storage = get_object_storage()
         if settings.object_storage_provider == "vercel_blob":
-            # Check presence of Vercel Blob OIDC token or static auth token without performing expensive Blob writes
             token = os.getenv("VERCEL_OIDC_TOKEN") or os.getenv("BLOB_READ_WRITE_TOKEN") or getattr(settings, "blob_read_write_token", None) or os.getenv("VERCEL")
-            if token:
+            has_broker = bool(settings.blob_broker_hmac_secret or os.getenv("BLOB_BROKER_HMAC_SECRET"))
+            if token or has_broker:
                 dependencies["storage"] = "ok"
             else:
                 dependencies["storage"] = "unconfigured"

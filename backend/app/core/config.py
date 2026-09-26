@@ -63,6 +63,15 @@ class Settings(BaseModel):
     blob_read_write_token: str | None = Field(
         default_factory=lambda: os.getenv("BLOB_READ_WRITE_TOKEN")
     )
+    blob_broker_hmac_secret: str | None = Field(
+        default_factory=lambda: os.getenv("BLOB_BROKER_HMAC_SECRET", "talentra-blob-broker-dev-secret-32-bytes-min")
+    )
+    blob_broker_token_ttl_seconds: int = Field(
+        default_factory=lambda: int(os.getenv("BLOB_BROKER_TOKEN_TTL_SECONDS", "60"))
+    )
+    blob_download_url_ttl_seconds: int = Field(
+        default_factory=lambda: int(os.getenv("BLOB_DOWNLOAD_URL_TTL_SECONDS", "300"))
+    )
 
     # Document Database (MongoDB — Optional / Legacy Compatibility only)
     mongodb_url: str | None = Field(
@@ -161,6 +170,19 @@ class Settings(BaseModel):
                 has_oidc = bool(os.getenv("VERCEL_OIDC_TOKEN") or os.getenv("VERCEL"))
                 if not (has_token or has_oidc):
                     raise RuntimeError("CRITICAL: Production with OBJECT_STORAGE_PROVIDER=vercel_blob requires Vercel Blob OIDC or BLOB_READ_WRITE_TOKEN!")
+                insecure_broker_secrets = (
+                    "talentra-blob-broker-dev-secret-32-bytes-min",
+                    "secret123",
+                    "development-secret",
+                    "changeme",
+                    self.jwt_secret_key,
+                )
+                if (
+                    not self.blob_broker_hmac_secret
+                    or self.blob_broker_hmac_secret in insecure_broker_secrets
+                    or len(self.blob_broker_hmac_secret) < 32
+                ):
+                    raise RuntimeError("CRITICAL: Production requires a dedicated, non-default BLOB_BROKER_HMAC_SECRET of at least 32 bytes!")
             if self.object_storage_provider == "s3":
                 if self.s3_access_key_id in ("minioadmin", "admin") or self.s3_secret_access_key in ("minioadmin", "admin"):
                     raise RuntimeError("CRITICAL: Production cannot use default S3 credentials!")
@@ -177,3 +199,16 @@ settings = Settings()
 # Execute initial production safety check
 if settings.app_env == "production":
     settings.validate_production_safety()
+
+
+def get_internal_app_origin() -> str:
+    """
+    Resolves trusted internal origin for function-to-function calls on Vercel or local.
+    Prevents SSRF by strictly deriving from environment configuration.
+    """
+    vercel_url = os.getenv("VERCEL_URL")
+    if vercel_url:
+        return f"https://{vercel_url}".rstrip("/")
+    if settings.app_env in ("development", "test") or "localhost" in settings.public_app_url:
+        return os.getenv("INTERNAL_APP_URL", "http://127.0.0.1:3000").rstrip("/")
+    return settings.public_app_url.rstrip("/")

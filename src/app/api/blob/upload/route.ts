@@ -1,7 +1,10 @@
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.API_BASE_URL || 'http://127.0.0.1:8000';
+const BACKEND_URL =
+  process.env.API_BASE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://127.0.0.1:8000');
+
 
 export async function POST(request: Request): Promise<NextResponse> {
   let body: HandleUploadBody;

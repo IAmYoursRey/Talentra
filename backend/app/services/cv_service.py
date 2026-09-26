@@ -522,6 +522,52 @@ class CVService:
             "fingerprint": derive_snapshot_fingerprint(snap.get("content_digest", "")),
         }
 
+    async def get_cv_download_access(self, school_id: str, student_id: str, snapshot_id: str) -> Dict[str, Any]:
+        """
+        Issues short-lived signed GET URL for student owner to download private CV PDF directly from Blob.
+        Audits access event and returns { downloadUrl, filename, expiresInSeconds }.
+        """
+        snap = await self.portfolio_repo.get_cv_snapshot(school_id, student_id, snapshot_id)
+        if not snap:
+            raise HTTPException(status_code=404, detail="Dokumen CV tidak ditemukan.")
+
+        verif = await self.verification_repo.get_by_snapshot_id(snapshot_id)
+        if not verif:
+            raise HTTPException(status_code=404, detail="Catatan verifikasi CV tidak ditemukan.")
+
+        storage_obj_id = verif.get("pdf_storage_object_id")
+        if not storage_obj_id:
+            raise HTTPException(status_code=404, detail="Berkas fisik CV tidak ditemukan.")
+
+        async with AsyncSessionLocal() as session:
+            stmt = select(StorageObjectModel).where(StorageObjectModel.id == storage_obj_id)
+            res = await session.execute(stmt)
+            obj = res.scalar_one_or_none()
+            if not obj:
+                raise HTTPException(status_code=404, detail="Objek penyimpanan CV tidak ditemukan.")
+            object_key = obj.object_key
+
+        download_url = self.storage.create_download_url(
+            object_key=object_key,
+            expires_in=settings.blob_download_url_ttl_seconds,
+        )
+
+        audit_logger.log_event(
+            AuditEventType.CV_DOWNLOAD_ACCESSED,
+            user_id=student_id,
+            school_id=school_id,
+            safe_context="cv_download_accessed",
+            metadata={"snapshot_id": snapshot_id, "display_code": verif.get("display_code")},
+        )
+
+        display_code = verif.get("display_code", "DOCUMENT")
+        filename = f"TALENTRA-CV-{display_code}.pdf"
+        return {
+            "downloadUrl": download_url,
+            "filename": filename,
+            "expiresInSeconds": settings.blob_download_url_ttl_seconds,
+        }
+
     async def download_cv_pdf(self, school_id: str, student_id: str, snapshot_id: str) -> Tuple[bytes, str]:
         """
         Downloads PDF binary for authenticated student owner.

@@ -123,6 +123,36 @@ def test_production_failfast_cors_wildcard():
         settings.validate_production_safety()
 
 
+def test_production_failfast_blob_broker_secret():
+    """Verify production startup fails when vercel_blob is used without a dedicated non-default BLOB_BROKER_HMAC_SECRET."""
+    settings = Settings(
+        app_env="production",
+        jwt_secret_key="secure-high-entropy-jwt-secret-key-for-prod-32bytes",
+        cookie_secure=True,
+        enable_demo_auth=False,
+        repository_backend="postgres",
+        database_url="postgresql+asyncpg://user:pass@host:5432/db",
+        object_storage_provider="vercel_blob",
+        blob_read_write_token="vercel_blob_rw_token_prod_12345",
+        blob_broker_hmac_secret="talentra-blob-broker-dev-secret-32-bytes-min",
+        identifier_lookup_pepper="unique-prod-pepper-64-character-hex-string-for-talentra",
+        cv_verification_token_pepper="unique-prod-cv-pepper-64-char-hex-string-talentra",
+        public_app_url="https://talentra.id",
+        allowed_origins=["https://talentra.id"],
+    )
+    with pytest.raises(RuntimeError, match="CRITICAL: Production requires a dedicated, non-default BLOB_BROKER_HMAC_SECRET"):
+        settings.validate_production_safety()
+
+    # Fails if same as jwt_secret_key
+    settings.blob_broker_hmac_secret = "secure-high-entropy-jwt-secret-key-for-prod-32bytes"
+    with pytest.raises(RuntimeError, match="CRITICAL: Production requires a dedicated, non-default BLOB_BROKER_HMAC_SECRET"):
+        settings.validate_production_safety()
+
+    # Passes when separate, dedicated 32-byte secret is provided
+    settings.blob_broker_hmac_secret = "unique-dedicated-blob-broker-secret-32bytes!"
+    settings.validate_production_safety()
+
+
 def test_production_valid_configuration_passes():
     """Verify a properly configured production settings object validates successfully."""
     settings = Settings(

@@ -1,4 +1,3 @@
-import base64
 import os
 import time
 import hmac
@@ -7,15 +6,16 @@ from typing import Optional, Dict, Any
 import httpx
 
 from .base import ObjectStorage
-from ..core.config import settings
+from ..core.config import settings, get_internal_app_origin
 
 
 class VercelBlobStorage(ObjectStorage):
     """
     Vercel Blob storage adapter implementing private blob storage.
     Enforces access='private' by default for institutional student data and generated CVs.
-    Prefers official Node Blob Broker (@vercel/blob with OIDC) in production,
-    with static token fallback for local/offline testing.
+    Uses official @vercel/blob Node broker (/api/blob/sign) to obtain narrow presigned URLs
+    for PUT, GET, HEAD, and DELETE operations without proxying large binaries through functions.
+    Static token fallback is preserved strictly for local/offline testing.
     """
 
     def __init__(
@@ -28,13 +28,23 @@ class VercelBlobStorage(ObjectStorage):
         # Static BLOB_READ_WRITE_TOKEN fallback for local/test environments
         self.token = token or os.getenv("BLOB_READ_WRITE_TOKEN") or getattr(settings, "blob_read_write_token", None) or ""
         self.base_url = base_url.rstrip("/")
-        self.broker_url = (broker_url or settings.public_app_url).rstrip("/")
+        self.broker_url = (broker_url or get_internal_app_origin()).rstrip("/")
         self.timeout = timeout
-        self.secret = (settings.jwt_secret_key or "talentra-storage-secret").encode("utf-8")
+        # Dedicated BLOB_BROKER_HMAC_SECRET strictly isolated from JWT_SECRET_KEY
+        self.secret = (
+            getattr(settings, "blob_broker_hmac_secret", None)
+            or os.getenv("BLOB_BROKER_HMAC_SECRET")
+            or "talentra-blob-broker-dev-secret-32-bytes-min"
+        ).encode("utf-8")
 
-    def _broker_sign(self, action: str, object_key: str, ttl: int = 300) -> tuple[int, str]:
-        expires = int(time.time()) + ttl
-        sig_data = f"{action}:{object_key}:{expires}".encode("utf-8")
+    def _broker_sign(self, action: str, object_key: str, ttl: Optional[int] = None) -> tuple[int, str]:
+        """
+        Signs canonical payload for internal broker authorization:
+        action|cleanPathname|expires
+        """
+        clean_path = object_key.lstrip("/")
+        expires = int(time.time()) + (ttl or settings.blob_broker_token_ttl_seconds)
+        sig_data = f"{action}|{clean_path}|{expires}".encode("utf-8")
         sig = hmac.new(self.secret, sig_data, hashlib.sha256).hexdigest()
         return expires, sig
 
@@ -44,6 +54,29 @@ class VercelBlobStorage(ObjectStorage):
             headers["authorization"] = f"Bearer {self.token}"
         return headers
 
+    def _get_presigned_url(self, action: str, object_key: str, valid_until_ttl: Optional[int] = None) -> str:
+        """
+        Requests narrow, short-lived presigned URL from trusted Next.js Blob broker.
+        """
+        clean_path = object_key.lstrip("/")
+        expires, sig = self._broker_sign(action, clean_path)
+        internal_origin = get_internal_app_origin()
+        endpoint = f"{internal_origin}/api/blob/sign"
+        payload = {
+            "action": action,
+            "pathname": clean_path,
+            "expires": expires,
+            "sig": sig,
+            "ttl": valid_until_ttl or settings.blob_download_url_ttl_seconds,
+        }
+        with httpx.Client(timeout=self.timeout) as client:
+            res = client.post(endpoint, json=payload)
+            if res.status_code == 200:
+                data = res.json()
+                return data["url"]
+            res.raise_for_status()
+            raise RuntimeError(f"Failed to obtain presigned Blob URL: {res.text}")
+
     def create_upload_url(
         self,
         object_key: str,
@@ -51,13 +84,14 @@ class VercelBlobStorage(ObjectStorage):
         expires_in: Optional[int] = None,
     ) -> str:
         """
-        Directs client upload through authorized Vercel Blob client handler route.
+        Returns client upload initiation URL.
         """
+        clean_path = object_key.lstrip("/")
         ttl = expires_in if expires_in is not None else settings.presigned_url_ttl_seconds
         expiry = int(time.time()) + ttl
-        sig_data = f"blob_upload:{object_key}:{expiry}".encode("utf-8")
+        sig_data = f"upload|{clean_path}|{expiry}".encode("utf-8")
         signature = hmac.new(self.secret, sig_data, hashlib.sha256).hexdigest()
-        return f"/api/blob/upload?pathname={object_key}&expires={expiry}&sig={signature}"
+        return f"/api/blob/upload?pathname={clean_path}&expires={expiry}&sig={signature}"
 
     def create_download_url(
         self,
@@ -66,23 +100,36 @@ class VercelBlobStorage(ObjectStorage):
     ) -> str:
         """
         Generates a short-lived signed download URL for private blob access.
+        In production, obtains a signed GET URL directly from Vercel Blob via broker.
         """
-        ttl = expires_in if expires_in is not None else settings.presigned_url_ttl_seconds
+        clean_path = object_key.lstrip("/")
+        ttl = expires_in if expires_in is not None else settings.blob_download_url_ttl_seconds
+
+        # Production broker flow: return direct presigned GET URL from Vercel Blob
+        if not self.token or os.getenv("VERCEL_URL") or os.getenv("VERCEL"):
+            try:
+                return self._get_presigned_url("get", clean_path, valid_until_ttl=ttl)
+            except Exception:
+                pass
+
+        # Static token / offline fallback
         expiry = int(time.time()) + ttl
-        sig_data = f"blob_download:{object_key}:{expiry}".encode("utf-8")
+        sig_data = f"blob_download|{clean_path}|{expiry}".encode("utf-8")
         signature = hmac.new(self.secret, sig_data, hashlib.sha256).hexdigest()
-        return f"/api/v1/storage/download?key={object_key}&expires={expiry}&sig={signature}"
+        return f"/api/v1/storage/download?key={clean_path}&expires={expiry}&sig={signature}"
 
     def verify_signed_url(self, action: str, object_key: str, expires: int, signature: str) -> bool:
         if int(time.time()) > expires:
             return False
-        sig_data = f"{action}:{object_key}:{expires}".encode("utf-8")
+        clean_path = object_key.lstrip("/")
+        sig_data = f"{action}|{clean_path}|{expires}".encode("utf-8")
         expected_sig = hmac.new(self.secret, sig_data, hashlib.sha256).hexdigest()
         return hmac.compare_digest(expected_sig, signature)
 
     def head_object(self, object_key: str) -> Optional[Dict[str, Any]]:
+        clean_path = object_key.lstrip("/")
         if self.token:
-            url = f"{self.base_url}/{object_key.lstrip('/')}"
+            url = f"{self.base_url}/{clean_path}"
             headers = self._get_headers()
             try:
                 with httpx.Client(timeout=self.timeout) as client:
@@ -95,20 +142,16 @@ class VercelBlobStorage(ObjectStorage):
                     return None
             except Exception:
                 return None
-        
-        # Production broker route via official @vercel/blob OIDC boundary
-        expires, sig = self._broker_sign("blob_inspect", object_key)
+
+        # Production: Request signed HEAD URL, call Blob directly
         try:
+            signed_url = self._get_presigned_url("head", clean_path)
             with httpx.Client(timeout=self.timeout) as client:
-                res = client.post(
-                    f"{self.broker_url}/api/blob/inspect",
-                    json={"key": object_key, "expires": expires, "sig": sig, "maxBytes": 0},
-                )
+                res = client.head(signed_url)
                 if res.status_code == 200:
-                    data = res.json()
                     return {
-                        "size_bytes": int(data.get("size", 0)),
-                        "content_type": data.get("contentType", "application/octet-stream"),
+                        "size_bytes": int(res.headers.get("content-length", 0)),
+                        "content_type": res.headers.get("content-type", "application/octet-stream"),
                     }
                 return None
         except Exception:
@@ -120,49 +163,50 @@ class VercelBlobStorage(ObjectStorage):
     def read_range(self, object_key: str, offset: int = 0, length: int = 4096) -> bytes:
         """
         Reads byte slice using HTTP Range header without full buffering.
-        Ideal for inspecting magic bytes / file signatures on large files.
+        Obtains signed GET URL from broker and queries Vercel Blob directly.
         """
+        clean_path = object_key.lstrip("/")
         if self.token:
-            url = f"{self.base_url}/{object_key.lstrip('/')}"
+            url = f"{self.base_url}/{clean_path}"
             headers = self._get_headers()
             headers["range"] = f"bytes={offset}-{offset + length - 1}"
             headers["cache-control"] = "no-cache"
-            headers["pragma"] = "no-cache"
             with httpx.Client(timeout=self.timeout) as client:
                 res = client.get(url, headers=headers)
                 if res.status_code in (200, 206):
                     return res.content[:length]
                 raise FileNotFoundError(f"Storage object '{object_key}' not found or inaccessible.")
 
-        # Production broker route via official @vercel/blob OIDC boundary
-        expires, sig = self._broker_sign("blob_inspect", object_key)
+        # Production: Request signed GET URL, read byte range directly from Blob
         try:
+            signed_url = self._get_presigned_url("get", clean_path)
+            headers = {
+                "range": f"bytes={offset}-{offset + length - 1}",
+                "cache-control": "no-cache",
+            }
             with httpx.Client(timeout=self.timeout) as client:
-                res = client.post(
-                    f"{self.broker_url}/api/blob/inspect",
-                    json={"key": object_key, "expires": expires, "sig": sig, "maxBytes": length},
-                )
-                if res.status_code == 200:
-                    data = res.json()
-                    raw_b64 = data.get("magicBytesBase64", "")
-                    if raw_b64:
-                        return base64.b64decode(raw_b64)[:length]
-                raise FileNotFoundError(f"Storage object '{object_key}' not found or inaccessible via broker.")
+                res = client.get(signed_url, headers=headers)
+                if res.status_code in (200, 206):
+                    return res.content[:length]
+                raise FileNotFoundError(f"Storage object '{object_key}' not found via signed URL.")
         except Exception as e:
             if isinstance(e, FileNotFoundError):
                 raise
-            raise FileNotFoundError(f"Storage object '{object_key}' inspection failed: {str(e)}")
+            raise FileNotFoundError(f"Storage object '{object_key}' range read failed: {str(e)}")
 
     def upload_object(self, object_key: str, data: Any, content_type: Optional[str] = None) -> str:
         """
         Uploads binary payload directly to private Vercel Blob.
-        Used for small in-memory operations like ReportLab CV PDF generation.
+        In production, obtains a signed PUT URL from broker, then PUTs binary directly to Blob.
+        No PDF bytes traverse Node Route Handlers.
         """
         if hasattr(data, "read"):
             data = data.read()
 
+        clean_path = object_key.lstrip("/")
+
         if self.token:
-            url = f"{self.base_url}/{object_key.lstrip('/')}"
+            url = f"{self.base_url}/{clean_path}"
             headers = self._get_headers()
             headers["x-access"] = "private"
             headers["x-add-random-suffix"] = "false"
@@ -177,27 +221,23 @@ class VercelBlobStorage(ObjectStorage):
                 res.raise_for_status()
                 return url
 
-        # Production broker route via official @vercel/blob OIDC boundary
-        expires, sig = self._broker_sign("blob_cv_put", object_key)
+        # Production: Obtain signed PUT URL from broker, then direct HTTP PUT to Blob
+        presigned_put_url = self._get_presigned_url("put", clean_path)
         headers = {"content-type": content_type or "application/pdf"}
         with httpx.Client(timeout=self.timeout) as client:
-            res = client.put(
-                f"{self.broker_url}/api/blob/cv-put?key={object_key}&expires={expires}&sig={sig}",
-                content=data,
-                headers=headers,
-            )
+            res = client.put(presigned_put_url, content=data, headers=headers)
             if res.status_code in (200, 201):
-                payload = res.json()
-                return payload.get("url", f"https://blob.vercel-storage.com/{object_key}")
+                return f"https://blob.vercel-storage.com/{clean_path}"
             res.raise_for_status()
-            return f"https://blob.vercel-storage.com/{object_key}"
+            return f"https://blob.vercel-storage.com/{clean_path}"
 
     def delete_object(self, object_key: str) -> bool:
+        clean_path = object_key.lstrip("/")
         if self.token:
             delete_url = f"{self.base_url}/delete"
             headers = self._get_headers()
             headers["content-type"] = "application/json"
-            target_url = f"{self.base_url}/{object_key.lstrip('/')}"
+            target_url = f"{self.base_url}/{clean_path}"
             try:
                 with httpx.Client(timeout=self.timeout) as client:
                     res = client.post(delete_url, json={"urls": [target_url]}, headers=headers)
@@ -205,25 +245,30 @@ class VercelBlobStorage(ObjectStorage):
             except Exception:
                 return False
 
-        # Production broker route via official @vercel/blob OIDC boundary
-        expires, sig = self._broker_sign("blob_delete", object_key)
+        # Production: Obtain signed DELETE URL from broker, then direct DELETE to Blob
         try:
+            signed_delete_url = self._get_presigned_url("delete", clean_path)
             with httpx.Client(timeout=self.timeout) as client:
-                res = client.post(
-                    f"{self.broker_url}/api/blob/delete",
-                    json={"key": object_key, "expires": expires, "sig": sig},
-                )
-                return res.status_code == 200
+                res = client.delete(signed_delete_url)
+                return res.status_code in (200, 204)
         except Exception:
             return False
 
     def get_object_bytes(self, object_key: str) -> bytes:
-        if not self.token:
-            raise RuntimeError("Vercel Blob token not configured.")
-        url = f"{self.base_url}/{object_key.lstrip('/')}"
-        headers = self._get_headers()
+        clean_path = object_key.lstrip("/")
+        if self.token:
+            url = f"{self.base_url}/{clean_path}"
+            headers = self._get_headers()
+            with httpx.Client(timeout=self.timeout) as client:
+                res = client.get(url, headers=headers)
+                if res.status_code == 200:
+                    return res.content
+                raise FileNotFoundError(f"Storage object '{object_key}' not found.")
+
+        # Production: Obtain signed GET URL, fetch bytes directly from Blob
+        signed_get_url = self._get_presigned_url("get", clean_path)
         with httpx.Client(timeout=self.timeout) as client:
-            res = client.get(url, headers=headers)
+            res = client.get(signed_get_url)
             if res.status_code == 200:
                 return res.content
-            raise FileNotFoundError(f"Storage object '{object_key}' not found.")
+            raise FileNotFoundError(f"Storage object '{object_key}' not found via signed URL.")
