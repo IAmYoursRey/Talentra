@@ -13,7 +13,7 @@ if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
 from app.core.config import settings
-from app.core.database import Base
+from app.core.database import Base, normalize_database_url
 import app.db.models  # Ensure all models are registered
 
 config = context.config
@@ -27,11 +27,12 @@ target_metadata = Base.metadata
 def get_url() -> str:
     x_args = context.get_x_argument(as_dictionary=True)
     if "db_url" in x_args:
-        return x_args["db_url"]
+        return normalize_database_url(x_args["db_url"])
     main_url = config.get_main_option("sqlalchemy.url")
     if main_url and "driver://user:pass@localhost/dbname" not in main_url:
-        return main_url
-    return os.getenv("DATABASE_URL", settings.database_url)
+        return normalize_database_url(main_url)
+    raw = os.getenv("DATABASE_URL", settings.database_url)
+    return normalize_database_url(raw)
 
 
 def run_migrations_offline() -> None:

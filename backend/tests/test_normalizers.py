@@ -85,3 +85,31 @@ def test_valid_email_identifier():
     assert "*******" in res.masked
     assert res.masked.endswith("@gmail.com")
 
+
+def test_normalize_database_url_variants():
+    from app.core.database import normalize_database_url
+
+    # Standard Neon postgres:// with sslmode
+    neon_postgres = "postgres://usr:pwd@ep-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=prefer"
+    norm = normalize_database_url(neon_postgres)
+    assert norm.startswith("postgresql+asyncpg://")
+    assert "ssl=require" in norm
+    assert "sslmode" not in norm
+    assert "channel_binding" not in norm
+
+    # Standard postgresql:// with sslmode
+    neon_pg = "postgresql://usr:pwd@ep-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
+    norm2 = normalize_database_url(neon_pg)
+    assert norm2.startswith("postgresql+asyncpg://")
+    assert "ssl=require" in norm2
+    assert "sslmode" not in norm2
+
+    # Already asyncpg
+    already = "postgresql+asyncpg://usr:pwd@ep-pooler.us-east-1.aws.neon.tech/neondb?ssl=require"
+    assert normalize_database_url(already) == already
+
+    # SQLite untouched
+    sqlite_url = "sqlite+aiosqlite:///./test_talentra.db"
+    assert normalize_database_url(sqlite_url) == sqlite_url
+
+
