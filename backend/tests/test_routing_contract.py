@@ -25,6 +25,12 @@ def test_vercel_entrypoint_identity_and_no_duplicate_routes():
     assert "/api/v1/public/verify/{token}" in route_paths
     assert "/api/v1/storage/verify-intent" in route_paths
 
+    # Assert FastAPI owns /api/* exclusively and does NOT contain Next.js /blob/* broker routes
+    assert "/blob/upload" not in route_paths
+    assert "/blob/sign" not in route_paths
+    assert "/api/blob/upload" not in route_paths
+    assert "/api/blob/sign" not in route_paths
+
 
 @pytest.mark.asyncio
 async def test_canonical_routes_response_contracts():

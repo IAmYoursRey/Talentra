@@ -182,7 +182,7 @@ def test_vercel_blob_storage_adapter():
 
     # 1. Upload URL generation
     upload_url = storage.create_upload_url(object_key=object_key, content_type="application/pdf", expires_in=600)
-    assert "/api/blob/upload" in upload_url
+    assert "/blob/upload" in upload_url
     assert object_key in upload_url
     assert "sig=" in upload_url
 

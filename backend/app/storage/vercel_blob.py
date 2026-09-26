@@ -13,7 +13,7 @@ class VercelBlobStorage(ObjectStorage):
     """
     Vercel Blob storage adapter implementing private blob storage.
     Enforces access='private' by default for institutional student data and generated CVs.
-    Uses official @vercel/blob Node broker (/api/blob/sign) to obtain narrow presigned URLs
+    Uses official @vercel/blob Node broker (/blob/sign) to obtain narrow presigned URLs
     for PUT, GET, HEAD, and DELETE operations without proxying large binaries through functions.
     Static token fallback is preserved strictly for local/offline testing.
     """
@@ -61,7 +61,7 @@ class VercelBlobStorage(ObjectStorage):
         clean_path = object_key.lstrip("/")
         expires, sig = self._broker_sign(action, clean_path)
         internal_origin = get_internal_app_origin()
-        endpoint = f"{internal_origin}/api/blob/sign"
+        endpoint = f"{internal_origin}/blob/sign"
         payload = {
             "action": action,
             "pathname": clean_path,
@@ -91,7 +91,7 @@ class VercelBlobStorage(ObjectStorage):
         expiry = int(time.time()) + ttl
         sig_data = f"upload|{clean_path}|{expiry}".encode("utf-8")
         signature = hmac.new(self.secret, sig_data, hashlib.sha256).hexdigest()
-        return f"/api/blob/upload?pathname={clean_path}&expires={expiry}&sig={signature}"
+        return f"/blob/upload?pathname={clean_path}&expires={expiry}&sig={signature}"
 
     def create_download_url(
         self,

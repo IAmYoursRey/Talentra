@@ -34,7 +34,29 @@ Tidak memerlukan server VPS, daemon Docker, MongoDB, MinIO, ataupun kartu kredit
 
 ---
 
-## 2. Variabel Lingkungan Vercel (Environment Variables)
+## 2. Otoritas Routing Produksi (Production Route Ownership)
+
+Arsitektur Vercel membagi kepemilikan rute secara tegas untuk menghindari kolisi namespace:
+
+1. **`/api/*` → Otoritas Penuh FastAPI (`api/index.py`)**:
+   - Seluruh endpoint API bisnis TALENTRA berada di bawah namespace `/api/*`:
+     - `/api/v1/auth/*` (Login, Me, CSRF, Logout)
+     - `/api/v1/student/*` (Portofolio, Rekomendasi, CV, Unduhan)
+     - `/api/v1/teacher/*` (Antrean validasi, review, rubrik)
+     - `/api/v1/admin/*` (Manajemen pengguna, kelas, analitik)
+     - `/api/v1/public/*` (Verifikasi publik QR independen)
+     - `/api/v1/health/*` (Probe live & ready)
+   - **TIDAK ADA Route Handler Next.js di bawah `/api/*`**.
+2. **`/blob/*` → Otoritas Next.js Route Handlers (Trusted Vercel Blob Broker)**:
+   - Terisolasi di luar `/api/*` agar tidak pernah diintersepsi oleh serverless Python:
+     - `/blob/upload`: Handler `@vercel/blob/client` `handleUpload` yang memverifikasi intent dengan FastAPI.
+     - `/blob/sign`: Broker penandatangan URL sempit (`issueSignedToken` + `presignUrl`) yang dilindungi `BLOB_BROKER_HMAC_SECRET`.
+3. **Semua Rute Lainnya → Next.js App Router**:
+   - `/`, `/login`, `/student/*`, `/teacher/*`, `/admin/*`, `/verify/*`.
+
+---
+
+## 3. Variabel Lingkungan Vercel (Environment Variables)
 
 Konfigurasikan variabel berikut pada menu **Project Settings > Environment Variables** di Dashboard Vercel:
 

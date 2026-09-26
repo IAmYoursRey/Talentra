@@ -87,8 +87,8 @@ def test_expiration_rejection(monkeypatch):
 
 def test_direct_signed_put_cv_upload(monkeypatch):
     """
-    Test 44: CV storage architecture: FastAPI requests presigned PUT from /api/blob/sign
-    and performs direct HTTP PUT to that signed URL. PDF bytes do NOT pass through /api/blob/cv-put.
+    Test 44: CV storage architecture: FastAPI requests presigned PUT from /blob/sign
+    and performs direct HTTP PUT to that signed URL. PDF bytes do NOT pass through /blob/cv-put.
     """
     monkeypatch.setattr(settings, "blob_broker_hmac_secret", "f" * 32)
     storage = VercelBlobStorage(token="")  # Production mode without static token
@@ -110,10 +110,10 @@ def test_direct_signed_put_cv_upload(monkeypatch):
         cv_pdf_bytes = b"%PDF-1.4 reportlab generated test cv"
         result_url = storage.upload_object("cv/sch-1/cv-123.pdf", cv_pdf_bytes, "application/pdf")
 
-        # 1. Verify broker /api/blob/sign was called with metadata only (no PDF bytes)
+        # 1. Verify broker /blob/sign was called with metadata only (no PDF bytes)
         assert mock_sign_post.call_count == 1
         sign_call_args, sign_call_kwargs = mock_sign_post.call_args
-        assert "/api/blob/sign" in sign_call_args[0]
+        assert "/blob/sign" in sign_call_args[0]
         sign_payload = sign_call_kwargs.get("json", {})
         assert sign_payload.get("action") == "put"
         assert sign_payload.get("pathname") == "cv/sch-1/cv-123.pdf"
@@ -153,7 +153,7 @@ def test_direct_signed_get_read_range(monkeypatch):
 
         # Verify broker sign called for "get"
         assert mock_sign_post.call_count == 1
-        assert "/api/blob/sign" in mock_sign_post.call_args[0][0]
+        assert "/blob/sign" in mock_sign_post.call_args[0][0]
 
         # Verify direct range GET on Blob URL
         assert mock_blob_get.call_count == 1
