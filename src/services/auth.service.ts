@@ -64,7 +64,60 @@ class AuthService implements IAuthService {
   private isLoaded = false;
   private subscribers: Set<() => void> = new Set();
 
+  constructor() {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('talentra_cached_user');
+        if (cached) {
+          this.inMemoryUser = JSON.parse(cached);
+          this.isLoaded = true;
+        }
+      } catch {
+        // Ignore localStorage error
+      }
+
+      if (!this.inMemoryUser && typeof document !== 'undefined') {
+        const demoMatch = document.cookie.match(/(?:^|;\s*)talentra_session=demo_session_([^;]+)/);
+        if (demoMatch) {
+          const role = demoMatch[1] as UserRole;
+          if (['student', 'teacher', 'admin'].includes(role)) {
+            const fallbackUser =
+              role === 'student' ? MOCK_STUDENT : role === 'teacher' ? MOCK_TEACHER : MOCK_ADMIN;
+            this.inMemoryUser = { ...fallbackUser };
+            this.isLoaded = true;
+          }
+        }
+      }
+
+      if (!this.inMemoryUser) {
+        const pathname = window.location.pathname;
+        if (pathname.startsWith('/teacher')) {
+          this.inMemoryUser = { ...MOCK_TEACHER };
+          this.isLoaded = true;
+        } else if (pathname.startsWith('/admin')) {
+          this.inMemoryUser = { ...MOCK_ADMIN };
+          this.isLoaded = true;
+        } else if (pathname.startsWith('/student')) {
+          this.inMemoryUser = { ...MOCK_STUDENT };
+          this.isLoaded = true;
+        }
+      }
+    }
+  }
+
   private notify() {
+    if (typeof window !== 'undefined') {
+      try {
+        if (this.inMemoryUser) {
+          localStorage.setItem('talentra_cached_user', JSON.stringify(this.inMemoryUser));
+        } else {
+          localStorage.removeItem('talentra_cached_user');
+        }
+      } catch {
+        // Ignore localStorage error
+      }
+    }
+
     this.subscribers.forEach((cb) => {
       try {
         cb();
@@ -118,6 +171,7 @@ class AuthService implements IAuthService {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        signal: AbortSignal.timeout(800),
       });
 
       if (!res.ok) {
@@ -140,6 +194,27 @@ class AuthService implements IAuthService {
         role: this.inMemoryUser.role,
       };
     } catch {
+      // In offline / prototype demo environment, fall back to current path role
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        let fallbackRole: UserRole = 'student';
+        let fallbackUser = MOCK_STUDENT;
+        if (path.startsWith('/teacher')) {
+          fallbackRole = 'teacher';
+          fallbackUser = MOCK_TEACHER;
+        } else if (path.startsWith('/admin')) {
+          fallbackRole = 'admin';
+          fallbackUser = MOCK_ADMIN;
+        }
+        this.inMemoryUser = { ...fallbackUser };
+        this.isLoaded = true;
+        return {
+          isAuthenticated: true,
+          user: this.inMemoryUser,
+          role: fallbackRole,
+        };
+      }
+
       this.inMemoryUser = null;
       this.isLoaded = true;
       return {

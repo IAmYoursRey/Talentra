@@ -155,6 +155,7 @@ export class HTTPReviewService implements IReviewService {
         headers: {
           'Accept': 'application/json',
         },
+        signal: AbortSignal.timeout(1000),
       });
 
       if (res.ok) {

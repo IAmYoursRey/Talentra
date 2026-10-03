@@ -22,7 +22,7 @@ export class HTTPVerificationService implements IVerificationService {
       return {
         status: 'verified',
         displayCode: 'TLN-2026-94B8',
-        studentDisplayName: 'Alya Rahma',
+        studentDisplayName: 'Dimas Pratama',
         schoolDisplayName: 'SMK Negeri 1 Cimahi',
         issuedAt: '2026-09-25T10:00:00Z',
         snapshotDigestShort: 'TLN-A1B2-C3D4',
@@ -33,7 +33,7 @@ export class HTTPVerificationService implements IVerificationService {
       return {
         status: 'expired',
         displayCode: 'TLN-2025-EXPD',
-        studentDisplayName: 'Alya Rahma',
+        studentDisplayName: 'Dimas Pratama',
         schoolDisplayName: 'SMK Negeri 1 Cimahi',
         issuedAt: '2025-01-01T10:00:00Z',
         expiresAt: '2025-07-01T10:00:00Z',
@@ -44,7 +44,7 @@ export class HTTPVerificationService implements IVerificationService {
       return {
         status: 'revoked',
         displayCode: 'TLN-2025-RVKD',
-        studentDisplayName: 'Alya Rahma',
+        studentDisplayName: 'Dimas Pratama',
         schoolDisplayName: 'SMK Negeri 1 Cimahi',
         issuedAt: '2025-01-01T10:00:00Z',
         revokedAt: '2025-03-01T10:00:00Z',
@@ -58,6 +58,7 @@ export class HTTPVerificationService implements IVerificationService {
         headers: {
           'Accept': 'application/json',
         },
+        signal: AbortSignal.timeout(1000),
       });
 
       if (res.status === 429) {
@@ -82,7 +83,7 @@ export class HTTPVerificationService implements IVerificationService {
         return {
           status: 'verified',
           displayCode: 'TLN-2026-94B8',
-          studentDisplayName: 'Alya Rahma',
+          studentDisplayName: 'Dimas Pratama',
           schoolDisplayName: 'SMK Negeri 1 Cimahi',
           issuedAt: '2026-09-25T10:00:00Z',
           snapshotDigestShort: 'TLN-A1B2-C3D4',
@@ -93,7 +94,7 @@ export class HTTPVerificationService implements IVerificationService {
         return {
           status: 'expired',
           displayCode: 'TLN-2025-EXPD',
-          studentDisplayName: 'Alya Rahma',
+          studentDisplayName: 'Dimas Pratama',
           schoolDisplayName: 'SMK Negeri 1 Cimahi',
           issuedAt: '2025-01-01T10:00:00Z',
           expiresAt: '2025-07-01T10:00:00Z',
@@ -104,7 +105,7 @@ export class HTTPVerificationService implements IVerificationService {
         return {
           status: 'revoked',
           displayCode: 'TLN-2025-RVKD',
-          studentDisplayName: 'Alya Rahma',
+          studentDisplayName: 'Dimas Pratama',
           schoolDisplayName: 'SMK Negeri 1 Cimahi',
           issuedAt: '2025-01-01T10:00:00Z',
           revokedAt: '2025-03-01T10:00:00Z',

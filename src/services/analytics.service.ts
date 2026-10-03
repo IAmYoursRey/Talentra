@@ -43,6 +43,7 @@ class AnalyticsService implements IAnalyticsService {
         method: 'GET',
         credentials: 'include',
         headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(1000),
       });
       if (res.ok) {
         const data = await res.json();
@@ -80,6 +81,7 @@ class AnalyticsService implements IAnalyticsService {
         method: 'GET',
         credentials: 'include',
         headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(1000),
       });
       if (res.ok) {
         return await res.json();
@@ -170,6 +172,7 @@ class AnalyticsService implements IAnalyticsService {
         method: 'GET',
         credentials: 'include',
         headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(1000),
       });
       if (res.ok) {
         return await res.json();
@@ -203,6 +206,7 @@ class AnalyticsService implements IAnalyticsService {
         method: 'GET',
         credentials: 'include',
         headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(1000),
       });
       if (res.ok) {
         return await res.json();

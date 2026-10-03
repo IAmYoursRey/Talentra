@@ -22,23 +22,40 @@ export const AppShell: React.FC<AppShellProps> = ({
   pageTitle,
   expectedRole,
 }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => authService.getCurrentUser());
+  const [isLoading, setIsLoading] = useState(() => !authService.getCurrentUser());
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     authService.getCurrentSession().then((session) => {
-      setCurrentUser(session.user);
-      setIsLoading(false);
+      if (isMounted) {
+        setCurrentUser(session.user);
+        setIsLoading(false);
+      }
     });
+
+    // Safety timeout: never block navigation for more than 400ms
+    const timer = setTimeout(() => {
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    }, 400);
 
     const unsubscribe = authService.subscribeSession(() => {
       authService.getCurrentSession().then((session) => {
-        setCurrentUser(session.user);
+        if (isMounted) {
+          setCurrentUser(session.user);
+        }
       });
     });
 
-    return unsubscribe;
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+      unsubscribe();
+    };
   }, []);
 
   if (isLoading || !currentUser) {

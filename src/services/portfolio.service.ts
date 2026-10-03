@@ -110,6 +110,7 @@ class HTTPPortfolioService implements IPortfolioService {
       const res = await fetch(`${API_BASE}/api/v1/skill-tags`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(1000),
       });
       if (res.ok) {
         const data = await res.json();
@@ -143,6 +144,7 @@ class HTTPPortfolioService implements IPortfolioService {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        signal: AbortSignal.timeout(1000),
       });
 
       if (res.ok) {
@@ -195,6 +197,7 @@ class HTTPPortfolioService implements IPortfolioService {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        signal: AbortSignal.timeout(1000),
       });
 
       if (res.ok) {

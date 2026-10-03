@@ -27,6 +27,7 @@ export class HTTPSkillService implements ISkillService {
         headers: {
           'Accept': 'application/json',
         },
+        signal: AbortSignal.timeout(1000),
       });
 
       if (res.ok) {
@@ -133,6 +134,7 @@ export class HTTPSkillService implements ISkillService {
         headers: {
           'Accept': 'application/json',
         },
+        signal: AbortSignal.timeout(1000),
       });
 
       if (res.ok) {
