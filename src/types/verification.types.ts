@@ -19,6 +19,10 @@ export interface PublicVerificationResult {
   displayCode?: string;
   studentDisplayName?: string;
   schoolDisplayName?: string;
+  validatorName?: string;
+  validatorRole?: string;
+  institutionAuthority?: string;
+  academicYear?: string;
   issuedAt?: string;
   expiresAt?: string | null;
   revokedAt?: string | null;

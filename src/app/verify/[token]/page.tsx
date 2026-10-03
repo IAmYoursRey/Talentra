@@ -13,6 +13,10 @@ import {
   Calendar,
   Award,
   ArrowLeft,
+  UserCheck,
+  BadgeCheck,
+  Hash,
+  Lock,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageLoadingCover } from '../../../components/common/PageLoadingCover';
@@ -42,12 +46,22 @@ export default function VerificationPage() {
         // Fallback verified result for demo token
         setData({
           status: 'verified',
-          studentName: 'Dimas Pratama',
-          schoolName: 'SMAN 1 Ngoro',
-          graduationYear: 2027,
-          competencies: ['Web Development', 'Leadership', 'Communication'],
-          issuedAt: '12 September 2026',
-        } as any);
+          displayCode: 'TLN-2026-94B8',
+          studentDisplayName: 'Dimas Pratama',
+          schoolDisplayName: 'SMK Negeri 1 Cimahi',
+          validatorName: 'Budi Santoso, S.Kom',
+          validatorRole: 'Guru Pembimbing Kejuruan / Validator Resmi',
+          institutionAuthority: 'Dinas Pendidikan Provinsi Jawa Barat',
+          academicYear: '2025/2026',
+          snapshotDigestShort: '3A8B-2C1D-9E4F',
+          issuedAt: '2026-09-25T10:00:00Z',
+          validatedSkillSummary: [
+            { name: 'Web Development', score: 85, level: 'Tingkat Mahir' },
+            { name: 'Leadership & Kolaborasi', score: 90, level: 'Tingkat Mahir' },
+            { name: 'Algoritma & Pemrograman', score: 88, level: 'Tingkat Mahir' },
+            { name: 'Komunikasi Efektif', score: 82, level: 'Tingkat Menengah' },
+          ],
+        });
       })
       .finally(() => setIsLoading(false));
   }, [token]);
@@ -139,65 +153,157 @@ export default function VerificationPage() {
           </div>
         ) : (
           /* 26-Public-Verified-HF.svg Layout */
-          <div className="bg-white rounded-[26px] border border-[#E9E1F4] p-8 sm:p-10 shadow-[0_8px_30px_rgba(76,29,149,0.08)] space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-[#059669] flex items-center justify-center text-2xl font-black shrink-0">
-                ✓
+          <div className="bg-white rounded-[26px] border border-[#E9E1F4] p-6 sm:p-10 shadow-[0_8px_30px_rgba(76,29,149,0.08)] space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-2xl font-black shrink-0 shadow-md">
+                  <ShieldCheck className="w-8 h-8" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl sm:text-2xl font-black text-[#261331] tracking-tight">
+                      CV TERVERIFIKASI RESMI
+                    </h1>
+                  </div>
+                  <p className="text-xs text-[#6F607D] mt-0.5">
+                    Tervalidasi sah berdasarkan catatan riwayat karya dan penilaian validator sekolah.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black text-[#261331] tracking-tight">
-                  CV TERVERIFIKASI
-                </h1>
-                <p className="text-xs text-[#6F607D] mt-0.5">
-                  Cocok dengan snapshot resmi yang diterbitkan sekolah.
-                </p>
-              </div>
+              <span className="self-start sm:self-auto px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>STATUS: SAH & AKTIF</span>
+              </span>
             </div>
 
-            <div className="bg-[#FCFBFF] rounded-2xl border border-[#E9E1F4] p-6 space-y-3.5 text-xs">
-              <div className="flex items-center justify-between py-1.5 border-b border-[#E9E1F4]">
-                <span className="font-semibold text-[#6F607D]">Nama siswa</span>
-                <span className="font-bold text-sm text-[#261331]">
-                  {data?.studentDisplayName || 'Dimas Pratama'}
-                </span>
+            {/* Grid Informasi Verifikasi Lengkap */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Kolom 1: Subjek & Instansi */}
+              <div className="bg-[#FCFBFF] rounded-2xl border border-[#E9E1F4] p-5 space-y-3.5 text-xs">
+                <div className="flex items-center gap-2 text-[#6D28D9] font-bold text-xs pb-1 border-b border-[#E9E1F4]">
+                  <School className="w-4 h-4 text-[#8B5CF6]" />
+                  <span>IDENTITAS SISWA & LEMBAGA</span>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[11px] font-semibold text-[#6F607D]">Nama Siswa (Pemegang Portofolio):</span>
+                  <div className="font-bold text-sm text-[#261331] flex items-center gap-1.5">
+                    <span>{data?.studentDisplayName || 'Dimas Pratama'}</span>
+                    <BadgeCheck className="w-4 h-4 text-emerald-600" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[11px] font-semibold text-[#6F607D]">Sekolah / Lembaga Pendidikan:</span>
+                  <p className="font-bold text-[#261331]">
+                    {data?.schoolDisplayName || 'SMK Negeri 1 Cimahi'}
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[11px] font-semibold text-[#6F607D]">Instansi / Otoritas Pembina:</span>
+                  <p className="font-medium text-[#261331]">
+                    {data?.institutionAuthority || 'Dinas Pendidikan Provinsi Jawa Barat'}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 text-[11px] border-t border-[#E9E1F4]">
+                  <span className="text-[#6F607D]">Tahun Kelulusan Siswa:</span>
+                  <span className="font-bold text-[#261331]">Angkatan 2027</span>
+                </div>
               </div>
 
-              <div className="flex items-center justify-between py-1.5 border-b border-[#E9E1F4]">
-                <span className="font-semibold text-[#6F607D]">Sekolah</span>
-                <span className="font-bold text-[#261331]">
-                  {data?.schoolDisplayName || 'SMAN 1 Ngoro'}
-                </span>
-              </div>
+              {/* Kolom 2: Validator & Waktu Terbit */}
+              <div className="bg-[#FCFBFF] rounded-2xl border border-[#E9E1F4] p-5 space-y-3.5 text-xs">
+                <div className="flex items-center gap-2 text-[#6D28D9] font-bold text-xs pb-1 border-b border-[#E9E1F4]">
+                  <UserCheck className="w-4 h-4 text-[#8B5CF6]" />
+                  <span>PEJABAT PENILAI & LEGALITAS</span>
+                </div>
 
-              <div className="flex items-center justify-between py-1.5 border-b border-[#E9E1F4]">
-                <span className="font-semibold text-[#6F607D]">Tahun lulus</span>
-                <span className="font-bold text-[#261331]">
-                  2027
-                </span>
-              </div>
+                <div className="space-y-1">
+                  <span className="text-[11px] font-semibold text-[#6F607D]">Diverifikasi & Disetujui Oleh:</span>
+                  <p className="font-bold text-sm text-[#261331]">
+                    {data?.validatorName || 'Budi Santoso, S.Kom'}
+                  </p>
+                </div>
 
-              <div className="py-2">
-                <span className="font-semibold text-[#6F607D] block mb-2">Kompetensi</span>
-                <div className="flex flex-wrap gap-2">
-                  {(data?.validatedSkillSummary && data.validatedSkillSummary.length > 0
-                    ? data.validatedSkillSummary.map((s) => s.name)
-                    : ['Web Development', 'Leadership', 'Communication']
-                  ).map((comp) => (
-                    <span
-                      key={comp}
-                      className="px-3 py-1 rounded-full text-xs font-bold bg-[#F7F2FF] text-[#6D28D9] border border-purple-100"
-                    >
-                      {comp}
-                    </span>
-                  ))}
+                <div className="space-y-1">
+                  <span className="text-[11px] font-semibold text-[#6F607D]">Jabatan Validator Resmi:</span>
+                  <p className="font-medium text-[#261331]">
+                    {data?.validatorRole || 'Guru Pembimbing Kejuruan / Validator Resmi Sekolah'}
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[11px] font-semibold text-[#6F607D]">Tahun Akademik:</span>
+                  <p className="font-bold text-[#261331]">
+                    {data?.academicYear || '2025/2026'}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 text-[11px] border-t border-[#E9E1F4]">
+                  <span className="text-[#6F607D]">Tanggal Penerbitan CV:</span>
+                  <span className="font-bold text-emerald-700">
+                    {data?.issuedAt
+                      ? new Date(data.issuedAt).toLocaleDateString('id-ID', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })
+                      : '25 September 2026'}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Privacy Assurance Card matching 26-Public-Verified-HF.svg */}
-            <div className="p-4 rounded-xl bg-[#FAF5FF] border border-purple-100 text-center">
-              <p className="text-xs font-semibold text-[#6D28D9]">
-                Tidak menampilkan NISN, kontak pribadi, atau evidence yang belum disetujui.
+            {/* Dokumen & Kriptografi */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-slate-600">
+                  <Hash className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="font-semibold text-[11px]">Nomor Register Dokumen:</span>
+                  <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    {data?.displayCode || 'TLN-2026-94B8'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-slate-600">
+                  <Lock className="w-3.5 h-3.5 text-purple-500" />
+                  <span className="font-semibold text-[11px]">Sidik Snapshot (SHA-256):</span>
+                  <span className="font-mono font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                    {data?.snapshotDigestShort || '3A8B-2C1D-9E4F'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Kompetensi Terakreditasi */}
+            <div className="bg-[#FCFBFF] rounded-2xl border border-[#E9E1F4] p-5 space-y-2.5">
+              <span className="font-bold text-xs text-[#261331] block">
+                Kompetensi Terakreditasi (Proof of Work Tervalidasi):
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {(data?.validatedSkillSummary && data.validatedSkillSummary.length > 0
+                  ? data.validatedSkillSummary.map((s) => s.name)
+                  : ['Web Development', 'Leadership', 'Communication', 'Algoritma & Pemrograman', 'Problem Solving']
+                ).map((comp) => (
+                  <span
+                    key={comp}
+                    className="px-3 py-1 rounded-full text-xs font-bold bg-[#F7F2FF] text-[#6D28D9] border border-purple-100 flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3 h-3 text-[#8B5CF6]" />
+                    <span>{comp}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Privacy Assurance Card */}
+            <div className="p-4 rounded-xl bg-[#FAF5FF] border border-purple-100 text-center space-y-1">
+              <p className="text-xs font-bold text-[#6D28D9]">
+                Jaminan Kepatuhan Perlindungan Privasi Data Siswa
+              </p>
+              <p className="text-[11px] text-[#6F607D]">
+                TALENTRA.ID tidak memublikasikan NISN, nomor kontak, atau karya draf. Halaman verifikasi publik ini menjamin autentisitas pencapaian siswa tanpa membuka data pribadi sensitif.
               </p>
             </div>
           </div>

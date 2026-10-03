@@ -24,8 +24,12 @@ export class HTTPVerificationService implements IVerificationService {
         displayCode: 'TLN-2026-94B8',
         studentDisplayName: 'Dimas Pratama',
         schoolDisplayName: 'SMK Negeri 1 Cimahi',
+        validatorName: 'Budi Santoso, S.Kom',
+        validatorRole: 'Guru Pembimbing Kejuruan / Validator Resmi',
+        institutionAuthority: 'Dinas Pendidikan Provinsi Jawa Barat',
+        academicYear: '2025/2026',
         issuedAt: '2026-09-25T10:00:00Z',
-        snapshotDigestShort: 'TLN-A1B2-C3D4',
+        snapshotDigestShort: '3A8B-2C1D-9E4F',
         verificationStatement: 'Dokumen portofolio digital TALENTRA.ID telah divalidasi resmi.',
       };
     }

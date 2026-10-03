@@ -21,10 +21,6 @@ interface AppShellProps {
 }
 
 const getFallbackUser = (expectedRole?: UserRole): UserProfile => {
-  if (typeof window !== 'undefined') {
-    const cached = authService.getCurrentUser();
-    if (cached) return cached;
-  }
   if (expectedRole === 'teacher') {
     return {
       id: 'teacher-demo',

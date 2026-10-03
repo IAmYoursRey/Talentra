@@ -29,7 +29,7 @@ import { cn } from '../../../lib/utils';
 
 export default function StudentCVPage() {
   const [context, setContext] = useState<CVBuilderContext | null>(null);
-  const [currentUser, setCurrentUser] = useState<string>(() => authService.getCurrentUser()?.name || 'Dimas Pratama');
+  const [currentUser, setCurrentUser] = useState<string>('Dimas Pratama');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4']);
   const [isGenerating, setIsGenerating] = useState(false);

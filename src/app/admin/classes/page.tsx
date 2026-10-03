@@ -114,6 +114,10 @@ export default function AdminClassesPage() {
 
   const handleSelectClass = async (cls: AdminClass) => {
     setSelectedClassId(cls.id);
+    const cached = adminClassService.getCachedClassDetail(cls.id);
+    if (cached) {
+      setClassDetail(cached);
+    }
     await loadDetail(cls.id);
   };
 
