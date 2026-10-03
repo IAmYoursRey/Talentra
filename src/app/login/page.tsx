@@ -21,6 +21,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { PageLoadingCover } from '../../components/common/PageLoadingCover';
 
 type SubmittingTarget = 'student' | 'teacher' | 'admin' | 'form' | null;
 
@@ -82,7 +83,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFBFF] flex flex-col justify-between font-sans selection:bg-[#8B5CF6] selection:text-white">
+    <div className="min-h-screen bg-[#FCFBFF] flex flex-col justify-between font-sans selection:bg-[#8B5CF6] selection:text-white relative">
+      <PageLoadingCover
+        isVisible={isSubmitting}
+        message="Memverifikasi & Menyiapkan Sesi..."
+        subMessage="Menghubungkan akun ke dasbor TALENTRA.ID..."
+        className="fixed inset-0 z-50 bg-[#FCFBFF]/95 backdrop-blur-md"
+      />
       <div className="flex-1 flex flex-col lg:flex-row min-h-screen">
         {/* Left Hero Pane matching 01-Landing-Login-HF-v2.svg */}
         <div className="lg:w-[58%] bg-gradient-to-br from-[#2E1065] via-[#4C1D95] to-[#6D28D9] p-8 sm:p-12 lg:p-16 flex flex-col justify-between text-white relative overflow-hidden">

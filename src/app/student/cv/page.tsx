@@ -93,7 +93,7 @@ export default function StudentCVPage() {
   };
 
   return (
-    <AppShell pageTitle="Digital CV" expectedRole="student">
+    <AppShell pageTitle="Digital CV" expectedRole="student" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 11-Student-DigitalCV-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

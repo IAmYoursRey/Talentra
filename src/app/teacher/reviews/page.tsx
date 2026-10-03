@@ -31,6 +31,20 @@ export default function TeacherReviewQueuePage() {
   const [actionNotice, setActionNotice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingAction, setSubmittingAction] = useState<'endorse' | 'revision' | 'reject' | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    reviewService
+      .getReviewQueue()
+      .then((items) => {
+        if (items && items.length > 0) {
+          setQueue(items);
+          setSelectedId(items[0].id);
+        }
+      })
+      .catch(() => null)
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const fallbackQueue = [
     {
@@ -101,7 +115,7 @@ export default function TeacherReviewQueuePage() {
   };
 
   return (
-    <AppShell pageTitle="Approval Queue" expectedRole="teacher">
+    <AppShell pageTitle="Approval Queue" expectedRole="teacher" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 13-Teacher-Approval-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -15,6 +15,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import Link from 'next/link';
+import { PageLoadingCover } from '../../../components/common/PageLoadingCover';
 
 export default function VerificationPage() {
   const params = useParams();
@@ -72,7 +73,14 @@ export default function VerificationPage() {
         </div>
 
         {/* Verification Status Card */}
-        {isRevoked ? (
+        <div className="relative min-h-[380px] rounded-[26px]">
+          <PageLoadingCover
+            isVisible={isLoading}
+            message="Memverifikasi Dokumen..."
+            subMessage="Memeriksa keabsahan kriptografi snapshot portofolio resmi..."
+            className="rounded-[26px]"
+          />
+          {isRevoked ? (
           /* 27-Public-Revoked-HF.svg Layout */
           <div className="bg-white rounded-[26px] border border-rose-200 p-8 sm:p-10 shadow-[0_8px_30px_rgba(244,63,94,0.08)] space-y-6 text-center">
             <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-2xl font-black">
@@ -176,6 +184,7 @@ export default function VerificationPage() {
             </div>
           </div>
         )}
+        </div>
 
         <div className="text-center pt-2">
           <Link

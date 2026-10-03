@@ -37,15 +37,20 @@ export default function NewPortfolioPage() {
   const [linkUrl, setLinkUrl] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingTags, setIsLoadingTags] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    portfolioService.getCanonicalTags().then((tags) => {
-      setAvailableTags(tags);
-      if (tags.length >= 3 && selectedTagIds.length === 0) {
-        setSelectedTagIds(tags.slice(0, 3).map((t) => t.id));
-      }
-    });
+    portfolioService
+      .getCanonicalTags()
+      .then((tags) => {
+        setAvailableTags(tags);
+        if (tags.length >= 3 && selectedTagIds.length === 0) {
+          setSelectedTagIds(tags.slice(0, 3).map((t) => t.id));
+        }
+      })
+      .catch(() => null)
+      .finally(() => setIsLoadingTags(false));
   }, []);
 
   const toggleTag = (tagId: string) => {
@@ -117,7 +122,7 @@ export default function NewPortfolioPage() {
   const selectedTags = availableTags.filter((t) => selectedTagIds.includes(t.id));
 
   return (
-    <AppShell pageTitle="Tambah Proof of Work" expectedRole="student">
+    <AppShell pageTitle="Tambah Proof of Work" expectedRole="student" isPageLoading={isLoadingTags}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 08-Student-Upload-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

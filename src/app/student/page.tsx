@@ -71,7 +71,7 @@ export default function StudentDashboardPage() {
   ];
 
   return (
-    <AppShell pageTitle="Overview" expectedRole="student">
+    <AppShell pageTitle="Overview" expectedRole="student" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 02-Student-Overview-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

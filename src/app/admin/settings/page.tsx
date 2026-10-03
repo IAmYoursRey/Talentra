@@ -1,10 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppShell } from '../../../components/layout/AppShell';
 import { ShieldCheck, School, Database, FileCheck2, Check, Lock, Sliders } from 'lucide-react';
 
 export default function AdminSettingsPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [schoolName, setSchoolName] = useState('SMAN 1 Ngoro');
   const [academicYear, setAcademicYear] = useState('2026 / 2027');
   const [demoLogin, setDemoLogin] = useState(false);
@@ -25,7 +32,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <AppShell pageTitle="School Settings" expectedRole="admin">
+    <AppShell pageTitle="School Settings" expectedRole="admin" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 21-Admin-Settings-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

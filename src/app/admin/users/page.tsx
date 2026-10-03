@@ -223,7 +223,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <AppShell pageTitle="User Management" expectedRole="admin">
+    <AppShell pageTitle="User Management" expectedRole="admin" isPageLoading={isLoading}>
       <div className="space-y-6">
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

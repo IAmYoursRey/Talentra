@@ -98,6 +98,19 @@ body {
   animation: indeterminate 1.4s infinite cubic-bezier(0.65, 0.815, 0.735, 0.395);
 }
 
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 3s linear infinite;
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,

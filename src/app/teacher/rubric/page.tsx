@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppShell } from '../../../components/layout/AppShell';
 import { BookOpen, CheckCircle2, Clock, Sparkles } from 'lucide-react';
 
@@ -12,6 +12,13 @@ interface RubricRow {
 }
 
 export default function TeacherRubricPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   const rubrics: RubricRow[] = [
     {
       dimension: 'Initiative',
@@ -46,7 +53,7 @@ export default function TeacherRubricPage() {
   ];
 
   return (
-    <AppShell pageTitle="Rubrik Soft Skill" expectedRole="teacher">
+    <AppShell pageTitle="Rubrik Soft Skill" expectedRole="teacher" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

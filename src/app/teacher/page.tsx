@@ -76,7 +76,7 @@ export default function TeacherDashboardPage() {
   ];
 
   return (
-    <AppShell pageTitle="Dashboard" expectedRole="teacher">
+    <AppShell pageTitle="Dashboard" expectedRole="teacher" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 12-Teacher-Dashboard-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

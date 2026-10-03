@@ -64,7 +64,7 @@ export default function StudentCareerPage() {
   const currentRationale = defaultPaths[selectedPathIndex] || defaultPaths[0];
 
   return (
-    <AppShell pageTitle="Career Path" expectedRole="student">
+    <AppShell pageTitle="Career Path" expectedRole="student" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 10-Student-Career-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

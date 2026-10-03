@@ -39,7 +39,7 @@ export default function StudentSkillsPage() {
   ];
 
   return (
-    <AppShell pageTitle="Skill Map" expectedRole="student">
+    <AppShell pageTitle="Skill Map" expectedRole="student" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 09-Student-SkillMap-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -21,7 +21,14 @@ import {
 import Link from 'next/link';
 
 export default function AdminDashboardPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    analyticsService
+      .getSchoolMetrics()
+      .catch(() => null)
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const topDomains = [
     { name: 'Technology & Coding', percentage: 72 },
@@ -39,7 +46,7 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <AppShell pageTitle="Overview" expectedRole="admin">
+    <AppShell pageTitle="Overview" expectedRole="admin" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 17-Admin-Overview-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

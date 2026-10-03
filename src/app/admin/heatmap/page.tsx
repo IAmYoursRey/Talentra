@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppShell } from '../../../components/layout/AppShell';
 import { ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
 import { cn } from '../../../lib/utils';
@@ -15,6 +15,13 @@ interface HeatmapRow {
 }
 
 export default function AdminHeatmapPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   const data: HeatmapRow[] = [
     {
       grade: 'Kelas X',
@@ -50,7 +57,7 @@ export default function AdminHeatmapPage() {
   };
 
   return (
-    <AppShell pageTitle="Talent Heatmap" expectedRole="admin">
+    <AppShell pageTitle="Talent Heatmap" expectedRole="admin" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 18-Admin-Heatmap-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

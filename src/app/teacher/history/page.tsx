@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppShell } from '../../../components/layout/AppShell';
 import { CheckCircle2, Clock, Filter, AlertCircle, RotateCcw, XCircle } from 'lucide-react';
 import { cn } from '../../../lib/utils';
@@ -15,6 +15,12 @@ interface HistoryItem {
 
 export default function TeacherHistoryPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'endorsed' | 'revision' | 'rejected'>('all');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const historyItems: HistoryItem[] = [
     {
@@ -76,7 +82,7 @@ export default function TeacherHistoryPage() {
   };
 
   return (
-    <AppShell pageTitle="Riwayat Validasi" expectedRole="teacher">
+    <AppShell pageTitle="Riwayat Validasi" expectedRole="teacher" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

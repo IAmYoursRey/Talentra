@@ -144,7 +144,7 @@ export default function TeacherReviewDetailPage() {
   };
 
   return (
-    <AppShell pageTitle="Validasi Portofolio Siswa" expectedRole="teacher">
+    <AppShell pageTitle="Validasi Portofolio Siswa" expectedRole="teacher" isPageLoading={isLoading}>
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Navigation link */}
         <div className="flex items-center justify-between">

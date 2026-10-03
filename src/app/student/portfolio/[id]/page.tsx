@@ -74,7 +74,7 @@ export default function StudentPortfolioDetailPage() {
   };
 
   return (
-    <AppShell pageTitle="Detail Portofolio" expectedRole="student">
+    <AppShell pageTitle="Detail Portofolio" expectedRole="student" isPageLoading={isLoading}>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Navigation bar */}
         <div className="flex items-center justify-between">

@@ -18,6 +18,13 @@ interface AssignedClass {
 
 export default function TeacherClassesPage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [classes, setClasses] = useState<AssignedClass[]>([
     {
       id: 'cls-x-ipa-1',
@@ -48,7 +55,7 @@ export default function TeacherClassesPage() {
   const totalPending = classes.reduce((acc, c) => acc + c.pendingCount, 0);
 
   return (
-    <AppShell pageTitle="Kelas Saya" expectedRole="teacher">
+    <AppShell pageTitle="Kelas Saya" expectedRole="teacher" isPageLoading={isLoading}>
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header matching 14-Teacher-Classes-HF.svg */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
