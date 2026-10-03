@@ -59,16 +59,16 @@ export const AppShell: React.FC<AppShellProps> = ({
   const isForbidden = expectedRole && currentUser.role !== expectedRole;
 
   return (
-    <div className="min-h-screen bg-[#FCFBFF] flex flex-col font-sans text-[#261331] antialiased selection:bg-[#6D28D9] selection:text-white">
+    <div className="h-screen max-h-screen w-screen bg-[#FCFBFF] flex flex-col font-sans text-[#261331] antialiased overflow-hidden selection:bg-[#6D28D9] selection:text-white">
       {/* Top Demo Access Banner */}
       <DemoAccessBanner />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex min-h-0 overflow-hidden relative">
         {/* Desktop Sidebar */}
         <Sidebar
           currentUser={currentUser}
           onLogout={handleLogout}
-          className="hidden md:flex"
+          className="hidden md:flex h-full"
         />
 
         {/* Mobile Drawer Backdrop & Sidebar */}

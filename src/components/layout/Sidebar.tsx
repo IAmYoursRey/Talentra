@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserProfile, UserRole } from '../../types/auth.types';
-import { DemoMenuModal } from '../common/DemoMenuModal';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -19,7 +18,6 @@ import {
   CheckCircle2,
   BarChart3,
   BookOpen,
-  Sparkles,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -39,7 +37,6 @@ interface NavItem {
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onLogout, onNavigate, className }) => {
   const pathname = usePathname();
-  const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   const getNavItems = (role: UserRole): NavItem[] => {
     switch (role) {
@@ -61,11 +58,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onLogout, onNavig
         ];
       case 'admin':
         return [
-          { label: 'Overview', href: '/admin', icon: LayoutDashboard },
+          { label: 'Ringkasan', href: '/admin', icon: LayoutDashboard },
           { label: 'Talent Heatmap', href: '/admin/heatmap', icon: BarChart3 },
-          { label: 'Users', href: '/admin/users', icon: Users },
-          { label: 'Classes', href: '/admin/classes', icon: School },
-          { label: 'Settings', href: '/admin/settings', icon: Sliders },
+          { label: 'Pengguna', href: '/admin/users', icon: Users },
+          { label: 'Kelas & Penugasan', href: '/admin/classes', icon: School },
+          { label: 'Pengaturan Sekolah', href: '/admin/settings', icon: Sliders },
         ];
       default:
         return [];
@@ -77,13 +74,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onLogout, onNavig
   const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case 'student':
-        return 'STUDENT';
+        return 'Portofolio Siswa';
       case 'teacher':
-        return 'TEACHER';
+        return 'Verifikasi Guru';
       case 'admin':
-        return 'SCHOOL ADMIN';
+        return 'Administrasi';
       default:
-        return 'USER';
+        return '';
     }
   };
 
@@ -102,19 +99,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onLogout, onNavig
     if (currentUser.role === 'teacher') {
       return 'Validator • 3 kelas';
     }
-    return currentUser.schoolName || 'SMAN 1 Ngoro';
+    return currentUser.schoolName || 'SMKN 1 Jakarta';
   };
 
   return (
     <aside
       className={cn(
-        'w-[224px] bg-gradient-to-b from-[#2E1065] via-[#4C1D95] to-[#6D28D9] text-white flex flex-col justify-between shrink-0 h-full select-none shadow-xl border-r border-[#4C1D95]/40',
+        'w-64 bg-gradient-to-b from-[#2E1065] via-[#4C1D95] to-[#6D28D9] text-white flex flex-col justify-between shrink-0 h-full select-none shadow-xl border-r border-[#4C1D95]/40 min-h-0',
         className
       )}
     >
-      <div>
+      <div className="flex flex-col min-h-0 flex-1">
         {/* Brand Logo & Header */}
-        <div className="h-20 px-5 flex items-center gap-3">
+        <div className="h-20 px-5 flex items-center gap-3 shrink-0 border-b border-purple-900/40">
           <Link
             href="/"
             onClick={() => onNavigate?.()}
@@ -135,8 +132,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onLogout, onNavig
           </Link>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="px-3 pt-3 space-y-1.5" aria-label="Navigasi Utama">
+        {/* Navigation Items - Stretches full vertical height, scrolls internally if needed */}
+        <nav className="px-3 py-4 space-y-1.5 flex-1 overflow-y-auto min-h-0" aria-label="Navigasi Utama">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isExact = pathname === item.href;
@@ -187,25 +184,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onLogout, onNavig
         </nav>
       </div>
 
-      {/* Demo Explorer Trigger */}
-      <div className="px-3 pt-2">
-        <button
-          type="button"
-          onClick={() => setIsDemoOpen(true)}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-500/20 to-indigo-500/20 hover:from-purple-500/30 hover:to-indigo-500/30 border border-purple-400/30 text-[#E9D5FF] transition-all shadow-xs"
-        >
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Jelajah Demo Fitur</span>
-          </div>
-          <span className="text-[10px] bg-purple-400/20 text-[#C084FC] px-1.5 py-0.5 rounded font-mono">
-            SEMUA
-          </span>
-        </button>
-      </div>
-
-      {/* Footer Profile & Logout */}
-      <div className="p-3 border-t border-[#4C1D95]/60 bg-[#250d53]/40">
+      {/* Footer Profile & Logout - Pinned to bottom */}
+      <div className="p-3 border-t border-[#4C1D95]/60 bg-[#250d53]/50 shrink-0">
         <div className="flex items-center justify-between p-2 rounded-xl bg-[#4C1D95]/50 border border-purple-500/20">
           <div className="flex items-center gap-2.5 min-w-0 pr-1">
             <div className="w-8 h-8 rounded-full bg-[#4C1D95] border border-purple-400/40 text-[#D9CCE8] font-bold text-xs flex items-center justify-center shrink-0">
@@ -227,13 +207,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onLogout, onNavig
           </button>
         </div>
       </div>
-
-      {/* Demo Menu Modal */}
-      <DemoMenuModal
-        isOpen={isDemoOpen}
-        onClose={() => setIsDemoOpen(false)}
-        currentRole={currentUser.role}
-      />
     </aside>
   );
 };

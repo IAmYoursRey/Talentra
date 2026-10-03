@@ -20,8 +20,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '../../lib/utils';
-import { DemoMenuModal } from '../common/DemoMenuModal';
-import { LayoutGrid } from 'lucide-react';
 
 interface HeaderProps {
   currentUser: UserProfile;
@@ -41,7 +39,6 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const [unreadNotif, setUnreadNotif] = useState(true);
 
   const profileRef = useRef<HTMLDivElement>(null);
@@ -172,17 +169,49 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
         </div>
 
         <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Demo Menu Explorer Pill */}
-          <button
-            type="button"
-            onClick={() => setIsDemoModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-100 to-indigo-100 hover:from-purple-200 hover:to-indigo-200 text-[#6D28D9] border border-purple-200 shadow-xs transition-all"
-            aria-label="Buka menu demo semua fitur"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
-            <span className="hidden sm:inline">Menu Demo Fitur</span>
-            <span className="sm:hidden">Demo</span>
-          </button>
+          {/* Quick Demo Switchers */}
+          <div className="hidden sm:flex items-center gap-1 bg-purple-50/80 p-1 rounded-xl border border-purple-100">
+            <span className="text-[10px] font-bold text-purple-700 px-1.5 uppercase">Akun Demo:</span>
+            <button
+              type="button"
+              onClick={() => handleSwitchDemoRole('student')}
+              title="Masuk Akun Siswa (Alya)"
+              className={cn(
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all',
+                currentUser.role === 'student'
+                  ? 'bg-[#6D28D9] text-white shadow-2xs'
+                  : 'text-purple-700 hover:bg-purple-100'
+              )}
+            >
+              Siswa
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchDemoRole('teacher')}
+              title="Masuk Akun Guru (Budi)"
+              className={cn(
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all',
+                currentUser.role === 'teacher'
+                  ? 'bg-growth-600 text-white shadow-2xs'
+                  : 'text-purple-700 hover:bg-purple-100'
+              )}
+            >
+              Guru
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchDemoRole('admin')}
+              title="Masuk Akun Admin (Raihan)"
+              className={cn(
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all',
+                currentUser.role === 'admin'
+                  ? 'bg-intelligence-600 text-white shadow-2xs'
+                  : 'text-purple-700 hover:bg-purple-100'
+              )}
+            >
+              Admin
+            </button>
+          </div>
 
           {/* Verification Link pill */}
           <Link
@@ -380,13 +409,6 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
       <ChangePasswordModal
         isOpen={isChangePasswordOpen}
         onClose={() => setIsChangePasswordOpen(false)}
-      />
-
-      {/* Demo Menu Modal */}
-      <DemoMenuModal
-        isOpen={isDemoModalOpen}
-        onClose={() => setIsDemoModalOpen(false)}
-        currentRole={currentUser.role}
       />
     </>
   );

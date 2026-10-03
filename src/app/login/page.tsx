@@ -16,9 +16,10 @@ import {
   X,
   Compass,
   FileCheck2,
+  User,
+  GraduationCap,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { DemoMenuModal } from '../../components/common/DemoMenuModal';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,7 +29,6 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showFlowModal, setShowFlowModal] = useState(false);
-  const [showDemoModal, setShowDemoModal] = useState(false);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,11 +121,12 @@ export default function LoginPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowDemoModal(true)}
+                  onClick={() => handleQuickRole('student')}
+                  disabled={isSubmitting}
                   className="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center gap-1.5"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Coba Menu Demo</span>
+                  <span>Masuk Akun Demo (1-Klik)</span>
                 </button>
                 <button
                   type="button"
@@ -239,56 +240,99 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="pt-4 border-t border-[#E9E1F4] space-y-3">
+            {/* Direct Demo Account Logins */}
+            <div id="demo-accounts" className="pt-5 border-t border-[#E9E1F4] space-y-3.5">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-[#6F607D]">
-                  Coba instan dengan akun demo:
-                </p>
-                <span className="text-[10px] uppercase font-extrabold text-[#6D28D9] bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                  Demo Mode
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#261331] tracking-tight">
+                    Masuk dengan Akun Demo
+                  </h3>
+                  <p className="text-[11px] text-[#6F607D]">
+                    Pilih akun demo untuk langsung masuk dan mencoba fitur:
+                  </p>
+                </div>
+                <span className="text-[10px] uppercase font-black text-[#6D28D9] bg-purple-100 px-2 py-0.5 rounded-full border border-purple-200">
+                  1-Klik Masuk
                 </span>
               </div>
 
-              {/* Quick Role Triggers: SISWA, GURU, ADMIN */}
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickRole('student')}
-                  disabled={isSubmitting}
-                  className="py-2.5 px-3 rounded-xl text-xs font-bold bg-[#F3E8FF] hover:bg-purple-200 text-[#6D28D9] border border-purple-200 transition-all shadow-xs flex flex-col items-center justify-center gap-1"
-                >
-                  <span className="text-[10px] text-purple-600 font-medium">Siswa</span>
-                  <span>ALYA</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickRole('teacher')}
-                  disabled={isSubmitting}
-                  className="py-2.5 px-3 rounded-xl text-xs font-bold bg-[#F7F2FF] hover:bg-purple-200 text-[#6D28D9] border border-purple-200 transition-all shadow-xs flex flex-col items-center justify-center gap-1"
-                >
-                  <span className="text-[10px] text-purple-600 font-medium">Guru</span>
-                  <span>BUDI</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickRole('admin')}
-                  disabled={isSubmitting}
-                  className="py-2.5 px-3 rounded-xl text-xs font-bold bg-[#F3E8FF] hover:bg-purple-200 text-[#9333EA] border border-purple-200 transition-all shadow-xs flex flex-col items-center justify-center gap-1"
-                >
-                  <span className="text-[10px] text-purple-600 font-medium">Admin</span>
-                  <span>RAIHAN</span>
-                </button>
-              </div>
+              {/* 3 Dedicated Demo Account Cards */}
+              <div className="space-y-2.5">
+                {/* 1. Akun Siswa */}
+                <div className="bg-[#FAF7FD] hover:bg-[#F3E8FF] border border-[#E9E1F4] hover:border-[#8B5CF6] rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-purple-100 text-[#6D28D9] flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-[#261331] truncate">Alya Rahma Azzahra</span>
+                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-blue-100 text-blue-700 rounded-md">SISWA</span>
+                      </div>
+                      <p className="text-[11px] text-[#6F607D] truncate">NISN: 0081234567 • XII RPL 1</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickRole('student')}
+                    disabled={isSubmitting}
+                    className="px-3.5 py-2 rounded-xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Masuk</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-              {/* All Features Demo Modal Trigger */}
-              <button
-                type="button"
-                onClick={() => setShowDemoModal(true)}
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 border border-purple-200 text-[#6D28D9] text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-xs"
-              >
-                <Sparkles className="w-4 h-4 text-purple-600" />
-                <span>Jelajah Seluruh Fitur & Modul Demo</span>
-              </button>
+                {/* 2. Akun Guru */}
+                <div className="bg-[#FAF7FD] hover:bg-[#ECFDF5] border border-[#E9E1F4] hover:border-emerald-400 rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
+                      <GraduationCap className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-[#261331] truncate">Budi Santoso, S.Kom</span>
+                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-md">GURU</span>
+                      </div>
+                      <p className="text-[11px] text-[#6F607D] truncate">NIP: 19850101... • Pembimbing 3 Kelas</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickRole('teacher')}
+                    disabled={isSubmitting}
+                    className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Masuk</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* 3. Akun Admin */}
+                <div className="bg-[#FAF7FD] hover:bg-[#F3E8FF] border border-[#E9E1F4] hover:border-purple-400 rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-purple-100 text-[#9333EA] flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-[#261331] truncate">Raihan Ansari</span>
+                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-purple-100 text-purple-800 rounded-md">ADMIN</span>
+                      </div>
+                      <p className="text-[11px] text-[#6F607D] truncate">Admin Sekolah • SMKN 1 Jakarta</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickRole('admin')}
+                    disabled={isSubmitting}
+                    className="px-3.5 py-2 rounded-xl bg-[#9333EA] hover:bg-[#7E22CE] text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Masuk</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -353,11 +397,6 @@ export default function LoginPage() {
           </div>
         </div>
       )}
-      {/* Demo Menu Modal */}
-      <DemoMenuModal
-        isOpen={showDemoModal}
-        onClose={() => setShowDemoModal(false)}
-      />
     </div>
   );
 }
