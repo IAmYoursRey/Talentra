@@ -228,7 +228,6 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
           {/* Verification Link pill */}
           <Link
             href="/verify/tlnt_token_v94b8e21"
-            target="_blank"
             className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
           >
             <Shield className="w-3.5 h-3.5" />
@@ -364,7 +363,6 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
 
                   <Link
                     href="/verify/tlnt_token_v94b8e21"
-                    target="_blank"
                     onClick={() => setIsProfileOpen(false)}
                     className="w-full px-4 py-2.5 flex items-center justify-between text-xs text-slate-700 hover:bg-slate-50 font-medium transition-colors"
                   >
@@ -372,7 +370,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
                       <Shield className="w-4 h-4 text-slate-400" />
                       <span>Verifikasi Publik QR</span>
                     </span>
-                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                    <Shield className="w-3.5 h-3.5 text-slate-400" />
                   </Link>
                 </div>
 

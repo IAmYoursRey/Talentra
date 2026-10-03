@@ -421,11 +421,10 @@ export default function StudentCVPage() {
                   <div>
                     <Link
                       href={generatedCv.verificationUrl || `/verify/${generatedCv.verificationToken || 'tlnt_token_v94b8e21'}`}
-                      target="_blank"
                       className="w-full py-2.5 px-4 rounded-xl tal-btn-secondary text-xs font-bold inline-flex items-center justify-center gap-2"
                     >
                       <span>Buka Halaman Verifikasi Publik</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
                     </Link>
                   </div>
                 </div>

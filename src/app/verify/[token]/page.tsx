@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { verificationService } from '../../../services/verification.service';
 import { PublicVerificationResult } from '../../../types/verification.types';
 import {
@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { PageLoadingCover } from '../../../components/common/PageLoadingCover';
 
 export default function VerificationPage() {
+  const router = useRouter();
   const params = useParams();
   const rawParam = params?.token;
   const token = (Array.isArray(rawParam) ? rawParam[0] : rawParam) || '';
@@ -59,13 +60,30 @@ export default function VerificationPage() {
       <div className="max-w-2xl w-full mx-auto space-y-6">
         {/* Brand Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#E9E1F4]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#8B5CF6] to-[#A855F7] flex items-center justify-center font-black text-white text-sm shadow-md">
-              T
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push('/student/cv');
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#E9E1F4] text-xs font-bold text-[#6F607D] hover:text-[#261331] hover:border-purple-300 transition-all shadow-xs"
+              title="Kembali ke halaman sebelumnya"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-[#6D28D9]" />
+              <span>Kembali</span>
+            </button>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#8B5CF6] to-[#A855F7] flex items-center justify-center font-black text-white text-sm shadow-md">
+                T
+              </div>
+              <span className="font-black text-lg tracking-tight text-[#261331]">
+                TALENTRA<span className="text-[#8B5CF6]">.ID</span>
+              </span>
             </div>
-            <span className="font-black text-lg tracking-tight text-[#261331]">
-              TALENTRA<span className="text-[#8B5CF6]">.ID</span>
-            </span>
           </div>
           <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#F3E8FF] text-[#6D28D9] border border-purple-200">
             PUBLIC VERIFICATION
@@ -186,14 +204,21 @@ export default function VerificationPage() {
         )}
         </div>
 
-        <div className="text-center pt-2">
-          <Link
-            href="/login"
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push('/student/cv');
+              }
+            }}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl tal-btn-secondary text-xs font-bold"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Kembali ke TALENTRA.ID</span>
-          </Link>
+            <span>Kembali ke Halaman Sebelumnya</span>
+          </button>
         </div>
       </div>
     </div>
