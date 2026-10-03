@@ -209,13 +209,13 @@ export default function AdminDashboardPage() {
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <Link
                   href="/admin/users"
-                  className="py-2.5 rounded-xl tal-btn-primary font-bold text-xs text-center shadow-xs"
+                  className="py-2.5 rounded-xl tal-btn-primary font-bold text-xs text-center"
                 >
                   Kelola Users
                 </Link>
                 <Link
                   href="/admin/classes"
-                  className="py-2.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-[#6D28D9] font-bold text-xs text-center transition-colors shadow-xs"
+                  className="py-2.5 rounded-xl tal-btn-secondary font-bold text-xs text-center"
                 >
                   Kelola Kelas
                 </Link>

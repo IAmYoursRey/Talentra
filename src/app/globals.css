@@ -42,21 +42,183 @@ body {
   box-shadow: 0 10px 28px -4px rgba(76, 29, 149, 0.12), 0 4px 10px -2px rgba(76, 29, 149, 0.06);
 }
 
+/* Button & Micro-interaction System */
 .tal-btn-primary {
-  background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 52%, #A855F7 100%);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #6D28D9 0%, #7C3AED 48%, #9333EA 100%);
   color: #FFFFFF;
-  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 14px -1px rgba(109, 40, 217, 0.38), 0 2px 6px -1px rgba(109, 40, 217, 0.2);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
 }
 
-.tal-btn-primary:hover {
-  filter: brightness(1.08);
+.tal-btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: translateX(-160%) skewX(-20deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.tal-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.07);
+  transform: translateY(-2px) scale(1.015);
+  box-shadow: 0 8px 24px -2px rgba(124, 58, 237, 0.48), 0 4px 12px -2px rgba(147, 51, 234, 0.28);
+}
+
+.tal-btn-primary:hover:not(:disabled)::after {
+  animation: btn-shimmer 1s ease-in-out;
+}
+
+.tal-btn-primary:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.98);
+  filter: brightness(0.97);
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.25);
+}
+
+/* Emerald / Success Button (Endorse, Approve, Simpan) */
+.tal-btn-emerald {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #047857 0%, #059669 48%, #10B981 100%);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px -1px rgba(5, 150, 105, 0.38), 0 2px 6px -1px rgba(16, 185, 129, 0.2);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.tal-btn-emerald:hover:not(:disabled) {
+  filter: brightness(1.07);
+  transform: translateY(-2px) scale(1.015);
+  box-shadow: 0 8px 24px -2px rgba(5, 150, 105, 0.48), 0 4px 12px -2px rgba(16, 185, 129, 0.28);
+}
+
+.tal-btn-emerald:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.98);
+  filter: brightness(0.97);
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+}
+
+/* Amber / Warning Button (Revisi, Pending) */
+.tal-btn-amber {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #B45309 0%, #D97706 48%, #F59E0B 100%);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px -1px rgba(217, 119, 6, 0.38), 0 2px 6px -1px rgba(245, 158, 11, 0.2);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.tal-btn-amber:hover:not(:disabled) {
+  filter: brightness(1.07);
+  transform: translateY(-2px) scale(1.015);
+  box-shadow: 0 8px 24px -2px rgba(217, 119, 6, 0.48), 0 4px 12px -2px rgba(245, 158, 11, 0.28);
+}
+
+.tal-btn-amber:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.98);
+  filter: brightness(0.97);
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
+}
+
+/* Rose / Danger Button (Tolak, Hapus, Nonaktifkan) */
+.tal-btn-rose {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #BE123C 0%, #E11D48 48%, #F43F5E 100%);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px -1px rgba(225, 29, 72, 0.38), 0 2px 6px -1px rgba(244, 63, 94, 0.2);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.tal-btn-rose:hover:not(:disabled) {
+  filter: brightness(1.07);
+  transform: translateY(-2px) scale(1.015);
+  box-shadow: 0 8px 24px -2px rgba(225, 29, 72, 0.48), 0 4px 12px -2px rgba(244, 63, 94, 0.28);
+}
+
+.tal-btn-rose:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.98);
+  filter: brightness(0.97);
+  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.25);
+}
+
+/* Secondary & Outline Frosted Button */
+.tal-btn-secondary {
+  position: relative;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8F5FE 100%);
+  border: 1.5px solid #DDD6FE;
+  color: #6D28D9;
+  box-shadow: 0 2px 8px -1px rgba(109, 40, 217, 0.08);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.tal-btn-secondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #FAF5FF 0%, #EDE9FE 100%);
+  border-color: #8B5CF6;
+  color: #5B21B6;
+  transform: translateY(-1.5px) scale(1.01);
+  box-shadow: 0 6px 18px -2px rgba(109, 40, 217, 0.16);
+}
+
+.tal-btn-secondary:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.98);
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.08);
+}
+
+/* Subtle Dark Glass Button (for dark hero sections) */
+.tal-btn-dark {
+  position: relative;
+  background: linear-gradient(135deg, rgba(59, 23, 104, 0.85) 0%, rgba(76, 29, 149, 0.9) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  color: #F5F3FF;
+  box-shadow: 0 4px 14px rgba(46, 16, 101, 0.3);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.tal-btn-dark:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.95) 0%, rgba(109, 40, 217, 0.95) 100%);
+  border-color: rgba(192, 132, 252, 0.6);
+  color: #FFFFFF;
+  transform: translateY(-1.5px) scale(1.01);
+  box-shadow: 0 8px 24px rgba(76, 29, 149, 0.45);
+}
+
+.tal-btn-dark:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.98);
+}
+
+/* Interactive Pill & Tag Filters */
+.tal-pill-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.tal-pill-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);
 }
 
-.tal-btn-primary:active {
-  transform: translateY(0);
-  filter: brightness(0.96);
+.tal-pill-btn:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.97);
+}
+
+@keyframes btn-shimmer {
+  0% {
+    transform: translateX(-160%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(260%) skewX(-20deg);
+  }
 }
 
 /* Accessible custom scrollbars */

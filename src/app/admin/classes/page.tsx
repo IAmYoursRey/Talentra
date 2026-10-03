@@ -278,7 +278,7 @@ export default function AdminClassesPage() {
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl tal-btn-primary font-semibold text-xs transition-all shadow-tal-card hover:shadow-tal-hover self-start sm:self-center"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl tal-btn-primary font-semibold text-xs self-start sm:self-center"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Kelas</span>
@@ -408,7 +408,7 @@ export default function AdminClassesPage() {
                   <button
                     type="button"
                     onClick={() => handleSelectClass(cls)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#F7F2FF] hover:bg-[#6D28D9] text-[#6D28D9] hover:text-white font-semibold text-xs border border-[#E9E1F4] transition-all"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl tal-btn-secondary font-semibold text-xs"
                   >
                     <span>Kelola</span>
                     <ChevronRight className="w-3.5 h-3.5" />

@@ -169,10 +169,10 @@ export default function NewPortfolioPage() {
                   type="button"
                   onClick={() => setEvidenceMode('file')}
                   className={cn(
-                    'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                    'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                     evidenceMode === 'file'
-                      ? 'tal-btn-primary shadow-xs'
-                      : 'bg-[#F7F2FF] text-[#6D28D9]'
+                      ? 'tal-btn-primary'
+                      : 'bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4] hover:bg-purple-100 hover:border-purple-200'
                   )}
                 >
                   Upload File
@@ -181,10 +181,10 @@ export default function NewPortfolioPage() {
                   type="button"
                   onClick={() => setEvidenceMode('link')}
                   className={cn(
-                    'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                    'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                     evidenceMode === 'link'
-                      ? 'tal-btn-primary shadow-xs'
-                      : 'bg-[#F7F2FF] text-[#6D28D9]'
+                      ? 'tal-btn-primary'
+                      : 'bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4] hover:bg-purple-100 hover:border-purple-200'
                   )}
                 >
                   Tempel Tautan
@@ -288,10 +288,10 @@ export default function NewPortfolioPage() {
                       type="button"
                       onClick={() => toggleTag(tag.id)}
                       className={cn(
-                        'px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5',
+                        'px-3.5 py-1.5 rounded-full text-xs font-bold tal-pill-btn flex items-center gap-1.5',
                         isSelected
-                          ? 'tal-btn-primary shadow-xs'
-                          : 'bg-[#F7F2FF] text-[#6D28D9] border border-purple-100 hover:border-purple-300'
+                          ? 'tal-btn-primary'
+                          : 'bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4] hover:border-purple-300 hover:bg-[#EDE9FE]'
                       )}
                     >
                       <span>#{tag.label || tag.id}</span>
@@ -305,7 +305,7 @@ export default function NewPortfolioPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 rounded-xl tal-btn-primary font-bold text-sm shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform disabled:opacity-50"
+              className="w-full py-3.5 rounded-xl tal-btn-primary font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

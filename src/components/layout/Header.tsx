@@ -184,9 +184,9 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
               disabled={Boolean(switchingRole)}
               title="Masuk Akun Siswa Demo"
               className={cn(
-                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold tal-pill-btn inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'student'
-                  ? 'bg-[#6D28D9] text-white shadow-2xs'
+                  ? 'tal-btn-primary'
                   : 'text-purple-700 hover:bg-purple-100'
               )}
             >
@@ -199,9 +199,9 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
               disabled={Boolean(switchingRole)}
               title="Masuk Akun Guru Demo"
               className={cn(
-                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold tal-pill-btn inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'teacher'
-                  ? 'bg-growth-600 text-white shadow-2xs'
+                  ? 'tal-btn-emerald'
                   : 'text-purple-700 hover:bg-purple-100'
               )}
             >
@@ -214,9 +214,9 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
               disabled={Boolean(switchingRole)}
               title="Masuk Akun Admin Demo"
               className={cn(
-                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold tal-pill-btn inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'admin'
-                  ? 'bg-intelligence-600 text-white shadow-2xs'
+                  ? 'tal-btn-primary'
                   : 'text-purple-700 hover:bg-purple-100'
               )}
             >

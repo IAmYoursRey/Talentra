@@ -303,7 +303,7 @@ export default function TeacherReviewDetailPage() {
                     type="button"
                     disabled={isSubmitting}
                     onClick={handleEndorse}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-endorse-500 hover:bg-endorse-600 text-white font-semibold text-xs sm:text-sm transition-colors shadow-xs focus:ring-2 focus:ring-endorse-500 disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl tal-btn-emerald font-bold text-xs sm:text-sm disabled:opacity-50"
                   >
                     {submittingAction === 'endorse' ? (
                       <>
@@ -323,7 +323,7 @@ export default function TeacherReviewDetailPage() {
                     type="button"
                     disabled={isSubmitting}
                     onClick={handleRequestRevision}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-revision-500 hover:bg-revision-600 text-white font-semibold text-xs sm:text-sm transition-colors shadow-xs focus:ring-2 focus:ring-revision-500 disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl tal-btn-amber font-bold text-xs sm:text-sm disabled:opacity-50"
                   >
                     {submittingAction === 'request_revision' ? (
                       <>
@@ -343,11 +343,11 @@ export default function TeacherReviewDetailPage() {
                     type="button"
                     disabled={isSubmitting}
                     onClick={() => setIsRejectDialogOpen(true)}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-reject-200 bg-reject-50 hover:bg-reject-100 text-reject-700 font-semibold text-xs transition-colors focus:ring-2 focus:ring-reject-500 disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl tal-btn-rose font-bold text-xs disabled:opacity-50"
                   >
                     {submittingAction === 'reject' ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin text-reject-700" />
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
                         <span>Menolak Portofolio...</span>
                       </>
                     ) : (

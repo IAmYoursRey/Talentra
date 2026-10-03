@@ -137,12 +137,12 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
                 onClick={() => handleToggleTag(tag.id)}
                 disabled={isDisabled}
                 className={cn(
-                  'text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all text-left flex items-center gap-1.5',
+                  'text-xs px-2.5 py-1.5 rounded-lg border font-semibold transition-all tal-pill-btn text-left flex items-center gap-1.5',
                   isSelected
-                    ? 'bg-brand-500 text-white border-brand-600 shadow-2xs'
+                    ? 'tal-btn-primary'
                     : isDisabled
                     ? 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    : 'bg-[#F7F2FF] text-[#6D28D9] border-[#E9E1F4] hover:bg-[#EDE9FE]'
                 )}
               >
                 <span>{tag.label}</span>

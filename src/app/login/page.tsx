@@ -125,7 +125,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => document.getElementById('identifier')?.focus()}
-                  className="px-5 py-3 rounded-xl tal-btn-primary font-bold text-xs sm:text-sm shadow-lg shadow-purple-950/30"
+                  className="px-5 py-3 rounded-xl tal-btn-primary font-bold text-xs sm:text-sm"
                 >
                   Mulai eksplorasi
                 </button>
@@ -133,7 +133,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => handleQuickRole('student')}
                   disabled={Boolean(submittingTarget)}
-                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:brightness-110 active:scale-[0.98] text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-purple-950/40 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {submittingTarget === 'student' ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -149,7 +149,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowFlowModal(true)}
-                  className="px-5 py-3 rounded-xl bg-[#3B1768]/80 hover:bg-[#4C1D95] border border-[#604C70] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
+                  className="px-5 py-3 rounded-xl tal-btn-dark font-bold text-xs sm:text-sm"
                 >
                   Lihat alur
                 </button>
@@ -297,7 +297,7 @@ export default function LoginPage() {
                     }
                   }}
                   className={cn(
-                    'bg-[#FAF7FD] hover:bg-[#F3E8FF] border rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#8B5CF6]',
+                    'bg-[#FAF7FD] hover:bg-[#F3E8FF] border rounded-2xl p-3.5 tal-card-hover flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#8B5CF6]',
                     submittingTarget === 'student'
                       ? 'border-[#8B5CF6] ring-2 ring-purple-200 bg-[#F3E8FF]'
                       : 'border-[#E9E1F4] hover:border-[#8B5CF6]',
@@ -320,12 +320,7 @@ export default function LoginPage() {
                       <p className="text-[11px] text-[#6F607D] truncate">NISN: 0081234567 • XII RPL 1</p>
                     </div>
                   </div>
-                  <div
-                    className={cn(
-                      'px-3.5 py-2 rounded-xl text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1.5',
-                      submittingTarget === 'student' ? 'bg-[#5B21B6]' : 'bg-[#6D28D9] group-hover:bg-[#5B21B6]'
-                    )}
-                  >
+                  <div className="px-3.5 py-2 rounded-xl tal-btn-primary text-xs font-bold shrink-0 flex items-center gap-1.5">
                     {submittingTarget === 'student' ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
@@ -352,7 +347,7 @@ export default function LoginPage() {
                     }
                   }}
                   className={cn(
-                    'bg-[#FAF7FD] hover:bg-[#ECFDF5] border rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500',
+                    'bg-[#FAF7FD] hover:bg-[#ECFDF5] border rounded-2xl p-3.5 tal-card-hover flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500',
                     submittingTarget === 'teacher'
                       ? 'border-emerald-500 ring-2 ring-emerald-200 bg-[#ECFDF5]'
                       : 'border-[#E9E1F4] hover:border-emerald-400',
@@ -375,12 +370,7 @@ export default function LoginPage() {
                       <p className="text-[11px] text-[#6F607D] truncate">NIP: 19850101... • Pembimbing 3 Kelas</p>
                     </div>
                   </div>
-                  <div
-                    className={cn(
-                      'px-3.5 py-2 rounded-xl text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1.5',
-                      submittingTarget === 'teacher' ? 'bg-emerald-700' : 'bg-emerald-600 group-hover:bg-emerald-700'
-                    )}
-                  >
+                  <div className="px-3.5 py-2 rounded-xl tal-btn-emerald text-xs font-bold shrink-0 flex items-center gap-1.5">
                     {submittingTarget === 'teacher' ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
@@ -407,7 +397,7 @@ export default function LoginPage() {
                     }
                   }}
                   className={cn(
-                    'bg-[#FAF7FD] hover:bg-[#F3E8FF] border rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-500',
+                    'bg-[#FAF7FD] hover:bg-[#F3E8FF] border rounded-2xl p-3.5 tal-card-hover flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-500',
                     submittingTarget === 'admin'
                       ? 'border-purple-500 ring-2 ring-purple-200 bg-[#F3E8FF]'
                       : 'border-[#E9E1F4] hover:border-purple-400',
@@ -430,12 +420,7 @@ export default function LoginPage() {
                       <p className="text-[11px] text-[#6F607D] truncate">Admin Sekolah • SMKN 1 Jakarta</p>
                     </div>
                   </div>
-                  <div
-                    className={cn(
-                      'px-3.5 py-2 rounded-xl text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1.5',
-                      submittingTarget === 'admin' ? 'bg-[#7E22CE]' : 'bg-[#9333EA] group-hover:bg-[#7E22CE]'
-                    )}
-                  >
+                  <div className="px-3.5 py-2 rounded-xl tal-btn-primary text-xs font-bold shrink-0 flex items-center gap-1.5">
                     {submittingTarget === 'admin' ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />

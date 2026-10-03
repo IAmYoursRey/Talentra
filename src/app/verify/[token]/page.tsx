@@ -189,7 +189,7 @@ export default function VerificationPage() {
         <div className="text-center pt-2">
           <Link
             href="/login"
-            className="text-xs font-bold text-[#6D28D9] hover:underline inline-flex items-center gap-1.5"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl tal-btn-secondary text-xs font-bold"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Kembali ke TALENTRA.ID</span>

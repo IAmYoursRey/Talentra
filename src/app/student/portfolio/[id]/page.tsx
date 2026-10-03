@@ -156,7 +156,7 @@ export default function StudentPortfolioDetailPage() {
                       <button
                         type="button"
                         onClick={() => setIsEditingRevision(false)}
-                        className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600"
+                        className="px-3.5 py-1.5 rounded-xl tal-btn-secondary text-xs font-bold"
                       >
                         Batal
                       </button>
@@ -164,7 +164,7 @@ export default function StudentPortfolioDetailPage() {
                         type="button"
                         disabled={isResubmitting}
                         onClick={handleResubmitRevision}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-revision-600 hover:bg-revision-700 text-white font-semibold text-xs transition-colors shadow-xs"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl tal-btn-amber font-bold text-xs disabled:opacity-50"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>{isResubmitting ? 'Mengirim...' : 'Kirim Ulang ke Guru'}</span>
@@ -176,7 +176,7 @@ export default function StudentPortfolioDetailPage() {
                     <button
                       type="button"
                       onClick={() => setIsEditingRevision(true)}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-revision-600 hover:bg-revision-700 text-white font-semibold text-xs transition-colors shadow-xs"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl tal-btn-amber font-bold text-xs"
                     >
                       <RotateCcw className="w-4 h-4" />
                       <span>Perbaiki & Kirim Ulang</span>

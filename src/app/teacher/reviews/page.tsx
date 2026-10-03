@@ -257,10 +257,10 @@ export default function TeacherReviewQueuePage() {
                             type="button"
                             onClick={() => setRubricScores({ ...rubricScores, [dim]: val })}
                             className={cn(
-                              'w-7 h-7 rounded-lg text-xs font-extrabold transition-all',
+                              'w-7 h-7 rounded-lg text-xs font-extrabold tal-pill-btn',
                               score === val
-                                ? 'tal-btn-primary text-white shadow-xs'
-                                : 'bg-white border border-[#E9E1F4] text-[#6F607D] hover:border-purple-300'
+                                ? 'tal-btn-primary'
+                                : 'bg-white border border-[#E9E1F4] text-[#6F607D] hover:border-purple-300 hover:bg-[#FAF7FD]'
                             )}
                           >
                             {val}
@@ -293,25 +293,25 @@ export default function TeacherReviewQueuePage() {
                 type="button"
                 onClick={() => handleAction('reject')}
                 disabled={isSubmitting}
-                className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl tal-btn-rose font-bold text-xs inline-flex items-center gap-1.5 disabled:opacity-50"
               >
-                {submittingAction === 'reject' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {submittingAction === 'reject' && <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />}
                 <span>{submittingAction === 'reject' ? 'Menolak...' : 'Tolak'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleAction('revision')}
                 disabled={isSubmitting}
-                className="px-5 py-2.5 rounded-xl border border-amber-200 text-amber-700 hover:bg-amber-50 font-bold text-xs transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl tal-btn-amber font-bold text-xs inline-flex items-center gap-1.5 disabled:opacity-50"
               >
-                {submittingAction === 'revision' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {submittingAction === 'revision' && <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />}
                 <span>{submittingAction === 'revision' ? 'Mengirim...' : 'Minta revisi'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleAction('endorse')}
                 disabled={isSubmitting}
-                className="flex-1 py-2.5 rounded-xl tal-btn-primary font-bold text-xs shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl tal-btn-emerald font-bold text-xs flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {submittingAction === 'endorse' ? (
                   <>

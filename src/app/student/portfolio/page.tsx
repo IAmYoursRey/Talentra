@@ -97,7 +97,7 @@ export default function StudentPortfolioPage() {
             </span>
             <Link
               href="/student/portfolio/new"
-              className="px-5 py-2.5 rounded-xl tal-btn-primary font-bold text-xs inline-flex items-center gap-2 shadow-md hover:scale-[1.02] transition-transform"
+              className="px-5 py-2.5 rounded-xl tal-btn-primary font-bold text-xs inline-flex items-center gap-2"
             >
               <PlusCircle className="w-4 h-4" />
               <span>Tambah Karya</span>
@@ -113,10 +113,10 @@ export default function StudentPortfolioPage() {
               type="button"
               onClick={() => setStatusFilter('all')}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                 statusFilter === 'all'
-                  ? 'tal-btn-primary shadow-xs'
-                  : 'bg-[#F7F2FF] text-[#6D28D9] hover:bg-purple-100'
+                  ? 'tal-btn-primary'
+                  : 'bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4] hover:bg-purple-100 hover:border-purple-200'
               )}
             >
               Semua
@@ -125,10 +125,10 @@ export default function StudentPortfolioPage() {
               type="button"
               onClick={() => setStatusFilter('approved')}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                 statusFilter === 'approved'
-                  ? 'tal-btn-primary shadow-xs'
-                  : 'bg-[#F7F2FF] text-[#6D28D9] hover:bg-purple-100'
+                  ? 'tal-btn-primary'
+                  : 'bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4] hover:bg-purple-100 hover:border-purple-200'
               )}
             >
               Disetujui
@@ -137,10 +137,10 @@ export default function StudentPortfolioPage() {
               type="button"
               onClick={() => setStatusFilter('submitted')}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                 statusFilter === 'submitted'
-                  ? 'tal-btn-primary shadow-xs'
-                  : 'bg-[#FAF5FF] text-[#A78BFA] hover:bg-purple-100'
+                  ? 'tal-btn-primary'
+                  : 'bg-[#FAF5FF] text-[#7E22CE] border border-[#E9E1F4] hover:bg-purple-100 hover:border-purple-200'
               )}
             >
               Menunggu
@@ -149,10 +149,10 @@ export default function StudentPortfolioPage() {
               type="button"
               onClick={() => setStatusFilter('revision_requested')}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                 statusFilter === 'revision_requested'
-                  ? 'tal-btn-primary shadow-xs'
-                  : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                  ? 'tal-btn-amber'
+                  : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
               )}
             >
               Perlu revisi

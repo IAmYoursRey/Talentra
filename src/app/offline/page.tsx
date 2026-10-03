@@ -20,7 +20,7 @@ export default function OfflinePage() {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm transition-colors shadow-xs"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl tal-btn-primary font-bold text-sm"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Muat Ulang Halaman</span>
@@ -28,7 +28,7 @@ export default function OfflinePage() {
 
           <Link
             href="/"
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl tal-btn-secondary font-bold text-sm"
           >
             <Home className="w-4 h-4" />
             <span>Ke Beranda Tersimpan</span>

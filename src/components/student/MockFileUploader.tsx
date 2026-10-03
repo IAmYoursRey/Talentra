@@ -130,7 +130,7 @@ export const MockFileUploader: React.FC<MockFileUploaderProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="text-xs px-4 py-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 font-semibold shadow-2xs transition-colors"
+              className="text-xs px-5 py-2.5 rounded-xl tal-btn-primary font-bold shadow-md"
             >
               Pilih Berkas dari Perangkat
             </button>
@@ -144,21 +144,21 @@ export const MockFileUploader: React.FC<MockFileUploaderProps> = ({
               <button
                 type="button"
                 onClick={() => handleSelectMockPreset({ name: 'Dokumen_Portofolio_Karya.pdf', type: 'application/pdf', size: '2.4 MB' })}
-                className="text-xs px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
+                className="text-xs px-3.5 py-1.5 rounded-xl tal-btn-secondary font-semibold"
               >
                 + Sampel PDF
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectMockPreset({ name: 'Tangkapan_Layar_Sistem.png', type: 'image/png', size: '1.1 MB' })}
-                className="text-xs px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
+                className="text-xs px-3.5 py-1.5 rounded-xl tal-btn-secondary font-semibold"
               >
                 + Sampel PNG
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectMockPreset({ name: 'Video_Presentasi_Demo.mp4', type: 'video/mp4', size: '14.2 MB' })}
-                className="text-xs px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
+                className="text-xs px-3.5 py-1.5 rounded-xl tal-btn-secondary font-semibold"
               >
                 + Sampel MP4
               </button>

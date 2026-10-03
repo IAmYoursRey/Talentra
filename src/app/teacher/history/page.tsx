@@ -108,10 +108,10 @@ export default function TeacherHistoryPage() {
               type="button"
               onClick={() => setActiveFilter('all')}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                 activeFilter === 'all'
-                  ? 'tal-btn-primary shadow-xs'
-                  : 'bg-[#F7F2FF] text-[#6D28D9] hover:bg-purple-100'
+                  ? 'tal-btn-primary'
+                  : 'bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4] hover:bg-purple-100 hover:border-purple-200'
               )}
             >
               Semua
@@ -120,10 +120,10 @@ export default function TeacherHistoryPage() {
               type="button"
               onClick={() => setActiveFilter('endorsed')}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                 activeFilter === 'endorsed'
-                  ? 'tal-btn-primary shadow-xs'
-                  : 'bg-[#F7F2FF] text-[#6D28D9] hover:bg-purple-100'
+                  ? 'tal-btn-emerald'
+                  : 'bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4] hover:bg-purple-100 hover:border-purple-200'
               )}
             >
               Endorsed
@@ -132,10 +132,10 @@ export default function TeacherHistoryPage() {
               type="button"
               onClick={() => setActiveFilter('revision')}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                 activeFilter === 'revision'
-                  ? 'tal-btn-primary shadow-xs'
-                  : 'bg-[#FAF5FF] text-[#A78BFA] hover:bg-purple-100'
+                  ? 'tal-btn-amber'
+                  : 'bg-[#FAF5FF] text-[#7E22CE] border border-[#E9E1F4] hover:bg-purple-100 hover:border-purple-200'
               )}
             >
               Revisi
@@ -144,10 +144,10 @@ export default function TeacherHistoryPage() {
               type="button"
               onClick={() => setActiveFilter('rejected')}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all',
+                'px-4 py-1.5 rounded-full text-xs font-bold tal-pill-btn',
                 activeFilter === 'rejected'
-                  ? 'tal-btn-primary shadow-xs'
-                  : 'bg-[#F6F1FF] text-[#6D28D9] hover:bg-purple-100'
+                  ? 'tal-btn-rose'
+                  : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
               )}
             >
               Rejected

@@ -73,10 +73,10 @@ export const DemoAccessBanner: React.FC = () => {
           onClick={() => handleRoleSwitch('student')}
           disabled={Boolean(switchingRole)}
           className={cn(
-            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer disabled:opacity-50',
+            'inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50 tal-pill-btn',
             currentRole === 'student'
-              ? 'bg-brand-500 text-white shadow-2xs font-bold'
-              : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+              ? 'tal-btn-primary'
+              : 'bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
           )}
         >
           {switchingRole === 'student' ? (
@@ -93,10 +93,10 @@ export const DemoAccessBanner: React.FC = () => {
           onClick={() => handleRoleSwitch('teacher')}
           disabled={Boolean(switchingRole)}
           className={cn(
-            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer disabled:opacity-50',
+            'inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50 tal-pill-btn',
             currentRole === 'teacher'
-              ? 'bg-growth-600 text-white shadow-2xs font-bold'
-              : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+              ? 'tal-btn-emerald'
+              : 'bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
           )}
         >
           {switchingRole === 'teacher' ? (
@@ -113,10 +113,10 @@ export const DemoAccessBanner: React.FC = () => {
           onClick={() => handleRoleSwitch('admin')}
           disabled={Boolean(switchingRole)}
           className={cn(
-            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer disabled:opacity-50',
+            'inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50 tal-pill-btn',
             currentRole === 'admin'
-              ? 'bg-intelligence-600 text-white shadow-2xs font-bold'
-              : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+              ? 'tal-btn-primary'
+              : 'bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
           )}
         >
           {switchingRole === 'admin' ? (

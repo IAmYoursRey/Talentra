@@ -44,16 +44,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   const variantStyles = {
     danger: {
-      btn: 'bg-reject-500 hover:bg-reject-600 text-white focus:ring-reject-500',
-      icon: 'text-reject-600 bg-reject-100',
+      btn: 'tal-btn-rose',
+      icon: 'text-rose-600 bg-rose-100',
     },
     warning: {
-      btn: 'bg-revision-500 hover:bg-revision-600 text-white focus:ring-revision-500',
-      icon: 'text-revision-600 bg-revision-100',
+      btn: 'tal-btn-amber',
+      icon: 'text-amber-600 bg-amber-100',
     },
     primary: {
-      btn: 'bg-brand-500 hover:bg-brand-600 text-white focus:ring-brand-500',
-      icon: 'text-brand-600 bg-brand-100',
+      btn: 'tal-btn-primary',
+      icon: 'text-purple-600 bg-purple-100',
     },
   };
 
@@ -101,7 +101,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300"
+            className="px-4 py-2 text-sm font-semibold rounded-xl tal-btn-secondary"
           >
             {cancelLabel}
           </button>
@@ -110,7 +110,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             onClick={onConfirm}
             disabled={isSubmitting}
             className={cn(
-              'px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-xs focus:outline-none focus:ring-2 focus:ring-offset-1 inline-flex items-center gap-1.5',
+              'px-5 py-2 text-sm font-bold rounded-xl inline-flex items-center gap-1.5',
               currentVariant.btn,
               isSubmitting && 'opacity-60 cursor-not-allowed'
             )}

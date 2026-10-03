@@ -275,7 +275,7 @@ export default function StudentCVPage() {
                 type="button"
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="w-full py-3.5 rounded-xl tal-btn-primary font-bold text-sm shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl tal-btn-primary font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {isGenerating ? (
                   <>
@@ -291,13 +291,16 @@ export default function StudentCVPage() {
               </button>
 
               {generatedCv && (
-                <div className="p-4 rounded-xl bg-purple-50 border border-purple-200 space-y-2 animate-in fade-in">
-                  <p className="text-xs font-bold text-[#6D28D9]">✓ CV Resmi Berhasil Diterbitkan</p>
-                  <div className="flex items-center gap-2 pt-1">
+                <div className="p-4 rounded-xl bg-gradient-to-r from-purple-50 to-emerald-50 border border-purple-200/80 space-y-3 animate-in fade-in">
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>CV Resmi Berhasil Diterbitkan</span>
+                  </div>
+                  <div>
                     <Link
                       href={generatedCv.verificationUrl || `/verify/${generatedCv.verificationToken || 'tlnt_token_v94b8e21'}`}
                       target="_blank"
-                      className="text-xs font-bold text-[#6D28D9] hover:underline inline-flex items-center gap-1"
+                      className="w-full py-2.5 px-4 rounded-xl tal-btn-secondary text-xs font-bold inline-flex items-center justify-center gap-2"
                     >
                       <span>Buka Halaman Verifikasi Publik</span>
                       <ExternalLink className="w-3.5 h-3.5" />

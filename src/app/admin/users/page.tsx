@@ -245,7 +245,7 @@ export default function AdminUsersPage() {
             <button
               type="button"
               onClick={() => setIsTeacherModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#E9E1F4] bg-[#F7F2FF] hover:bg-[#EDE9FE] text-xs font-semibold text-[#6D28D9] transition-all shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl tal-btn-secondary text-xs font-semibold"
             >
               <GraduationCap className="w-4 h-4 text-[#8B5CF6]" />
               <span>+ Guru</span>
@@ -254,7 +254,7 @@ export default function AdminUsersPage() {
             <button
               type="button"
               onClick={() => setIsStudentModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl tal-btn-primary text-xs font-semibold transition-all shadow-tal-card hover:shadow-tal-hover"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl tal-btn-primary text-xs font-semibold"
             >
               <Plus className="w-4 h-4" />
               <span>+ Tambah User</span>
@@ -470,7 +470,7 @@ export default function AdminUsersPage() {
                               setTargetUser(u);
                               setConfirmAction('reset_password');
                             }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F7F2FF] hover:bg-[#6D28D9] text-[#6D28D9] hover:text-white border border-[#E9E1F4] text-[11px] font-semibold transition-all"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg tal-btn-secondary text-[11px] font-semibold"
                           >
                             <KeyRound className="w-3 h-3" />
                             <span>Kelola / Reset</span>
@@ -480,7 +480,7 @@ export default function AdminUsersPage() {
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(u)}
-                            className="p-1.5 rounded-lg border border-[#E9E1F4] hover:bg-[#F7F2FF] text-[#6F607D] transition-colors"
+                            className="p-1.5 rounded-lg border border-[#E9E1F4] hover:bg-[#EDE9FE] hover:text-[#6D28D9] text-[#6F607D] transition-all active:scale-95 cursor-pointer"
                             title="Edit Profil"
                             aria-label={`Edit profil ${u.displayName}`}
                           >
@@ -495,7 +495,7 @@ export default function AdminUsersPage() {
                                 setTargetUser(u);
                                 setConfirmAction('disable_account');
                               }}
-                              className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 transition-colors"
+                              className="p-1.5 rounded-lg tal-btn-rose text-white"
                               title="Nonaktifkan Akun"
                               aria-label={`Nonaktifkan akun ${u.displayName}`}
                             >
@@ -508,7 +508,7 @@ export default function AdminUsersPage() {
                                 setTargetUser(u);
                                 setConfirmAction('reactivate_account');
                               }}
-                              className="p-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-50 text-emerald-600 transition-colors"
+                              className="p-1.5 rounded-lg tal-btn-emerald text-white"
                               title="Aktifkan Kembali Akun"
                               aria-label={`Aktifkan akun ${u.displayName}`}
                             >
