@@ -2,8 +2,8 @@ import os
 import time
 import pytest
 from unittest.mock import patch, MagicMock
-from backend.app.storage.vercel_blob import VercelBlobStorage
-from backend.app.core.config import settings, get_internal_app_origin
+from app.storage.vercel_blob import VercelBlobStorage
+from app.core.config import settings, get_internal_app_origin
 
 
 def test_vercel_blob_auth_preference(monkeypatch):

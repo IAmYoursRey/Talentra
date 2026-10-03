@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Literal
 from pydantic import BaseModel, Field
 
 class Settings(BaseModel):
@@ -20,7 +21,7 @@ class Settings(BaseModel):
     cookie_name: str = "talentra_session"
     refresh_cookie_name: str = "talentra_refresh"
     cookie_secure: bool = Field(default_factory=lambda: os.getenv("APP_ENV", "development") == "production")
-    cookie_samesite: str = "lax"
+    cookie_samesite: Literal["lax", "none", "strict"] = "lax"
     cookie_domain: str | None = None
     
     # CSRF Configuration

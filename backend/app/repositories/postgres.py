@@ -112,7 +112,7 @@ class PostgresIdentityRepository(IdentityRepository):
             )
             res = await session.execute(stmt)
             await session.commit()
-            return res.rowcount > 0
+            return getattr(res, "rowcount", 0) > 0
 
     update_user_password = update_password_hash
 
@@ -154,7 +154,7 @@ class PostgresIdentityRepository(IdentityRepository):
         must_change_pwd = False
         if first_ident:
             masked_id = f"{first_ident.identifier_type.upper()}: *******{first_ident.identifier_last4}"
-            must_change_pwd = bool(first_ident.must_change_password)
+            must_change_pwd = first_ident.must_change_password
 
         return User(
             id=model.id,
@@ -174,20 +174,20 @@ class PostgresSessionRepository(SessionRepository):
     def __init__(self, session_factory: Optional[async_sessionmaker[AsyncSession]] = None):
         self.session_factory = session_factory or AsyncSessionLocal
 
-    async def create_session(self, session_record: SessionRecord) -> SessionRecord:
-        async with self.session_factory() as session:
+    async def create_session(self, session: SessionRecord) -> SessionRecord:
+        async with self.session_factory() as db_session:
             model = SessionModel(
-                id=session_record.session_id,
-                user_id=session_record.user_id,
-                school_id=session_record.school_id,
-                role=session_record.role.value,
-                created_at=session_record.created_at,
-                expires_at=session_record.expires_at,
-                revoked_at=session_record.revoked_at,
+                id=session.session_id,
+                user_id=session.user_id,
+                school_id=session.school_id,
+                role=session.role.value,
+                created_at=session.created_at,
+                expires_at=session.expires_at,
+                revoked_at=session.revoked_at,
             )
-            session.add(model)
-            await session.commit()
-            return session_record
+            db_session.add(model)
+            await db_session.commit()
+            return session
 
     async def get_session(self, session_id: str) -> Optional[SessionRecord]:
         async with self.session_factory() as session:
@@ -226,7 +226,7 @@ class PostgresSessionRepository(SessionRepository):
             )
             res = await session.execute(stmt)
             await session.commit()
-            return res.rowcount > 0
+            return getattr(res, "rowcount", 0) > 0
 
     async def revoke_all_user_sessions(self, user_id: str, except_session_id: Optional[str] = None) -> int:
         async with self.session_factory() as session:
@@ -245,7 +245,7 @@ class PostgresSessionRepository(SessionRepository):
             )
             res = await session.execute(stmt)
             await session.commit()
-            return res.rowcount
+            return int(getattr(res, "rowcount", 0) or 0)
 
 
 class PostgresAuditRepository(AuditRepository):

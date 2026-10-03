@@ -223,16 +223,21 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <AppShell pageTitle="Manajemen Pengguna" expectedRole="admin">
+    <AppShell pageTitle="User Management" expectedRole="admin">
       <div className="space-y-6">
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              Manajemen Akun Siswa & Validator
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Otoritas sekolah terverifikasi: kelola identitas terlindungi, status akun, dan kata sandi sementara.
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-xl sm:text-2xl font-black text-[#261331] tracking-tight">
+                User Management
+              </h2>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4]">
+                2026 • Semester 1
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-[#6F607D]">
+              Kelola siswa, guru, reset password, dan status akun.
             </p>
           </div>
 
@@ -240,19 +245,19 @@ export default function AdminUsersPage() {
             <button
               type="button"
               onClick={() => setIsTeacherModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#E9E1F4] bg-[#F7F2FF] hover:bg-[#EDE9FE] text-xs font-semibold text-[#6D28D9] transition-all shadow-2xs"
             >
-              <GraduationCap className="w-4 h-4 text-growth-600" />
-              <span>Tambah Guru</span>
+              <GraduationCap className="w-4 h-4 text-[#8B5CF6]" />
+              <span>+ Guru</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsStudentModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-intelligence-600 hover:bg-intelligence-700 text-white text-xs font-semibold transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl tal-btn-primary text-xs font-semibold transition-all shadow-tal-card hover:shadow-tal-hover"
             >
               <Plus className="w-4 h-4" />
-              <span>Tambah Siswa</span>
+              <span>+ Tambah User</span>
             </button>
           </div>
         </div>
@@ -286,7 +291,7 @@ export default function AdminUsersPage() {
         )}
 
         {/* Filters Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-3">
+        <div className="bg-white rounded-2xl border border-[#E9E1F4] p-4 shadow-tal-card space-y-3">
           <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
             {/* Search */}
             <div className="relative flex-1">
@@ -295,8 +300,8 @@ export default function AdminUsersPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari berdasarkan nama, email, atau identitas ter-mask..."
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-intelligence-500 transition-colors"
+                placeholder="Cari ID resmi atau nama..."
+                className="w-full pl-10 pr-4 py-2.5 bg-[#F7F2FF] border border-[#E9E1F4] rounded-xl text-xs sm:text-sm text-[#261331] placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition-colors"
               />
             </div>
 
@@ -305,7 +310,7 @@ export default function AdminUsersPage() {
               <select
                 value={classFilter}
                 onChange={(e) => setClassFilter(e.target.value)}
-                className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-intelligence-500"
+                className="px-3 py-2.5 bg-[#F7F2FF] border border-[#E9E1F4] rounded-xl text-xs sm:text-sm text-[#261331] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
               >
                 <option value="all">Semua Rombel</option>
                 {classes.map((c) => (
@@ -319,7 +324,7 @@ export default function AdminUsersPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-intelligence-500"
+                className="px-3 py-2.5 bg-[#F7F2FF] border border-[#E9E1F4] rounded-xl text-xs sm:text-sm text-[#261331] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
               >
                 <option value="all">Semua Status</option>
                 <option value="active">Aktif</option>
@@ -329,39 +334,39 @@ export default function AdminUsersPage() {
           </div>
 
           {/* Role tabs */}
-          <div className="flex items-center gap-2 pt-1 border-t border-slate-100 text-xs">
+          <div className="flex items-center gap-2 pt-2 border-t border-[#E9E1F4] text-xs">
             <button
               type="button"
               onClick={() => setRoleFilter('all')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 roleFilter === 'all'
-                  ? 'bg-slate-900 text-white shadow-2xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#6D28D9] text-white shadow-2xs'
+                  : 'text-[#6F607D] hover:bg-[#F7F2FF]'
               }`}
             >
-              Semua Peran ({users.length})
+              Semua Role ({users.length})
             </button>
             <button
               type="button"
               onClick={() => setRoleFilter('student')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 roleFilter === 'student'
-                  ? 'bg-brand-500 text-white shadow-2xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#6D28D9] text-white shadow-2xs'
+                  : 'text-[#6F607D] hover:bg-[#F7F2FF]'
               }`}
             >
-              Siswa
+              Student
             </button>
             <button
               type="button"
               onClick={() => setRoleFilter('teacher')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 roleFilter === 'teacher'
-                  ? 'bg-growth-600 text-white shadow-2xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#6D28D9] text-white shadow-2xs'
+                  : 'text-[#6F607D] hover:bg-[#F7F2FF]'
               }`}
             >
-              Guru Validator
+              Teacher
             </button>
           </div>
         </div>
@@ -386,31 +391,31 @@ export default function AdminUsersPage() {
             }}
           />
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#E9E1F4] shadow-tal-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-semibold border-b border-slate-200">
+              <table className="w-full text-left text-xs text-[#261331]">
+                <thead className="bg-[#F7F2FF] text-[#6F607D] uppercase text-[10px] font-bold border-b border-[#E9E1F4]">
                   <tr>
-                    <th scope="col" className="px-5 py-3">Nama Pengguna</th>
-                    <th scope="col" className="px-4 py-3">Peran</th>
-                    <th scope="col" className="px-4 py-3">Identitas Ter-Mask</th>
-                    <th scope="col" className="px-4 py-3">Rombel / Penugasan</th>
-                    <th scope="col" className="px-4 py-3">Status</th>
-                    <th scope="col" className="px-5 py-3 text-right">Tindakan Keamanan</th>
+                    <th scope="col" className="px-5 py-3.5">Nama</th>
+                    <th scope="col" className="px-4 py-3.5">Role</th>
+                    <th scope="col" className="px-4 py-3.5">ID Resmi</th>
+                    <th scope="col" className="px-4 py-3.5">Rombel / Penugasan</th>
+                    <th scope="col" className="px-4 py-3.5">Status</th>
+                    <th scope="col" className="px-5 py-3.5 text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#E9E1F4]">
                   {users.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={u.id} className="hover:bg-[#F7F2FF]/60 transition-colors">
                       {/* Name & Avatar */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0 border border-slate-200">
+                          <div className="w-8 h-8 rounded-full bg-[#F7F2FF] text-[#6D28D9] flex items-center justify-center font-bold text-xs shrink-0 border border-[#E9E1F4]">
                             {u.displayName.charAt(0)}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-slate-900 truncate">{u.displayName}</p>
-                            <p className="text-[11px] text-slate-400 truncate">{u.email}</p>
+                            <p className="font-bold text-[#261331] truncate">{u.displayName}</p>
+                            <p className="text-[11px] text-[#6F607D] truncate">{u.email}</p>
                           </div>
                         </div>
                       </td>
@@ -420,37 +425,37 @@ export default function AdminUsersPage() {
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                             u.role === 'student'
-                              ? 'bg-brand-50 text-brand-700 border-brand-200'
+                              ? 'bg-[#F7F2FF] text-[#6D28D9] border-[#E9E1F4]'
                               : u.role === 'teacher'
-                              ? 'bg-growth-50 text-growth-700 border-growth-200'
-                              : 'bg-intelligence-50 text-intelligence-700 border-intelligence-200'
+                              ? 'bg-[#F3E8FF] text-[#7E22CE] border-[#DDD6FE]'
+                              : 'bg-slate-100 text-slate-700 border-slate-200'
                           }`}
                         >
-                          {u.role === 'student' ? 'Siswa' : u.role === 'teacher' ? 'Guru' : 'Admin'}
+                          {u.role === 'student' ? 'Student' : u.role === 'teacher' ? 'Teacher' : 'Admin'}
                         </span>
                       </td>
 
                       {/* Masked ID (Strict Privacy Protection) */}
-                      <td className="px-4 py-3.5 font-mono text-[11px] text-slate-600">
+                      <td className="px-4 py-3.5 font-mono text-[11px] text-[#6F607D]">
                         {u.maskedIdentifier}
                       </td>
 
                       {/* Class / Title */}
-                      <td className="px-4 py-3.5 text-slate-600">
+                      <td className="px-4 py-3.5 text-[#6F607D]">
                         {u.className || u.title || '-'}
                       </td>
 
                       {/* Status */}
                       <td className="px-4 py-3.5">
                         {u.status === 'active' ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-endorse-700 bg-endorse-50 px-2 py-0.5 rounded border border-endorse-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-endorse-500" />
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             <span>Aktif</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                            <span>Dinonaktifkan</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            <span>Reset wajib</span>
                           </span>
                         )}
                       </td>
@@ -458,29 +463,28 @@ export default function AdminUsersPage() {
                       {/* Actions */}
                       <td className="px-5 py-3.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {/* Edit profile */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit(u)}
-                            className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition-colors"
-                            title="Edit Profil"
-                            aria-label={`Edit profil ${u.displayName}`}
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Reset password */}
+                          {/* Quick Kelola / Reset Button */}
                           <button
                             type="button"
                             onClick={() => {
                               setTargetUser(u);
                               setConfirmAction('reset_password');
                             }}
-                            className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition-colors"
-                            title="Reset Kata Sandi"
-                            aria-label={`Reset kata sandi ${u.displayName}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F7F2FF] hover:bg-[#6D28D9] text-[#6D28D9] hover:text-white border border-[#E9E1F4] text-[11px] font-semibold transition-all"
                           >
-                            <KeyRound className="w-3.5 h-3.5" />
+                            <KeyRound className="w-3 h-3" />
+                            <span>Kelola / Reset</span>
+                          </button>
+
+                          {/* Edit profile */}
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(u)}
+                            className="p-1.5 rounded-lg border border-[#E9E1F4] hover:bg-[#F7F2FF] text-[#6F607D] transition-colors"
+                            title="Edit Profil"
+                            aria-label={`Edit profil ${u.displayName}`}
+                          >
+                            <Edit className="w-3.5 h-3.5" />
                           </button>
 
                           {/* Disable / Reactivate */}
@@ -491,7 +495,7 @@ export default function AdminUsersPage() {
                                 setTargetUser(u);
                                 setConfirmAction('disable_account');
                               }}
-                              className="p-1.5 rounded-lg border border-reject-200 hover:bg-reject-50 text-reject-600 transition-colors"
+                              className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 transition-colors"
                               title="Nonaktifkan Akun"
                               aria-label={`Nonaktifkan akun ${u.displayName}`}
                             >
@@ -504,7 +508,7 @@ export default function AdminUsersPage() {
                                 setTargetUser(u);
                                 setConfirmAction('reactivate_account');
                               }}
-                              className="p-1.5 rounded-lg border border-endorse-200 hover:bg-endorse-50 text-endorse-600 transition-colors"
+                              className="p-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-50 text-emerald-600 transition-colors"
                               title="Aktifkan Kembali Akun"
                               aria-label={`Aktifkan akun ${u.displayName}`}
                             >
@@ -520,6 +524,19 @@ export default function AdminUsersPage() {
             </div>
           </div>
         )}
+
+        {/* Security Policy Info Footer */}
+        <div className="bg-[#F7F2FF] rounded-2xl border border-[#E9E1F4] p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white border border-[#E9E1F4] text-[#6D28D9] flex items-center justify-center shrink-0 shadow-2xs">
+            <Lock className="w-4.5 h-4.5" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-[#261331]">Kebijakan Keamanan Akun</h4>
+            <p className="text-[11px] text-[#6F607D]">
+              Reset password menghasilkan password sementara dan wajib diganti saat login berikutnya.
+            </p>
+          </div>
+        </div>
 
         {/* Modal 1: Create Student */}
         {isStudentModalOpen && (

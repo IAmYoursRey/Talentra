@@ -5,6 +5,8 @@ import {
   CVDetailSnapshot,
 } from '../types/cv.types';
 
+import { ensureCsrfToken } from '../lib/csrf';
+
 export interface ICVService {
   getCVBuilderContext(): Promise<CVBuilderContext>;
   generateCV(req: CVGenerateRequest): Promise<CVGenerateResponse>;
@@ -13,7 +15,9 @@ export interface ICVService {
   revokeCV(snapshotId: string, reason?: string): Promise<{ status: string; snapshotId: string }>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window === 'undefined' ? (process.env.API_BASE_URL || 'http://127.0.0.1:8000') : '');
 
 export class HTTPCVService implements ICVService {
   public async getCVBuilderContext(): Promise<CVBuilderContext> {
@@ -35,12 +39,14 @@ export class HTTPCVService implements ICVService {
   }
 
   public async generateCV(req: CVGenerateRequest): Promise<CVGenerateResponse> {
+    const csrfToken = await ensureCsrfToken(API_BASE);
     const res = await fetch(`${API_BASE}/api/v1/student/cv`, {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
       },
       body: JSON.stringify(req),
     });
@@ -96,12 +102,14 @@ export class HTTPCVService implements ICVService {
   }
 
   public async revokeCV(snapshotId: string, reason = 'Dicabut oleh siswa'): Promise<{ status: string; snapshotId: string }> {
+    const csrfToken = await ensureCsrfToken(API_BASE);
     const res = await fetch(`${API_BASE}/api/v1/student/cv/${snapshotId}/revoke`, {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
       },
       body: JSON.stringify({ reason }),
     });

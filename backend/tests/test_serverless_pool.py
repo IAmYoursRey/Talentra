@@ -1,7 +1,7 @@
 import os
 import pytest
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
-from backend.app.core.database import get_engine
+from app.core.database import get_engine
 
 
 def test_serverless_pool_selection_nullpool(monkeypatch):

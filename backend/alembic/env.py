@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from alembic.ddl.impl import DefaultImpl
 
-# Override DefaultImpl.version_table_impl to support longer revision names (e.g. 0007_neon_single_store_architecture)
 def _custom_version_table_impl(self, *, version_table: str, version_table_schema: str | None, version_table_pk: bool, **kw):
     vt = Table(
         version_table,
@@ -22,14 +21,13 @@ def _custom_version_table_impl(self, *, version_table: str, version_table_schema
 
 DefaultImpl.version_table_impl = _custom_version_table_impl
 
-# Ensure backend directory is in sys.path
 backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
 from app.core.config import settings
 from app.core.database import Base, normalize_database_url
-import app.db.models  # Ensure all models are registered
+import app.db.models  
 
 config = context.config
 

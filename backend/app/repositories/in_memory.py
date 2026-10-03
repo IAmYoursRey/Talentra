@@ -48,8 +48,17 @@ class InMemoryIdentityRepository(IdentityRepository):
             password_hash=hash_password("PasswordSiswa123!"),
             active=True,
         )
+        student_identity_alias = AuthIdentity(
+            id="idn_std_001_alias",
+            user_id=student_user.id,
+            identifier_type=IdentifierType.NISN,
+            normalized_identifier="0081234567",
+            password_hash=hash_password("PasswordSiswa123!"),
+            active=True,
+        )
         self.users[student_user.id] = student_user
         self.identities[(student_identity.normalized_identifier, student_identity.identifier_type)] = (student_identity, student_user)
+        self.identities[(student_identity_alias.normalized_identifier, student_identity_alias.identifier_type)] = (student_identity_alias, student_user)
 
         # 3. Teacher (Budi Santoso) - NIP 18 digits and NUPTK 16 digits
         teacher_user = User(
@@ -70,6 +79,14 @@ class InMemoryIdentityRepository(IdentityRepository):
             password_hash=hash_password("PasswordGuru123!"),
             active=True,
         )
+        teacher_nip_identity_alias = AuthIdentity(
+            id="idn_tch_002_nip_alias",
+            user_id=teacher_user.id,
+            identifier_type=IdentifierType.NIP,
+            normalized_identifier="198501012010011001",
+            password_hash=hash_password("PasswordGuru123!"),
+            active=True,
+        )
         teacher_nuptk_identity = AuthIdentity(
             id="idn_tch_002_nuptk",
             user_id=teacher_user.id,
@@ -80,6 +97,7 @@ class InMemoryIdentityRepository(IdentityRepository):
         )
         self.users[teacher_user.id] = teacher_user
         self.identities[(teacher_nip_identity.normalized_identifier, teacher_nip_identity.identifier_type)] = (teacher_nip_identity, teacher_user)
+        self.identities[(teacher_nip_identity_alias.normalized_identifier, teacher_nip_identity_alias.identifier_type)] = (teacher_nip_identity_alias, teacher_user)
         self.identities[(teacher_nuptk_identity.normalized_identifier, teacher_nuptk_identity.identifier_type)] = (teacher_nuptk_identity, teacher_user)
 
         # 4. Admin (Dra. Hj. Ratna Juwita) - NPSN 8 alphanumeric chars

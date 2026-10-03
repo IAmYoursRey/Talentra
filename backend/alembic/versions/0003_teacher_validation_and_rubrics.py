@@ -9,8 +9,6 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-
-# revision identifiers, used by Alembic.
 revision: str = '0003_teacher_val_rubrics'
 down_revision: Union[str, None] = '0002_portfolio_tag_catalog'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -35,13 +33,11 @@ TAG_RADAR_MAPPINGS = {
 
 
 def upgrade() -> None:
-    # 1. Add radar_dimension column to skill_tags
     op.add_column(
         'skill_tags',
         sa.Column('radar_dimension', sa.String(length=64), nullable=False, server_default='creativity')
     )
 
-    # Update canonical tags with their respective radar dimensions
     bind = op.get_bind()
     for code, dimension in TAG_RADAR_MAPPINGS.items():
         bind.execute(
@@ -49,7 +45,6 @@ def upgrade() -> None:
             {"dimension": dimension, "code": code}
         )
 
-    # 2. Create validation_decisions table
     op.create_table(
         'validation_decisions',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -76,7 +71,6 @@ def upgrade() -> None:
     op.create_index('ix_validation_decisions_idempotency_key_hash', 'validation_decisions', ['idempotency_key_hash'])
     op.create_index('ix_val_dec_rev_status', 'validation_decisions', ['revision_id', 'application_status'])
 
-    # 3. Create rubric_assessments table
     op.create_table(
         'rubric_assessments',
         sa.Column('id', sa.String(length=36), primary_key=True),

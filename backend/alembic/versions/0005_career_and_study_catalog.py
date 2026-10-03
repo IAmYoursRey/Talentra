@@ -13,7 +13,6 @@ from alembic import op
 import sqlalchemy as sa
 
 
-# revision identifiers, used by Alembic.
 revision: str = '0005_career_and_study_catalog'
 down_revision: Union[str, None] = '0004_admin_and_account_lifecycle'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -386,7 +385,6 @@ INITIAL_STUDY_PATHS = [
 def upgrade() -> None:
     now = datetime.now(timezone.utc)
 
-    # 1. Create career_paths table
     career_paths_table = op.create_table(
         'career_paths',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -406,7 +404,6 @@ def upgrade() -> None:
     op.create_index('ix_career_paths_code', 'career_paths', ['code'], unique=True)
     op.create_index('ix_career_paths_active_sort', 'career_paths', ['is_active', 'sort_order'])
 
-    # 2. Create study_paths table
     study_paths_table = op.create_table(
         'study_paths',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -426,7 +423,6 @@ def upgrade() -> None:
     op.create_index('ix_study_paths_code', 'study_paths', ['code'], unique=True)
     op.create_index('ix_study_paths_active_sort', 'study_paths', ['is_active', 'sort_order'])
 
-    # Seed initial career paths
     career_rows = [
         {
             **item,
@@ -439,7 +435,6 @@ def upgrade() -> None:
     ]
     op.bulk_insert(career_paths_table, career_rows)
 
-    # Seed initial study paths
     study_rows = [
         {
             **item,

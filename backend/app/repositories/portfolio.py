@@ -1477,12 +1477,147 @@ class InMemoryPortfolioRepository(PortfolioRepository):
     """
 
     def __init__(self):
-        self.items: Dict[str, Dict[str, Any]] = {}
-        self.revisions: Dict[str, Dict[str, Any]] = {}
-        self.snapshots: Dict[str, Dict[str, Any]] = {}
+        now = datetime(2026, 9, 25, 10, 0, tzinfo=timezone.utc)
+        self.items: Dict[str, Dict[str, Any]] = {
+            "prt_001": {
+                "portfolio_id": "prt_001",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "title": "Aplikasi Web E-Commerce Koperasi Sekolah",
+                "activity_type": "project",
+                "activity_date": "2026-08-15",
+                "description": "Mengembangkan aplikasi toko digital untuk koperasi siswa dengan integrasi katalog produk.",
+                "canonical_tag_ids": ["web-development", "digital-literacy"],
+                "evidence_refs": [{"id": "ev_001", "type": "link", "url": "https://github.com/alya/koperasi-web", "title": "Repository GitHub"}],
+                "status": "approved",
+                "current_revision_id": "rev_001",
+                "current_revision_number": 1,
+                "created_at": now,
+                "updated_at": now,
+                "submitted_at": now,
+            },
+            "prt_002": {
+                "portfolio_id": "prt_002",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "title": "Sistem Manajemen Perpustakaan Digital",
+                "activity_type": "project",
+                "activity_date": "2026-09-10",
+                "description": "Platform peminjaman buku berbasis QR code dan dashboard statistik peminjaman.",
+                "canonical_tag_ids": ["web-development", "problem-solving"],
+                "evidence_refs": [{"id": "ev_002", "type": "link", "url": "https://github.com/alya/perpus-digital", "title": "Repository GitHub"}],
+                "status": "submitted",
+                "current_revision_id": "rev_002",
+                "current_revision_number": 1,
+                "created_at": now,
+                "updated_at": now,
+                "submitted_at": now,
+            },
+            "prt_003": {
+                "portfolio_id": "prt_003",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "title": "Redesain UI Portal Siswa SMK",
+                "activity_type": "assignment",
+                "activity_date": "2026-09-20",
+                "description": "Desain antarmuka modern mobile-first dengan Figma dan prototipe interaktif.",
+                "canonical_tag_ids": ["ui-ux", "creativity"],
+                "evidence_refs": [{"id": "ev_003", "type": "link", "url": "https://figma.com/design/portal-siswa", "title": "Figma Prototype"}],
+                "status": "draft",
+                "current_revision_id": "rev_003",
+                "current_revision_number": 1,
+                "created_at": now,
+                "updated_at": now,
+            },
+        }
+        self.revisions: Dict[str, Dict[str, Any]] = {
+            "rev_001": {
+                "revision_id": "rev_001",
+                "portfolio_id": "prt_001",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "version": 1,
+                "title_snapshot": "Aplikasi Web E-Commerce Koperasi Sekolah",
+                "activity_type_snapshot": "project",
+                "description_snapshot": "Mengembangkan aplikasi toko digital untuk koperasi siswa dengan integrasi katalog produk.",
+                "tag_snapshot": ["web-development", "digital-literacy"],
+                "evidence_refs": [{"id": "ev_001", "type": "link", "url": "https://github.com/alya/koperasi-web", "title": "Repository GitHub"}],
+                "created_at": now,
+            },
+            "rev_002": {
+                "revision_id": "rev_002",
+                "portfolio_id": "prt_002",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "version": 1,
+                "title_snapshot": "Sistem Manajemen Perpustakaan Digital",
+                "activity_type_snapshot": "project",
+                "description_snapshot": "Platform peminjaman buku berbasis QR code dan dashboard statistik peminjaman.",
+                "tag_snapshot": ["web-development", "problem-solving"],
+                "evidence_refs": [{"id": "ev_002", "type": "link", "url": "https://github.com/alya/perpus-digital", "title": "Repository GitHub"}],
+                "created_at": now,
+            },
+            "rev_003": {
+                "revision_id": "rev_003",
+                "portfolio_id": "prt_003",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "version": 1,
+                "title_snapshot": "Redesain UI Portal Siswa SMK",
+                "activity_type_snapshot": "assignment",
+                "description_snapshot": "Desain antarmuka modern mobile-first dengan Figma dan prototipe interaktif.",
+                "tag_snapshot": ["ui-ux", "creativity"],
+                "evidence_refs": [{"id": "ev_003", "type": "link", "url": "https://figma.com/design/portal-siswa", "title": "Figma Prototype"}],
+                "created_at": now,
+            },
+        }
+        self.snapshots: Dict[str, Dict[str, Any]] = {
+            "snap_ev_001": {
+                "snapshot_id": "snap_ev_001",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "portfolio_id": "prt_001",
+                "revision_id": "rev_001",
+                "validation_decision_id": "dec_001",
+                "canonical_tag_ids": ["web-development", "digital-literacy"],
+                "canonical_tag_codes": ["web-development", "digital-literacy"],
+                "approved_at": now,
+                "projection_version": "v1",
+            }
+        }
         self.recommendation_snapshots: Dict[str, Dict[str, Any]] = {}
         self.professional_descriptions: Dict[str, Dict[str, Any]] = {}
-        self.cv_snapshots: Dict[str, Dict[str, Any]] = {}
+        self.cv_snapshots: Dict[str, Dict[str, Any]] = {
+            "snap_demo_001": {
+                "snapshot_id": "snap_demo_001",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "profile": {
+                    "display_name": "Alya Rahma",
+                    "school_name": "SMK Negeri 1 Cimahi",
+                    "class_name": "XII RPL 1",
+                    "professional_summary": "Siswa Rekayasa Perangkat Lunak dengan keahlian pengembangan aplikasi web responsif dan integrasi sistem.",
+                },
+                "approved_skills": [
+                    {"name": "Web Development", "score": 92, "level": "Tingkat Mahir"},
+                    {"name": "Database Management", "score": 85, "level": "Tingkat Mahir"},
+                    {"name": "UI/UX Design", "score": 78, "level": "Tingkat Menengah"},
+                ],
+                "selected_portfolios": [
+                    {
+                        "portfolio_id": "prt_001",
+                        "title": "Aplikasi Web E-Commerce Koperasi Sekolah",
+                        "activity_type": "project",
+                        "activity_date": "2026-08-15",
+                        "professional_description": "Mengembangkan aplikasi toko digital untuk koperasi siswa dengan integrasi katalog produk.",
+                        "tags": ["Web Development", "Database Management"],
+                    }
+                ],
+                "content_digest": "TLN-A1B2-C3D4",
+                "status": "issued",
+                "generated_at": datetime(2026, 9, 25, 10, 0, tzinfo=timezone.utc),
+            }
+        }
 
 
     async def create_portfolio(
@@ -1957,14 +2092,20 @@ class InMemoryPortfolioRepository(PortfolioRepository):
         return matches[0]
 
 
+_in_memory_portfolio_repo_instance: Optional[InMemoryPortfolioRepository] = None
+
+
 def get_portfolio_repository() -> PortfolioRepository:
     """
     Factory resolving the authoritative portfolio repository.
     Returns InMemoryPortfolioRepository in test / in_memory mode.
     Returns PostgresPortfolioRepository for production / PostgreSQL (Neon).
     """
+    global _in_memory_portfolio_repo_instance
     if settings.app_env == "test" or settings.repository_backend == "in_memory":
-        return InMemoryPortfolioRepository()
+        if _in_memory_portfolio_repo_instance is None:
+            _in_memory_portfolio_repo_instance = InMemoryPortfolioRepository()
+        return _in_memory_portfolio_repo_instance
     return PostgresPortfolioRepository()
 
 

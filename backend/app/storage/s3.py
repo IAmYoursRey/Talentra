@@ -23,7 +23,7 @@ class S3ObjectStorage(ObjectStorage):
         self.endpoint_url = endpoint_url or settings.s3_endpoint_url
         self.region = region_name or settings.s3_region
 
-        session = boto3.session.Session()
+        session = boto3.Session()
         self.client = session.client(
             "s3",
             endpoint_url=self.endpoint_url,

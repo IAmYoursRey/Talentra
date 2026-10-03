@@ -196,6 +196,25 @@ class PostgresVerificationRepository(VerificationRepository):
 class InMemoryVerificationRepository(VerificationRepository):
     def __init__(self):
         self.records: Dict[str, Dict[str, Any]] = {}
+        try:
+            from ..core.cv_security import hash_verification_token
+            demo_token = "tlnt_token_v94b8e21"
+            token_hash = hash_verification_token(demo_token)
+            self.records["rec_demo_001"] = {
+                "id": "rec_demo_001",
+                "school_id": "sch_smk1_cimahi",
+                "student_id": "usr_std_001",
+                "cv_snapshot_id": "snap_demo_001",
+                "token_hash": token_hash,
+                "display_code": "TLN-2026-94B8",
+                "snapshot_digest": "TLN-A1B2-C3D4",
+                "status": VerificationStatus.ACTIVE.value,
+                "issued_at": datetime(2026, 9, 25, 10, 0, tzinfo=timezone.utc),
+                "expires_at": datetime(2027, 9, 25, 10, 0, tzinfo=timezone.utc),
+                "created_at": datetime(2026, 9, 25, 10, 0, tzinfo=timezone.utc),
+            }
+        except Exception:
+            pass
 
     async def create_verification_record(self, record_data: Dict[str, Any]) -> Dict[str, Any]:
         rid = record_data.get("id") or str(uuid.uuid4())
@@ -275,7 +294,11 @@ _global_verification_repo: Optional[VerificationRepository] = None
 def get_verification_repository() -> VerificationRepository:
     global _global_verification_repo
     if _global_verification_repo is None:
-        _global_verification_repo = PostgresVerificationRepository()
+        from ..core.config import settings
+        if settings.app_env in ("development", "test") or settings.repository_backend == "in_memory":
+            _global_verification_repo = InMemoryVerificationRepository()
+        else:
+            _global_verification_repo = PostgresVerificationRepository()
     return _global_verification_repo
 
 def set_verification_repository(repo: VerificationRepository) -> None:

@@ -3,8 +3,8 @@ try:
     from pymongo import AsyncMongoClient
     from pymongo.asynchronous.database import AsyncDatabase
 except ImportError:
-    AsyncMongoClient = Any  # type: ignore
-    AsyncDatabase = Any  # type: ignore
+    AsyncMongoClient: Any = object  # type: ignore
+    AsyncDatabase: Any = object  # type: ignore
 from .config import settings
 
 class MongoManager:

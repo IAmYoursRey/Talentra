@@ -19,7 +19,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # 1. schools
     op.create_table(
         'schools',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -29,7 +28,6 @@ def upgrade() -> None:
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     )
 
-    # 2. users
     op.create_table(
         'users',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -45,7 +43,6 @@ def upgrade() -> None:
     op.create_index('ix_users_role', 'users', ['role'])
     op.create_index('ix_users_status', 'users', ['status'])
 
-    # 3. auth_identities
     op.create_table(
         'auth_identities',
         sa.Column('id', sa.String(length=36), primary_key=True),

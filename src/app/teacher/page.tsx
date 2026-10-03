@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { AppShell } from '../../components/layout/AppShell';
 import { MetricCard } from '../../components/common/MetricCard';
-import { StatusBadge } from '../../components/common/StatusBadge';
-import { TagChip } from '../../components/common/TagChip';
-import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
 import { reviewService } from '../../services/review.service';
 import { authService } from '../../services/auth.service';
 import { PortfolioItem } from '../../types/portfolio.types';
@@ -16,10 +13,8 @@ import {
   CheckCircle2,
   Users,
   ArrowRight,
-  ShieldCheck,
-  Calendar,
+  School,
   ChevronRight,
-  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -43,176 +38,178 @@ export default function TeacherDashboardPage() {
     return unsub;
   }, []);
 
-  const pendingCount = queueItems.filter((i) => i.status === 'submitted').length;
-  const revisionCount = queueItems.filter((i) => i.status === 'revision_requested').length;
-  const approvedMonthCount = queueItems.filter((i) => i.status === 'approved').length;
-  const submittedQueue = queueItems.filter((i) => i.status === 'submitted').slice(0, 4);
+  const priorityQueue = [
+    {
+      id: 'p-1',
+      initials: 'RA',
+      name: 'Raihan Ansari',
+      project: 'Waste2Wisdom',
+      class: 'XII IPA 2',
+    },
+    {
+      id: 'p-2',
+      initials: 'NK',
+      name: 'Nabila K.',
+      project: 'Video Kampanye',
+      class: 'XI IPA 1',
+    },
+    {
+      id: 'p-3',
+      initials: 'AF',
+      name: 'Arya F.',
+      project: 'Robot Line Follower',
+      class: 'XII IPA 1',
+    },
+    {
+      id: 'p-4',
+      initials: 'SA',
+      name: 'Salsa A.',
+      project: 'Festival Seni',
+      class: 'XI IPA 2',
+    },
+  ];
+
+  const assignedClasses = [
+    { name: 'X IPA 1', students: 31, pending: 4 },
+    { name: 'XI IPA 2', students: 30, pending: 5 },
+    { name: 'XII IPA 2', students: 31, pending: 9 },
+  ];
 
   return (
-    <AppShell pageTitle="Dashboard Validator Guru" expectedRole="teacher">
-      <div className="space-y-6">
-        {/* Welcome Banner */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-growth-50 text-growth-700 border border-growth-200">
-                Validator Kejuruan & Karakter
-              </span>
-              <span className="text-xs text-slate-400">• {user?.title}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Selamat bertugas, {user?.name.split(',')[0]} 👨‍🏫
-            </h2>
-            <p className="text-sm text-slate-600 max-w-xl leading-relaxed">
-              Tinjau pengajuan karya nyata siswa bimbingan Anda, lakukan penilaian rubrik karakter, dan berikan masukan perbaikan yang konstruktif.
+    <AppShell pageTitle="Dashboard" expectedRole="teacher">
+      <div className="space-y-6 max-w-6xl mx-auto">
+        {/* Header matching 12-Teacher-Dashboard-HF.svg */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#261331] tracking-tight">
+              Teacher Dashboard
+            </h1>
+            <p className="text-sm text-[#6F607D] mt-1">
+              Ringkasan antrean validasi, kelas, dan progres siswa.
             </p>
           </div>
-
-          <div className="shrink-0">
-            <Link
-              href="/teacher/reviews"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-growth-600 hover:bg-growth-700 text-white font-semibold text-sm transition-all shadow-xs"
-            >
-              <Inbox className="w-4 h-4" />
-              <span>Buka Antrean Validasi ({pendingCount})</span>
-            </Link>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FAF5FF] border border-[#E9E1F4] text-[#A78BFA] font-bold text-xs shadow-xs self-start sm:self-auto">
+            <Clock className="w-3.5 h-3.5" />
+            <span>18 menunggu</span>
           </div>
         </div>
 
-        {/* Overview Metric Cards */}
-        {isLoading ? (
-          <LoadingSkeleton rows={2} />
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard
-              label="Menunggu Review"
-              value={pendingCount}
-              subtext="Perlu validasi guru"
-              icon={Clock}
-              colorScheme="brand"
-              badge="Prioritas"
-            />
-            <MetricCard
-              label="Perlu Tindak Lanjut"
-              value={revisionCount}
-              subtext="Karya dalam masa revisi"
-              icon={Inbox}
-              colorScheme="revision"
-            />
-            <MetricCard
-              label="Disetujui Bulan Ini"
-              value={approvedMonthCount}
-              subtext="Tervalidasi resmi"
-              icon={CheckCircle2}
-              colorScheme="endorse"
-            />
-            <MetricCard
-              label="Siswa Aktif Terbimbing"
-              value={36}
-              subtext="Kelas XII RPL 1"
-              icon={Users}
-              colorScheme="growth"
-            />
-          </div>
-        )}
+        {/* 3 Metric Cards matching 12-Teacher-Dashboard-HF.svg */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <MetricCard
+            indexNumber={1}
+            label="Menunggu review"
+            value="18"
+            subtext="+5 hari ini"
+            icon={Inbox}
+          />
+          <MetricCard
+            indexNumber={2}
+            label="Sudah direview"
+            value="146"
+            subtext="semester ini"
+            icon={CheckCircle2}
+          />
+          <MetricCard
+            indexNumber={3}
+            label="Kelas aktif"
+            value="3"
+            subtext="92 siswa"
+            icon={School}
+          />
+        </div>
 
-        {/* Approval Queue Preview */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        {/* 2-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column: Prioritas Approval Queue (7 cols) */}
+          <div className="lg:col-span-7 bg-white rounded-[18px] border border-[#E9E1F4] p-6 shadow-[0_4px_16px_rgba(76,29,149,0.06)] flex flex-col justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900">Antrean Karya Perlu Ditinjau</h3>
-              <p className="text-xs text-slate-500">
-                Pengajuan karya terbaru dari siswa yang menunggu penilaian validator
-              </p>
-            </div>
-            <Link
-              href="/teacher/reviews"
-              className="text-xs font-semibold text-growth-700 hover:text-growth-800 flex items-center gap-1"
-            >
-              <span>Buka Semua Antrean</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+              <div className="mb-4">
+                <h2 className="text-lg font-extrabold text-[#261331]">Prioritas Approval Queue</h2>
+                <p className="text-xs text-[#6F607D] mt-0.5">
+                  Urut berdasarkan waktu masuk
+                </p>
+              </div>
 
-          {submittedQueue.length === 0 ? (
-            <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl">
-              <CheckCircle2 className="w-8 h-8 text-endorse-500 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-slate-800">Semua Pengajuan Telah Ditinjau!</p>
-              <p className="text-xs text-slate-500 mt-0.5">Tidak ada antrean tertunda saat ini.</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {submittedQueue.map((item) => (
-                <div
-                  key={item.id}
-                  className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/70 px-2 rounded-xl transition-colors"
-                >
-                  <div className="space-y-1.5 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-slate-900">{item.studentName}</span>
-                      <span className="text-xs text-slate-400">({item.studentClass})</span>
-                      <span className="text-xs text-slate-300">•</span>
-                      <span className="text-[11px] text-slate-500">{item.date}</span>
+              <div className="space-y-3">
+                {priorityQueue.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-3.5 rounded-2xl bg-[#FCFBFF] border border-[#E9E1F4] flex items-center justify-between gap-4 hover:border-purple-300 transition-all"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-full bg-purple-100 text-[#6D28D9] font-black text-xs flex items-center justify-center shrink-0">
+                        {item.initials}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-extrabold text-[#261331] truncate">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-[#6F607D] truncate">
+                          {item.project} • {item.class}
+                        </p>
+                      </div>
                     </div>
 
                     <Link
                       href={`/teacher/reviews/${item.id}`}
-                      className="text-sm font-bold text-slate-900 hover:text-growth-700 truncate block"
+                      className="px-4 py-1.5 rounded-xl tal-btn-primary font-bold text-xs shrink-0 shadow-xs"
                     >
-                      {item.title}
-                    </Link>
-
-                    <div className="flex flex-wrap gap-1">
-                      {item.tags.map((t) => (
-                        <TagChip key={t} label={t} size="sm" />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-                    <Link
-                      href={`/teacher/reviews/${item.id}`}
-                      className="px-3.5 py-1.5 rounded-lg bg-growth-600 hover:bg-growth-700 text-white text-xs font-semibold transition-colors shadow-2xs flex items-center gap-1"
-                    >
-                      <span>Tinjau</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      Review
                     </Link>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Recent Validation Activity Feed */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-          <div className="pb-3 border-b border-slate-100">
-            <h3 className="text-base font-bold text-slate-900">Aktivitas Validasi Terakhir</h3>
-            <p className="text-xs text-slate-500">Log keputusan validasi dan umpan balik pembimbing</p>
+            <div className="pt-6 border-t border-[#E9E1F4] mt-6 flex justify-end">
+              <Link
+                href="/teacher/reviews"
+                className="text-xs font-bold text-[#6D28D9] hover:text-[#8B5CF6] inline-flex items-center gap-1.5"
+              >
+                <span>Buka semua antrean</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            {queueItems
-              .filter((i) => i.status !== 'draft' && i.status !== 'submitted')
-              .slice(0, 3)
-              .map((item) => (
-                <div
-                  key={item.id}
-                  className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/60 flex items-start justify-between gap-3 text-xs"
-                >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={item.status} size="sm" />
-                      <span className="font-semibold text-slate-900 truncate">{item.title}</span>
+          {/* Right Column: Kelas Saya (5 cols) */}
+          <div className="lg:col-span-5 bg-white rounded-[18px] border border-[#E9E1F4] p-6 shadow-[0_4px_16px_rgba(76,29,149,0.06)] flex flex-col justify-between">
+            <div>
+              <div className="mb-4">
+                <h2 className="text-lg font-extrabold text-[#261331]">Kelas Saya</h2>
+                <p className="text-xs text-[#6F607D] mt-0.5">
+                  Assignment validator aktif
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {assignedClasses.map((cls) => (
+                  <div
+                    key={cls.name}
+                    className="p-4 rounded-xl bg-[#FCFBFF] border border-[#E9E1F4] flex items-center justify-between"
+                  >
+                    <div>
+                      <h3 className="text-sm font-extrabold text-[#261331]">{cls.name}</h3>
+                      <p className="text-xs text-[#6F607D] mt-0.5">{cls.students} siswa</p>
                     </div>
-                    <p className="text-slate-600">
-                      Siswa: <strong>{item.studentName}</strong> • Catatan:{' '}
-                      <span className="italic">{item.teacherFeedback || 'Validasi sukses.'}</span>
-                    </p>
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#FAF5FF] text-[#A78BFA] border border-purple-100">
+                      {cls.pending} pending
+                    </span>
                   </div>
-                  <span className="text-[11px] text-slate-400 shrink-0">{item.date}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-[#E9E1F4] mt-6 flex justify-end">
+              <Link
+                href="/teacher/classes"
+                className="text-xs font-bold text-[#6D28D9] hover:text-[#8B5CF6] inline-flex items-center gap-1.5"
+              >
+                <span>Lihat kelas</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

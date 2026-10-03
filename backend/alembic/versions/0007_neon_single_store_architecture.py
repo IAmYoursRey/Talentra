@@ -10,7 +10,6 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
 revision: str = '0007_neon_single_store_architecture'
 down_revision: Union[str, None] = '0006_cv_verification'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -20,7 +19,6 @@ portable_json = sa.JSON().with_variant(postgresql.JSONB(), 'postgresql')
 
 
 def upgrade() -> None:
-    # 1. portfolio_items
     op.create_table(
         'portfolio_items',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -47,7 +45,6 @@ def upgrade() -> None:
     op.create_index('ix_portfolio_items_school_student_status', 'portfolio_items', ['school_id', 'student_id', 'status'])
     op.create_index('ix_portfolio_items_school_status_created', 'portfolio_items', ['school_id', 'status', 'created_at'])
 
-    # 2. portfolio_revisions
     op.create_table(
         'portfolio_revisions',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -68,7 +65,6 @@ def upgrade() -> None:
     op.create_index('ix_portfolio_revisions_student_id', 'portfolio_revisions', ['student_id'])
     op.create_index('ix_portfolio_revisions_portfolio_version', 'portfolio_revisions', ['portfolio_id', 'version'])
 
-    # 3. evidence_tag_snapshots
     op.create_table(
         'evidence_tag_snapshots',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -90,7 +86,6 @@ def upgrade() -> None:
     op.create_index('ix_evidence_tag_snapshots_student_approved', 'evidence_tag_snapshots', ['student_id', 'approved_at'])
     op.create_index('ix_evidence_tag_snapshots_school_student', 'evidence_tag_snapshots', ['school_id', 'student_id'])
 
-    # 4. recommendation_snapshots
     op.create_table(
         'recommendation_snapshots',
         sa.Column('id', sa.String(length=64), primary_key=True),
@@ -110,7 +105,6 @@ def upgrade() -> None:
     op.create_index('ix_recommendation_snapshots_student_id', 'recommendation_snapshots', ['student_id'])
     op.create_index('ix_recommendation_snapshots_student_generated', 'recommendation_snapshots', ['student_id', 'generated_at'])
 
-    # 5. derived_professional_descriptions
     op.create_table(
         'derived_professional_descriptions',
         sa.Column('id', sa.String(length=36), primary_key=True),
@@ -177,7 +171,6 @@ def upgrade() -> None:
     op.create_index('ix_blob_upload_intents_portfolio_id', 'blob_upload_intents', ['portfolio_id'])
     op.create_index('ix_blob_upload_intents_portfolio_status', 'blob_upload_intents', ['portfolio_id', 'status'])
 
-    # 8. rate_limit_buckets
     op.create_table(
         'rate_limit_buckets',
         sa.Column('id', sa.String(length=36), primary_key=True),

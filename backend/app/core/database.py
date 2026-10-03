@@ -1,5 +1,5 @@
 import os
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Any
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession, AsyncEngine
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
 from sqlalchemy.orm import DeclarativeBase
@@ -50,7 +50,7 @@ def normalize_database_url(url: str | None) -> str:
 def get_engine(url: str | None = None) -> AsyncEngine:
     raw_url = url or os.getenv("DATABASE_URL") or settings.database_url
     db_url = normalize_database_url(raw_url)
-    kwargs = {"echo": False}
+    kwargs: dict[str, Any] = {"echo": False}
     if db_url.startswith("postgresql"):
         kwargs["connect_args"] = {
             "statement_cache_size": 0,

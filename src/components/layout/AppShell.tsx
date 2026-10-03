@@ -59,7 +59,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   const isForbidden = expectedRole && currentUser.role !== expectedRole;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+    <div className="min-h-screen bg-[#FCFBFF] flex flex-col font-sans text-[#261331] antialiased selection:bg-[#6D28D9] selection:text-white">
       {/* Top Demo Access Banner */}
       <DemoAccessBanner />
 
@@ -74,18 +74,18 @@ export const AppShell: React.FC<AppShellProps> = ({
         {/* Mobile Drawer Backdrop & Sidebar */}
         {isMobileDrawerOpen && (
           <div
-            className="md:hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex animate-in fade-in duration-200"
+            className="md:hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex animate-in fade-in duration-200"
             onClick={() => setIsMobileDrawerOpen(false)}
           >
             <div
-              className="w-72 bg-white h-full shadow-2xl relative flex flex-col"
+              className="w-72 bg-gradient-to-b from-[#2E1065] via-[#4C1D95] to-[#6D28D9] h-full shadow-2xl relative flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="absolute top-4 right-4 z-10">
                 <button
                   type="button"
                   onClick={() => setIsMobileDrawerOpen(false)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-700 bg-slate-100"
+                  className="p-1 rounded-lg text-white/70 hover:text-white bg-white/10"
                   aria-label="Tutup menu navigasi"
                 >
                   <X className="w-5 h-5" />
@@ -94,6 +94,7 @@ export const AppShell: React.FC<AppShellProps> = ({
               <Sidebar
                 currentUser={currentUser}
                 onLogout={handleLogout}
+                onNavigate={() => setIsMobileDrawerOpen(false)}
                 className="w-full h-full border-r-0"
               />
             </div>

@@ -25,7 +25,6 @@ async def setup_admin_test_db(tmp_path):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    # Seed School A and School B
     school_a_id = "sch_alpha_001"
     school_b_id = "sch_beta_002"
 
@@ -135,21 +134,18 @@ async def test_admin_rbac_and_cross_tenant_isolation(tmp_path):
         dependencies.set_session_repo(sess_repo)
         dependencies.set_audit_repo(audit_repo)
 
-        # 1. Admin A session
         sid_a, token_a = make_auth_cookies(ids["admin_a_id"], ids["school_a_id"], UserRole.ADMIN)
         await sess_repo.create_session(SessionRecord(
             session_id=sid_a, user_id=ids["admin_a_id"], school_id=ids["school_a_id"],
             role=UserRole.ADMIN, expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
         ))
 
-        # 2. Student A session
         sid_s, token_s = make_auth_cookies(ids["student_a_id"], ids["school_a_id"], UserRole.STUDENT)
         await sess_repo.create_session(SessionRecord(
             session_id=sid_s, user_id=ids["student_a_id"], school_id=ids["school_a_id"],
             role=UserRole.STUDENT, expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
         ))
 
-        # 3. Admin B session (different school)
         sid_b, token_b = make_auth_cookies(ids["admin_b_id"], ids["school_b_id"], UserRole.ADMIN)
         await sess_repo.create_session(SessionRecord(
             session_id=sid_b, user_id=ids["admin_b_id"], school_id=ids["school_b_id"],
@@ -158,16 +154,13 @@ async def test_admin_rbac_and_cross_tenant_isolation(tmp_path):
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
-            # Anonymous -> 401
             res_anon = await client.get("/api/v1/admin/users")
             assert res_anon.status_code == 401
 
-            # Student -> 403 Forbidden
             client.cookies.set("talentra_session", token_s)
             res_std = await client.get("/api/v1/admin/users")
             assert res_std.status_code == 403
 
-            # Admin A -> 200 OK (own school)
             client.cookies.set("talentra_session", token_a)
             res_adm = await client.get("/api/v1/admin/users")
             assert res_adm.status_code == 200
@@ -175,7 +168,6 @@ async def test_admin_rbac_and_cross_tenant_isolation(tmp_path):
             assert "items" in data
             assert len(data["items"]) >= 1
 
-            # Cross-tenant check: Admin B cannot access School A student details
             client.cookies.set("talentra_session", token_b)
             res_cross = await client.get(f"/api/v1/admin/users/{ids['student_a_id']}")
             assert res_cross.status_code == 404, "Cross-tenant breach: Admin B accessed School A user!"
@@ -208,11 +200,9 @@ async def test_student_creation_and_identifier_privacy(tmp_path):
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
             client.cookies.set("talentra_session", token_a)
 
-            # Get CSRF
             csrf_res = await client.get("/api/v1/auth/csrf")
             csrf_token = csrf_res.json()["csrfToken"]
 
-            # 1. Create Student with leading zero NISN
             create_res = await client.post(
                 "/api/v1/admin/users/students",
                 headers={"X-CSRF-Token": csrf_token},
@@ -233,7 +223,6 @@ async def test_student_creation_and_identifier_privacy(tmp_path):
             temp_pwd = res_data["temporaryPassword"]
             assert len(temp_pwd) >= 12
 
-            # 2. Check duplicate NISN rejection
             dup_res = await client.post(
                 "/api/v1/admin/users/students",
                 headers={"X-CSRF-Token": csrf_token},
@@ -246,7 +235,6 @@ async def test_student_creation_and_identifier_privacy(tmp_path):
             assert dup_res.status_code == 409
             assert dup_res.json()["error"]["code"] == "IDENTITY_ALREADY_EXISTS"
 
-            # 3. Check list users: full NISN is NEVER returned
             list_res = await client.get("/api/v1/admin/users")
             assert list_res.status_code == 200
             items_str = str(list_res.json()).lower()
@@ -282,7 +270,6 @@ async def test_teacher_creation_and_identifier_resolution(tmp_path):
             csrf_res = await client.get("/api/v1/auth/csrf")
             csrf_token = csrf_res.json()["csrfToken"]
 
-            # Create teacher with 16-digit NUPTK
             res_nuptk = await client.post(
                 "/api/v1/admin/users/teachers",
                 headers={"X-CSRF-Token": csrf_token},
@@ -459,7 +446,7 @@ async def test_admin_password_reset_and_must_change_password_gate(tmp_path):
             assert skill_res.json()["error"]["code"] == "AUTH_PASSWORD_CHANGE_REQUIRED"
 
             # 5. Student changes password via /api/v1/auth/change-password
-            csrf_token_student = login_res.cookies.get("talentra_csrf")
+            csrf_token_student = login_res.cookies.get("talentra_csrf") or ""
             change_res = await client.post(
                 "/api/v1/auth/change-password",
                 headers={"X-CSRF-Token": csrf_token_student},

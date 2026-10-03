@@ -6,9 +6,10 @@ interface MetricCardProps {
   label: string;
   value: string | number;
   subtext?: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   colorScheme?: 'brand' | 'growth' | 'intelligence' | 'endorse' | 'revision';
   badge?: string;
+  indexNumber?: number;
   className?: string;
 }
 
@@ -19,54 +20,38 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   icon: Icon,
   colorScheme = 'brand',
   badge,
+  indexNumber,
   className,
 }) => {
-  const schemeStyles = {
-    brand: {
-      iconBg: 'bg-brand-50 text-brand-600',
-      badge: 'bg-brand-50 text-brand-700 border-brand-200',
-    },
-    growth: {
-      iconBg: 'bg-growth-50 text-growth-600',
-      badge: 'bg-growth-50 text-growth-700 border-growth-200',
-    },
-    intelligence: {
-      iconBg: 'bg-intelligence-50 text-intelligence-600',
-      badge: 'bg-intelligence-50 text-intelligence-700 border-intelligence-200',
-    },
-    endorse: {
-      iconBg: 'bg-endorse-50 text-endorse-600',
-      badge: 'bg-endorse-50 text-endorse-700 border-endorse-200',
-    },
-    revision: {
-      iconBg: 'bg-revision-50 text-revision-600',
-      badge: 'bg-revision-50 text-revision-700 border-revision-200',
-    },
-  };
-
-  const currentScheme = schemeStyles[colorScheme];
-
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between',
+        'bg-white rounded-[18px] border border-[#E9E1F4] p-5 sm:p-6 shadow-[0_4px_16px_rgba(76,29,149,0.06)] hover:shadow-[0_8px_24px_rgba(76,29,149,0.12)] transition-all flex flex-col justify-between tal-card-hover',
         className
       )}
     >
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-slate-500 tracking-wide uppercase">{label}</p>
-          <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5 tracking-tight">{value}</p>
+        <div className="space-y-1">
+          {indexNumber !== undefined && (
+            <span className="w-5 h-5 rounded-full bg-[#F3E8FF] text-[#6D28D9] font-extrabold text-[10px] flex items-center justify-center mb-1">
+              {indexNumber}
+            </span>
+          )}
+          <p className="text-xs font-semibold text-[#6F607D] tracking-tight">{label}</p>
+          <p className="text-3xl font-extrabold text-[#261331] tracking-tight">{value}</p>
         </div>
-        <div className={cn('p-2.5 rounded-lg shrink-0', currentScheme.iconBg)}>
-          <Icon className="w-5 h-5" />
-        </div>
+        {Icon && (
+          <div className="p-3 rounded-xl bg-[#F7F2FF] text-[#6D28D9] shrink-0 border border-purple-100">
+            <Icon className="w-5 h-5" />
+          </div>
+        )}
       </div>
+
       {(subtext || badge) && (
-        <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-          {subtext && <span className="text-slate-500 truncate">{subtext}</span>}
+        <div className="mt-4 pt-3 border-t border-[#E9E1F4] flex items-center justify-between text-xs">
+          {subtext && <span className="text-[#6F607D] font-medium truncate">{subtext}</span>}
           {badge && (
-            <span className={cn('px-2 py-0.5 rounded-md font-medium border text-[11px]', currentScheme.badge)}>
+            <span className="px-2.5 py-0.5 rounded-full font-bold text-[10px] bg-[#F7F2FF] text-[#6D28D9] border border-purple-100">
               {badge}
             </span>
           )}

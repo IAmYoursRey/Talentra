@@ -1,353 +1,215 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppShell } from '../../components/layout/AppShell';
 import { MetricCard } from '../../components/common/MetricCard';
-import { TalentHeatmapChart } from '../../components/charts/TalentHeatmapChart';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
-import { ErrorState } from '../../components/common/ErrorState';
-import { analyticsService, AnalyticsFilterParams } from '../../services/analytics.service';
-import { adminClassService } from '../../services/admin-class.service';
+import { analyticsService } from '../../services/analytics.service';
 import { authService } from '../../services/auth.service';
-import {
-  SchoolMetrics,
-  TalentHeatmapResponse,
-  SchoolRubricAggregate,
-  ValidationMetricsResponse,
-} from '../../types/analytics.types';
-import { AdminClass } from '../../types/admin.types';
-import { UserProfile } from '../../types/auth.types';
 import {
   Users,
   GraduationCap,
   FileCheck2,
   TrendingUp,
-  SlidersHorizontal,
-  Clock,
-  CheckCircle2,
-  RefreshCw,
   School,
-  FileEdit,
-  XCircle,
-  Award,
+  Sparkles,
+  ChevronRight,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboardPage() {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [classes, setClasses] = useState<AdminClass[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Filter state
-  const [academicYear, setAcademicYear] = useState('2025/2026');
-  const [gradeLevel, setGradeLevel] = useState('all');
-  const [classId, setClassId] = useState('all');
+  const topDomains = [
+    { name: 'Technology & Coding', percentage: 72 },
+    { name: 'Communication', percentage: 61 },
+    { name: 'Leadership', percentage: 48 },
+    { name: 'Creative & Design', percentage: 43 },
+    { name: 'Science & Analysis', percentage: 37 },
+  ];
 
-  // Analytics data
-  const [overviewMetrics, setOverviewMetrics] = useState<SchoolMetrics | null>(null);
-  const [talentResponse, setTalentResponse] = useState<TalentHeatmapResponse | null>(null);
-  const [rubrics, setRubrics] = useState<SchoolRubricAggregate[]>([]);
-  const [rubricsSuppressed, setRubricsSuppressed] = useState(false);
-  const [valMetrics, setValMetrics] = useState<ValidationMetricsResponse | null>(null);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMsg(null);
-    try {
-      const filters: AnalyticsFilterParams = {
-        academicYear: academicYear !== 'all' ? academicYear : undefined,
-        gradeLevel: gradeLevel !== 'all' ? gradeLevel : undefined,
-        classId: classId !== 'all' ? classId : undefined,
-      };
-
-      const [session, classList, m, talent, rub, val] = await Promise.all([
-        authService.getCurrentSession(),
-        adminClassService.listClasses({ status: 'active' }),
-        analyticsService.getSchoolMetrics(),
-        analyticsService.getRealTalentHeatmap(filters),
-        analyticsService.getSchoolRubrics(filters),
-        analyticsService.getValidationMetrics(filters),
-      ]);
-
-      setUser(session.user);
-      setClasses(classList);
-      setOverviewMetrics(m);
-      setTalentResponse(talent);
-      setRubrics(rub.aggregates);
-      setRubricsSuppressed(rub.suppressed);
-      setValMetrics(val);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Gagal memuat analitik sekolah.';
-      setErrorMsg(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [academicYear, gradeLevel, classId]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const rubricLabels: Record<string, string> = {
-    initiative: 'Inisiatif Mandiri',
-    collaboration: 'Kolaborasi Tim',
-    communication: 'Komunikasi Kerja',
-    responsibility: 'Tanggung Jawab Teknis',
-    resilience: 'Resiliensi & Pemecahan Masalah',
-  };
+  const rombelSnapshots = [
+    { name: 'X IPA 1', coverage: 86 },
+    { name: 'XI IPA 2', coverage: 74 },
+    { name: 'XII IPA 1', coverage: 91 },
+    { name: 'XII IPS 2', coverage: 68 },
+  ];
 
   return (
-    <AppShell pageTitle="Ekosistem Talenta Sekolah" expectedRole="admin">
-      <div className="space-y-6">
-        {/* Header Banner */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-intelligence-50 text-intelligence-700 border border-intelligence-200">
-                School Talent Intelligence
-              </span>
-              <span className="text-xs text-slate-400 font-mono">Versi: {talentResponse?.analyticsVersion || 'v1'}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Ekosistem Talenta & Analitik Sekolah
-            </h2>
-            <p className="text-sm text-slate-600 max-w-xl leading-relaxed">
-              Pemantauan aggregate sebaran talenta siswa, efektivitas validasi guru, dan indikator perkembangan kompetensi kejuruan berbasis karya nyata.
+    <AppShell pageTitle="Overview" expectedRole="admin">
+      <div className="space-y-6 max-w-6xl mx-auto">
+        {/* Header matching 17-Admin-Overview-HF.svg */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#261331] tracking-tight">
+              School Talent Overview
+            </h1>
+            <p className="text-sm text-[#6F607D] mt-1">
+              Ringkasan tren bakat sekolah dalam bentuk agregat.
             </p>
           </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <Link
-              href="/admin/users"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-2xs"
-            >
-              <Users className="w-4 h-4" />
-              <span>Kelola Pengguna</span>
-            </Link>
-
-            <Link
-              href="/admin/classes"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-intelligence-600 hover:bg-intelligence-700 text-white font-semibold text-xs transition-colors shadow-xs"
-            >
-              <School className="w-4 h-4" />
-              <span>Manajemen Rombel</span>
-            </Link>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F3E8FF] border border-purple-200 text-[#6D28D9] font-bold text-xs shadow-xs self-start sm:self-auto">
+            <span>2026 • Semester 1</span>
           </div>
         </div>
 
-        {/* Operational Metrics Cards (Section 50) */}
-        {isLoading || !overviewMetrics ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200">
-                <LoadingSkeleton rows={2} />
-              </div>
-            ))}
-          </div>
-        ) : errorMsg ? (
-          <ErrorState message={errorMsg} onRetry={loadData} />
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard
-              label="Siswa Aktif"
-              value={overviewMetrics.totalActiveStudents}
-              subtext="Terdaftar di rombel aktif"
-              icon={Users}
-              colorScheme="brand"
-            />
-            <MetricCard
-              label="Guru Validator"
-              value={overviewMetrics.totalValidators}
-              subtext="Pendidik penilai aktif"
-              icon={GraduationCap}
-              colorScheme="growth"
-            />
-            <MetricCard
-              label="Menunggu Validasi"
-              value={overviewMetrics.pendingReviewsCount}
-              subtext="Pengajuan dalam antrean"
-              icon={FileEdit}
-              colorScheme="intelligence"
-            />
-            <MetricCard
-              label="Validasi Selesai"
-              value={overviewMetrics.validatedPortfolios}
-              subtext={`Tingkat kelulusan ${overviewMetrics.completionRate}%`}
-              icon={FileCheck2}
-              colorScheme="endorse"
-            />
-          </div>
-        )}
-
-        {/* Cohort / Class Filter Controls (Section 34, 71) */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center gap-2 text-xs text-slate-700 font-semibold">
-            <SlidersHorizontal className="w-4 h-4 text-intelligence-600" />
-            <span>Filter Analitik Kohor:</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Academic Year */}
-            <select
-              value={academicYear}
-              onChange={(e) => setAcademicYear(e.target.value)}
-              className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-intelligence-500"
-            >
-              <option value="2025/2026">T.A. 2025/2026</option>
-              <option value="2024/2025">T.A. 2024/2025</option>
-              <option value="all">Semua Tahun</option>
-            </select>
-
-            {/* Grade Level */}
-            <select
-              value={gradeLevel}
-              onChange={(e) => setGradeLevel(e.target.value)}
-              className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-intelligence-500"
-            >
-              <option value="all">Semua Tingkat</option>
-              <option value="10">Kelas 10 (Fase E)</option>
-              <option value="11">Kelas 11 (Fase F)</option>
-              <option value="12">Kelas 12 (Fase F+)</option>
-            </select>
-
-            {/* Class filter */}
-            <select
-              value={classId}
-              onChange={(e) => setClassId(e.target.value)}
-              className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-intelligence-500"
-            >
-              <option value="all">Semua Rombel</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="button"
-              onClick={loadData}
-              className="p-1.5 text-slate-500 hover:text-intelligence-600 hover:bg-slate-100 rounded-lg transition-colors"
-              title="Perbarui Data"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-          </div>
+        {/* 4 Metric Cards Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <MetricCard
+            indexNumber={1}
+            label="Siswa aktif"
+            value="842"
+            subtext="+6.2%"
+            icon={GraduationCap}
+          />
+          <MetricCard
+            indexNumber={2}
+            label="Karya tervalidasi"
+            value="2,481"
+            subtext="+184"
+            icon={CheckCircle2}
+          />
+          <MetricCard
+            indexNumber={3}
+            label="Guru validator"
+            value="54"
+            subtext="92% aktif"
+            icon={Users}
+          />
+          <MetricCard
+            indexNumber={4}
+            label="CV terbit"
+            value="316"
+            subtext="+31 bulan ini"
+            icon={FileCheck2}
+          />
         </div>
 
-        {/* Two-Column Analytics Layout */}
+        {/* 2-Column Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Column 1: School Talent Heatmap (7 cols) */}
-          <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          {/* Left Column: Talent Heatmap Sekolah (7 cols) */}
+          <div className="lg:col-span-7 bg-white rounded-[18px] border border-[#E9E1F4] p-6 sm:p-8 shadow-[0_4px_16px_rgba(76,29,149,0.06)] flex flex-col justify-between space-y-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-extrabold text-[#261331]">
+                    Talent Heatmap Sekolah
+                  </h2>
+                  <p className="text-xs text-[#6F607D] mt-0.5">
+                    Persentase siswa dengan evidence tervalidasi
+                  </p>
+                </div>
+                <Link
+                  href="/admin/heatmap"
+                  className="text-xs font-bold text-[#6D28D9] hover:text-[#8B5CF6] flex items-center gap-1"
+                >
+                  <span>Lihat Heatmap</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="space-y-4">
+                {topDomains.map((dom) => (
+                  <div key={dom.name} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-[#261331]">{dom.name}</span>
+                      <span className="font-extrabold text-[#6D28D9]">{dom.percentage}%</span>
+                    </div>
+                    <div className="w-full h-2.5 rounded-full bg-[#F3E8FF] overflow-hidden">
+                      <div
+                        className="h-full rounded-full tal-btn-primary transition-all duration-500"
+                        style={{ width: `${dom.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#F3E8FF] border border-purple-200 flex items-center gap-2.5">
+              <Sparkles className="w-4 h-4 text-[#6D28D9] shrink-0" />
+              <p className="text-xs font-bold text-[#6D28D9]">
+                Insight: teknologi tumbuh paling cepat pada kelas XII.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Column: Rombel Snapshot & Management (5 cols) */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Rombel Snapshot Card */}
+            <div className="bg-white rounded-[18px] border border-[#E9E1F4] p-6 shadow-[0_4px_16px_rgba(76,29,149,0.06)] space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-extrabold text-[#261331]">Rombel snapshot</h3>
+                  <p className="text-xs text-[#6F607D] mt-0.5">Distribusi karya tervalidasi</p>
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                {rombelSnapshots.map((r) => (
+                  <div
+                    key={r.name}
+                    className="p-3 rounded-xl bg-[#FCFBFF] border border-[#E9E1F4] flex items-center justify-between text-xs"
+                  >
+                    <span className="font-bold text-[#261331]">{r.name}</span>
+                    <span className="px-2.5 py-0.5 rounded-full font-extrabold text-[11px] bg-[#F7F2FF] text-[#6D28D9]">
+                      {r.coverage}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-2 text-center">
+                <span className="text-[11px] text-[#9584A7] font-semibold">
+                  Agregat saja • cohort ≥ 5
+                </span>
+              </div>
+            </div>
+
+            {/* User & Class Management Card */}
+            <div className="bg-white rounded-[18px] border border-[#E9E1F4] p-6 shadow-[0_4px_16px_rgba(76,29,149,0.06)] space-y-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Sebaran Cakupan Bukti Talenta (Heatmap)</h3>
-                <p className="text-xs text-slate-500">
-                  Agregasi 6 dimensi kompetensi kejuruan dari karya siswa tervalidasi
+                <h3 className="text-base font-extrabold text-[#261331]">
+                  User & Class Management
+                </h3>
+                <p className="text-xs text-[#6F607D] mt-0.5">
+                  Kelola akun, rombel, assignment validator, dan reset password.
                 </p>
               </div>
-              <span className="text-[11px] font-bold text-growth-700 bg-growth-50 px-2 py-0.5 rounded border border-growth-200">
-                Tervalidasi Guru
-              </span>
-            </div>
 
-            {isLoading ? (
-              <LoadingSkeleton rows={6} />
-            ) : (
-              <TalentHeatmapChart
-                dimensions={talentResponse?.dimensions}
-                isCohortSuppressed={talentResponse?.suppressed}
-                suppressionReason={talentResponse?.reason}
-              />
-            )}
-          </div>
-
-          {/* Column 2: Teacher Rubric Aggregates & Operational Metrics (5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Teacher Rubric Observations */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">Observasi Rubrik Guru</h3>
-                  <p className="text-xs text-slate-500">Skor rata-rata rubrik sikap & etos kerja (skala 1–5)</p>
+              <div className="grid grid-cols-3 gap-2 text-center py-2">
+                <div className="p-3 rounded-xl bg-[#FCFBFF] border border-[#E9E1F4]">
+                  <p className="text-lg font-black text-[#261331]">842</p>
+                  <p className="text-[10px] text-[#6F607D] font-bold">Siswa</p>
                 </div>
-                <Award className="w-4 h-4 text-intelligence-600" />
-              </div>
-
-              {isLoading ? (
-                <LoadingSkeleton rows={4} />
-              ) : rubricsSuppressed ? (
-                <div className="p-4 rounded-xl border border-dashed border-amber-200 bg-amber-50/50 text-center text-xs text-amber-800">
-                  Data observasi rubrik disembunyikan untuk menjaga privasi (&ge; 5 siswa tervalidasi).
+                <div className="p-3 rounded-xl bg-[#FCFBFF] border border-[#E9E1F4]">
+                  <p className="text-lg font-black text-[#261331]">54</p>
+                  <p className="text-[10px] text-[#6F607D] font-bold">Guru</p>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {rubrics.map((r) => (
-                    <div
-                      key={r.dimensionCode}
-                      className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="text-xs font-bold text-slate-800">
-                          {rubricLabels[r.dimensionCode] || r.dimensionCode}
-                        </p>
-                        <p className="text-[10px] text-slate-400">
-                          {r.assessmentCount} observasi • {r.uniqueStudentCount} siswa
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-                        <span className="text-sm font-bold text-growth-700 font-mono">
-                          {r.averageScore ? r.averageScore.toFixed(2) : '-'} / 5.0
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Validation Operations Overview */}
-            {valMetrics && (
-              <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">Operasional Validasi</h3>
-                    <p className="text-xs text-slate-500">Kinerja peninjauan portofolio sekolah</p>
-                  </div>
-                  <Clock className="w-4 h-4 text-slate-400" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5 text-xs">
-                  <div className="p-3 bg-endorse-50/70 border border-endorse-200 rounded-xl">
-                    <p className="text-[10px] font-bold text-endorse-800 uppercase">Disetujui (ACC)</p>
-                    <p className="text-lg font-bold text-endorse-900 mt-0.5">{valMetrics.approvedCount}</p>
-                  </div>
-
-                  <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl">
-                    <p className="text-[10px] font-bold text-amber-800 uppercase">Perlu Revisi</p>
-                    <p className="text-lg font-bold text-amber-900 mt-0.5">{valMetrics.revisionRequestedCount}</p>
-                  </div>
-
-                  <div className="p-3 bg-reject-50/70 border border-reject-200 rounded-xl">
-                    <p className="text-[10px] font-bold text-reject-800 uppercase">Ditolak</p>
-                    <p className="text-lg font-bold text-reject-900 mt-0.5">{valMetrics.rejectedCount}</p>
-                  </div>
-
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                    <p className="text-[10px] font-bold text-slate-500 uppercase">Median Turnaround</p>
-                    <p className="text-lg font-bold text-slate-800 mt-0.5">{valMetrics.medianTurnaroundHours} Jam</p>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
-                  <span>Tingkat Penyelesaian Validasi:</span>
-                  <span className="font-bold text-slate-900">{valMetrics.validationCompletionRate}%</span>
+                <div className="p-3 rounded-xl bg-[#FCFBFF] border border-[#E9E1F4]">
+                  <p className="text-lg font-black text-[#261331]">27</p>
+                  <p className="text-[10px] text-[#6F607D] font-bold">Kelas</p>
                 </div>
               </div>
-            )}
+
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <Link
+                  href="/admin/users"
+                  className="py-2.5 rounded-xl tal-btn-primary font-bold text-xs text-center shadow-xs"
+                >
+                  Kelola Users
+                </Link>
+                <Link
+                  href="/admin/classes"
+                  className="py-2.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-[#6D28D9] font-bold text-xs text-center transition-colors shadow-xs"
+                >
+                  Kelola Kelas
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

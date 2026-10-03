@@ -257,26 +257,31 @@ export default function AdminClassesPage() {
   };
 
   return (
-    <AppShell pageTitle="Manajemen Rombongan Belajar" expectedRole="admin">
+    <AppShell pageTitle="Class Management" expectedRole="admin">
       <div className="space-y-6">
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              Rombongan Belajar (Rombel) & Penugasan Validator
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Kelola kelas, pendaftaran siswa, dan penugasan guru validator kompetensi kejuruan.
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-xl sm:text-2xl font-black text-[#261331] tracking-tight">
+                Class Management
+              </h2>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F7F2FF] text-[#6D28D9] border border-[#E9E1F4]">
+                2026 • Semester 1
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-[#6F607D]">
+              Atur rombongan belajar dan assignment validator.
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-intelligence-600 hover:bg-intelligence-700 text-white font-semibold text-xs transition-colors shadow-xs self-start sm:self-center"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl tal-btn-primary font-semibold text-xs transition-all shadow-tal-card hover:shadow-tal-hover self-start sm:self-center"
           >
             <Plus className="w-4 h-4" />
-            <span>Tambah Rombel Baru</span>
+            <span>Tambah Kelas</span>
           </button>
         </div>
 
@@ -309,12 +314,12 @@ export default function AdminClassesPage() {
         )}
 
         {/* Filter Controls */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#E9E1F4] shadow-tal-card">
           <div className="flex items-center gap-2 flex-1">
             <select
               value={gradeFilter}
               onChange={(e) => setGradeFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-intelligence-500"
+              className="px-3 py-2 bg-[#F7F2FF] border border-[#E9E1F4] rounded-xl text-xs sm:text-sm text-[#261331] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
             >
               <option value="all">Semua Tingkat</option>
               <option value="10">Kelas 10</option>
@@ -325,7 +330,7 @@ export default function AdminClassesPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-intelligence-500"
+              className="px-3 py-2 bg-[#F7F2FF] border border-[#E9E1F4] rounded-xl text-xs sm:text-sm text-[#261331] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
             >
               <option value="all">Semua Status</option>
               <option value="active">Rombel Aktif</option>
@@ -333,7 +338,7 @@ export default function AdminClassesPage() {
             </select>
           </div>
 
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-[#6F607D]">
             Total <strong>{classes.length}</strong> rombel ditemukan
           </div>
         </div>
@@ -342,7 +347,7 @@ export default function AdminClassesPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200">
+              <div key={i} className="bg-white p-6 rounded-2xl border border-[#E9E1F4]">
                 <LoadingSkeleton rows={4} />
               </div>
             ))}
@@ -358,66 +363,54 @@ export default function AdminClassesPage() {
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {classes.map((cls) => (
+            {classes.map((cls, idx) => (
               <div
                 key={cls.id}
-                className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:border-intelligence-300 transition-all flex flex-col justify-between space-y-4"
+                className="bg-white rounded-2xl border border-[#E9E1F4] p-5 shadow-tal-card tal-card-hover transition-all flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-intelligence-700 bg-intelligence-50 px-2.5 py-1 rounded-md border border-intelligence-200">
+                    <span className="w-7 h-7 rounded-full bg-[#F7F2FF] border border-[#E9E1F4] text-[#6D28D9] text-xs font-bold flex items-center justify-center">
+                      {idx + 1}
+                    </span>
+                    <span className="text-[11px] font-bold text-[#6D28D9] bg-[#F7F2FF] px-2 py-0.5 rounded-md border border-[#E9E1F4]">
                       Tingkat {cls.gradeLevel}
                     </span>
-                    <span className="text-xs text-slate-400 font-medium">T.A. {cls.academicYear}</span>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900">{cls.name}</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Status:{' '}
-                      <span
-                        className={`font-semibold ${
-                          cls.status === 'active' ? 'text-endorse-600' : 'text-slate-400'
-                        }`}
-                      >
-                        {cls.status === 'active' ? 'Aktif Berjalan' : 'Diarsipkan'}
-                      </span>
+                    <h3 className="text-lg font-black text-[#261331]">{cls.name}</h3>
+                    <p className="text-xs text-[#6F607D] font-medium mt-0.5">
+                      {cls.studentsCount} siswa
                     </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                      <p className="text-slate-400 text-[10px] uppercase font-bold">Total Siswa</p>
-                      <p className="text-base font-bold text-slate-800 mt-0.5">{cls.studentsCount} Siswa</p>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                      <p className="text-slate-400 text-[10px] uppercase font-bold">Guru Ditugaskan</p>
-                      <p className="text-base font-bold text-growth-700 mt-0.5">{cls.validatorsCount} Guru</p>
-                    </div>
+                    <p className="text-xs text-[#4C1D95] font-semibold mt-1 flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#8B5CF6]" />
+                      <span>Validator: {cls.validatorsCount > 0 ? `${cls.validatorsCount} Guru Ditugaskan` : 'Belum Ditugaskan'}</span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-[#E9E1F4] flex items-center justify-between">
                   {cls.status === 'active' ? (
                     <button
                       type="button"
                       onClick={() => setConfirmArchiveId(cls.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-reject-600 hover:bg-reject-50 transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                       title="Arsipkan Rombel"
                       aria-label={`Arsipkan ${cls.name}`}
                     >
                       <Archive className="w-4 h-4" />
                     </button>
                   ) : (
-                    <span className="text-[11px] text-slate-400">Arsip Historis</span>
+                    <span className="text-[11px] text-slate-400">Arsip</span>
                   )}
 
                   <button
                     type="button"
                     onClick={() => handleSelectClass(cls)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-intelligence-600 hover:text-intelligence-700 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#F7F2FF] hover:bg-[#6D28D9] text-[#6D28D9] hover:text-white font-semibold text-xs border border-[#E9E1F4] transition-all"
                   >
-                    <span>Detail & Kelola Anggota</span>
+                    <span>Kelola</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -425,6 +418,19 @@ export default function AdminClassesPage() {
             ))}
           </div>
         )}
+
+        {/* Assignment Policy Info Footer */}
+        <div className="bg-[#F7F2FF] rounded-2xl border border-[#E9E1F4] p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white border border-[#E9E1F4] text-[#6D28D9] flex items-center justify-center shrink-0 shadow-2xs">
+            <Shield className="w-4.5 h-4.5" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-[#261331]">Aturan assignment</h4>
+            <p className="text-[11px] text-[#6F607D]">
+              Guru hanya dapat melihat dan memvalidasi kelas yang ditugaskan.
+            </p>
+          </div>
+        </div>
 
         {/* Class Detail Drawer Modal */}
         {selectedClassId && classDetail && (

@@ -50,11 +50,13 @@ def test_portfolio_item_document_schema():
 
     # Required fields validation: missing school_id should raise ValidationError
     with pytest.raises(ValidationError):
-        PortfolioItemDocument(
-            student_id=student_id,
-            title="Incomplete",
-            activity_type="project",
-            description="Missing school",
+        PortfolioItemDocument.model_validate(
+            {
+                "student_id": student_id,
+                "title": "Incomplete",
+                "activity_type": "project",
+                "description": "Missing school",
+            }
         )
 
 

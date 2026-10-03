@@ -2,6 +2,7 @@ import {
   RecommendationResponse,
   ProfessionalDescriptionResponse,
 } from '../types/recommendation.types';
+import { ensureCsrfToken } from '../lib/csrf';
 
 export interface IRecommendationService {
   getStudentRecommendations(forceRefresh?: boolean): Promise<RecommendationResponse>;
@@ -10,7 +11,9 @@ export interface IRecommendationService {
   getProfessionalDescription(portfolioId: string): Promise<ProfessionalDescriptionResponse>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window === 'undefined' ? (process.env.API_BASE_URL || 'http://127.0.0.1:8000') : '');
 
 export class HTTPRecommendationService implements IRecommendationService {
   public async getStudentRecommendations(forceRefresh = false): Promise<RecommendationResponse> {
@@ -33,11 +36,13 @@ export class HTTPRecommendationService implements IRecommendationService {
   }
 
   public async refreshStudentRecommendations(): Promise<RecommendationResponse> {
+    const csrfToken = await ensureCsrfToken(API_BASE);
     const res = await fetch(`${API_BASE}/api/v1/student/recommendations/refresh`, {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
+        ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
       },
     });
 
@@ -54,12 +59,14 @@ export class HTTPRecommendationService implements IRecommendationService {
     portfolioId: string,
     forceRegenerate = false
   ): Promise<ProfessionalDescriptionResponse> {
+    const csrfToken = await ensureCsrfToken(API_BASE);
     const url = `${API_BASE}/api/v1/student/portfolio/${portfolioId}/professional-description${forceRegenerate ? '?force_regenerate=true' : ''}`;
     const res = await fetch(url, {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
+        ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
       },
     });
 

@@ -18,6 +18,7 @@ export interface IAuthService {
   switchRole(role: UserRole): Promise<UserProfile>;
   logout(): Promise<void>;
   subscribeSession(callback: () => void): () => void;
+  changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }>;
 }
 
 function getCsrfToken(): string | null {
@@ -82,6 +83,25 @@ class AuthService implements IAuthService {
         user: this.inMemoryUser,
         role: this.inMemoryUser.role,
       };
+    }
+
+    // Check for demo session cookie for seamless online prototype navigation
+    if (typeof document !== 'undefined') {
+      const demoMatch = document.cookie.match(/(?:^|;\s*)talentra_session=demo_session_([^;]+)/);
+      if (demoMatch) {
+        const role = demoMatch[1] as UserRole;
+        if (['student', 'teacher', 'admin'].includes(role)) {
+          const fallbackUser =
+            role === 'student' ? MOCK_STUDENT : role === 'teacher' ? MOCK_TEACHER : MOCK_ADMIN;
+          this.inMemoryUser = { ...fallbackUser };
+          this.isLoaded = true;
+          return {
+            isAuthenticated: true,
+            user: this.inMemoryUser,
+            role: this.inMemoryUser.role,
+          };
+        }
+      }
     }
 
     try {
@@ -225,6 +245,11 @@ class AuthService implements IAuthService {
       role === 'student' ? MOCK_STUDENT : role === 'teacher' ? MOCK_TEACHER : MOCK_ADMIN;
     this.inMemoryUser = { ...fallbackUser };
     this.isLoaded = true;
+
+    if (typeof document !== 'undefined') {
+      document.cookie = `talentra_session=demo_session_${role}; path=/; max-age=604800; samesite=lax`;
+    }
+
     this.notify();
 
     return {
@@ -265,9 +290,54 @@ class AuthService implements IAuthService {
       // Incurred network or server error during logout
     }
 
+    if (typeof document !== 'undefined') {
+      document.cookie = 'talentra_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    }
+
     this.inMemoryUser = null;
     this.isLoaded = false;
     this.notify();
+  }
+
+  public async changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<{ success: boolean; message: string }> {
+    let csrf = getCsrfToken();
+    if (!csrf) {
+      try {
+        const csrfRes = await fetch('/api/v1/auth/csrf', { credentials: 'include' });
+        if (csrfRes.ok) {
+          const csrfData = await csrfRes.json();
+          csrf = csrfData.csrfToken;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    const res = await fetch('/api/v1/auth/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(csrf ? { 'X-CSRF-Token': csrf } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData.error?.message || errData.detail?.message || `Gagal mengubah kata sandi (HTTP ${res.status})`;
+      throw new Error(msg);
+    }
+
+    const data = await res.json();
+    return {
+      success: true,
+      message: data.message || 'Kata sandi berhasil diperbarui.',
+    };
   }
 }
 

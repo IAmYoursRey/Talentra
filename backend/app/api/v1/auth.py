@@ -283,6 +283,12 @@ async def demo_login(
         UserRole.ADMIN: "usr_adm_003",
     }.get(payload.role)
 
+    if not target_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "VALIDATION_ERROR", "message": "Demo persona tidak ditemukan.", "requestId": req_id},
+        )
+
     user = await identity_repo.get_user_by_id(target_user_id)
     if not user:
         raise HTTPException(

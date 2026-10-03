@@ -8,6 +8,31 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        talNav: {
+          dark: "#2E1065",
+          DEFAULT: "#4C1D95",
+          light: "#6D28D9",
+        },
+        talPrimary: {
+          start: "#6D28D9",
+          mid: "#8B5CF6",
+          end: "#A855F7",
+        },
+        talAccent: {
+          start: "#A78BFA",
+          end: "#C084FC",
+        },
+        talText: {
+          primary: "#261331",
+          secondary: "#6F607D",
+          muted: "#9584A7",
+        },
+        talSurface: {
+          canvas: "#FCFBFF",
+          card: "#FFFFFF",
+          border: "#E9E1F4",
+          pill: "#F7F2FF",
+        },
         brand: {
           50: "#EEF2FD",
           100: "#DCE5FB",
@@ -84,8 +109,13 @@ module.exports = {
           DEFAULT: "#FFFFFF",
           muted: "#F8FAFC",
           card: "#FFFFFF",
-          border: "#E2E8F0",
+          border: "#E9E1F4",
         },
+      },
+      boxShadow: {
+        'tal-card': '0 4px 16px rgba(76, 29, 149, 0.06)',
+        'tal-hover': '0 8px 24px rgba(76, 29, 149, 0.12)',
+        'tal-glow': '0 0 20px rgba(139, 92, 246, 0.25)',
       },
       fontFamily: {
         sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],

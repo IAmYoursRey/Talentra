@@ -16,6 +16,7 @@ async def test_real_neon_cloud_integration():
     and schema tables when NEON_TEST_DATABASE_URL is provided.
     """
     neon_url = os.getenv("NEON_TEST_DATABASE_URL")
+    assert neon_url is not None, "NEON_TEST_DATABASE_URL must be configured"
     engine = create_async_engine(neon_url)
 
     assert engine.dialect.name == "postgresql", f"Expected postgresql dialect, got: {engine.dialect.name}"
@@ -59,7 +60,7 @@ def test_real_vercel_blob_cloud_integration():
     Validates live Vercel Blob operations with isolated synthetic test key.
     Never touches student files.
     """
-    from backend.app.storage.vercel_blob import VercelBlobStorage
+    from app.storage.vercel_blob import VercelBlobStorage
 
     storage = VercelBlobStorage()
     test_key = f"tests/{uuid.uuid4()}.txt"

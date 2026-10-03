@@ -3,24 +3,26 @@ from datetime import datetime, timezone, timedelta
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from backend.app.core.database import Base
-from backend.app.core.rate_limiter import DatabaseRateLimiter
-from backend.app.repositories.upload_intent import BlobUploadIntentRepository
+from app.core.database import Base
+from app.core.rate_limiter import DatabaseRateLimiter
+from app.repositories.upload_intent import BlobUploadIntentRepository
 
 
 import tempfile
 import os
 
 @pytest.fixture
-async def isolated_session_factory():
+def isolated_session_factory():
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
         db_path = tmp.name
     engine = create_async_engine(f"sqlite+aiosqlite:///{db_path}")
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    async def _init():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    asyncio.run(_init())
     session_factory = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
     yield session_factory
-    await engine.dispose()
+    asyncio.run(engine.dispose())
     if os.path.exists(db_path):
         os.remove(db_path)
 

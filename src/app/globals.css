@@ -3,16 +3,60 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-start-rgb: 248, 250, 252;
-  --background-end-rgb: 248, 250, 252;
+  --foreground-rgb: 38, 19, 49;
+  --background-start-rgb: 252, 251, 255;
+  --background-end-rgb: 252, 251, 255;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: #F8FAFC;
+  color: #261331;
+  background: #FCFBFF;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
+}
+
+/* Gradients from Visual System (28-Visual-System-HF.svg) */
+.bg-tal-primary {
+  background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 52%, #A855F7 100%);
+}
+
+.bg-tal-nav {
+  background: linear-gradient(180deg, #2E1065 0%, #4C1D95 55%, #6D28D9 100%);
+}
+
+.bg-tal-accent {
+  background: linear-gradient(135deg, #A78BFA 0%, #C084FC 100%);
+}
+
+.bg-tal-hero {
+  background: linear-gradient(135deg, #2E1065 0%, #4C1D95 55%, #6D28D9 100%);
+}
+
+/* Micro-animations and hover transitions */
+.tal-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tal-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px -4px rgba(76, 29, 149, 0.12), 0 4px 10px -2px rgba(76, 29, 149, 0.06);
+}
+
+.tal-btn-primary {
+  background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 52%, #A855F7 100%);
+  color: #FFFFFF;
+  transition: all 0.2s ease-in-out;
+}
+
+.tal-btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);
+}
+
+.tal-btn-primary:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
 }
 
 /* Accessible custom scrollbars */
@@ -21,19 +65,19 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #F7F2FF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #D8B4FE;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #A855F7;
 }
 
 /* Focus styles for keyboard accessibility */
 *:focus-visible {
-  outline: 2px solid #3157D5;
+  outline: 2px solid #8B5CF6;
   outline-offset: 2px;
 }
 

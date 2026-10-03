@@ -8,6 +8,8 @@ import {
 import { mockAppState } from './mock-state';
 import { MOCK_RUBRIC_DIMENSIONS } from '../mocks/soft-skills-rubric.mock';
 
+import { ensureCsrfToken } from '../lib/csrf';
+
 export interface IReviewService {
   getReviewQueue(filter?: ReviewQueueFilter): Promise<PortfolioItem[]>;
   getReviewItemById(id: string): Promise<PortfolioItem | null>;
@@ -17,7 +19,9 @@ export interface IReviewService {
   subscribeQueue(callback: () => void): () => void;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window === 'undefined' ? (process.env.API_BASE_URL || 'http://127.0.0.1:8000') : '');
 
 function mapQueueItemToPortfolioItem(item: any): PortfolioItem {
   return {
@@ -283,6 +287,7 @@ export class HTTPReviewService implements IReviewService {
     };
 
     try {
+      const csrfToken = await ensureCsrfToken(API_BASE);
       const res = await fetch(`${API_BASE}/api/v1/teacher/reviews/${payload.portfolioId}/decision`, {
         method: 'POST',
         credentials: 'include',
@@ -290,6 +295,7 @@ export class HTTPReviewService implements IReviewService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Idempotency-Key': `teacher-dec-${payload.portfolioId}-${Date.now()}`,
+          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
         },
         body: JSON.stringify(bodyPayload),
       });
@@ -308,7 +314,8 @@ export class HTTPReviewService implements IReviewService {
         }
       }
     } catch (e: any) {
-      if (e.message && !e.message.includes('fetch')) {
+      // If error is an explicit validation error from backend or client, rethrow
+      if (e.message && !e.message.includes('fetch') && !e.message.includes('Failed to parse URL') && !e.message.includes('ECONNREFUSED')) {
         throw e;
       }
       // If network error, fallback to mock state

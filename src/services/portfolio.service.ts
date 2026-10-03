@@ -1,6 +1,7 @@
 import { PortfolioItem, PortfolioFilter, CanonicalTag, EvidenceSource, ValidationTimelineEvent } from '../types/portfolio.types';
 import { mockAppState } from './mock-state';
 import { MOCK_CANONICAL_TAGS } from '../mocks/canonical-tags.mock';
+import { ensureCsrfToken } from '../lib/csrf';
 
 export interface IPortfolioService {
   getPortfolioItems(filter?: PortfolioFilter): Promise<PortfolioItem[]>;
@@ -14,7 +15,9 @@ export interface IPortfolioService {
   getEvidenceDownloadAccess?(portfolioId: string, storageObjectId: string): Promise<{ downloadUrl: string }>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window === 'undefined' ? (process.env.API_BASE_URL || 'http://127.0.0.1:8000') : '');
 
 function mapDocToPortfolioItem(doc: any): PortfolioItem {
   const evidenceRefs = doc.evidence_refs || [];
@@ -228,11 +231,13 @@ class HTTPPortfolioService implements IPortfolioService {
               label: 'Tautan Proyek',
             };
 
+      const csrfToken = await ensureCsrfToken(API_BASE);
       const res = await fetch(`${API_BASE}/api/v1/student/portfolio`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Idempotency-Key': `create-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -256,6 +261,7 @@ class HTTPPortfolioService implements IPortfolioService {
             headers: {
               'Content-Type': 'application/json',
               'Idempotency-Key': `submit-${portfolioId}`,
+              ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
             },
             credentials: 'include',
           });
@@ -292,9 +298,14 @@ class HTTPPortfolioService implements IPortfolioService {
     }
 
     try {
+      const csrfToken = await ensureCsrfToken(API_BASE);
+
       // 1. Begin revision cycle
       await fetch(`${API_BASE}/api/v1/student/portfolio/${id}/revision`, {
         method: 'POST',
+        headers: {
+          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+        },
         credentials: 'include',
       });
 
@@ -307,7 +318,10 @@ class HTTPPortfolioService implements IPortfolioService {
 
       await fetch(`${API_BASE}/api/v1/student/portfolio/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify(patchPayload),
       });
@@ -318,6 +332,7 @@ class HTTPPortfolioService implements IPortfolioService {
         headers: {
           'Content-Type': 'application/json',
           'Idempotency-Key': `resubmit-${id}-${Date.now()}`,
+          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
         },
         credentials: 'include',
       });

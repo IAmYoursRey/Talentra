@@ -89,7 +89,7 @@ def create_app() -> FastAPI:
             content={
                 "error": {
                     "code": "HTTP_ERROR",
-                    "message": str(exc.detail),
+                    "message": exc.detail,
                     "requestId": req_id,
                 }
             },
