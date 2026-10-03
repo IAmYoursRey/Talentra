@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { AppShell } from '../../components/layout/AppShell';
 import { MetricCard } from '../../components/common/MetricCard';
+import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
 import { reviewService } from '../../services/review.service';
 import { authService } from '../../services/auth.service';
 import { PortfolioItem } from '../../types/portfolio.types';
@@ -135,33 +136,37 @@ export default function TeacherDashboardPage() {
               </div>
 
               <div className="space-y-3">
-                {priorityQueue.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3.5 rounded-2xl bg-[#FCFBFF] border border-[#E9E1F4] flex items-center justify-between gap-4 hover:border-purple-300 transition-all"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-full bg-purple-100 text-[#6D28D9] font-black text-xs flex items-center justify-center shrink-0">
-                        {item.initials}
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-extrabold text-[#261331] truncate">
-                          {item.name}
-                        </h3>
-                        <p className="text-xs text-[#6F607D] truncate">
-                          {item.project} • {item.class}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Link
-                      href={`/teacher/reviews/${item.id}`}
-                      className="px-4 py-1.5 rounded-xl tal-btn-primary font-bold text-xs shrink-0 shadow-xs"
+                {isLoading ? (
+                  <LoadingSkeleton rows={3} />
+                ) : (
+                  priorityQueue.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-3.5 rounded-2xl bg-[#FCFBFF] border border-[#E9E1F4] flex items-center justify-between gap-4 hover:border-purple-300 transition-all"
                     >
-                      Review
-                    </Link>
-                  </div>
-                ))}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-purple-100 text-[#6D28D9] font-black text-xs flex items-center justify-center shrink-0">
+                          {item.initials}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-sm font-extrabold text-[#261331] truncate">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs text-[#6F607D] truncate">
+                            {item.project} • {item.class}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Link
+                        href={`/teacher/reviews/${item.id}`}
+                        className="px-4 py-1.5 rounded-xl tal-btn-primary font-bold text-xs shrink-0 shadow-xs"
+                      >
+                        Review
+                      </Link>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 

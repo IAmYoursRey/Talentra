@@ -221,36 +221,40 @@ export default function StudentCVPage() {
                 Evidence terpilih
               </h3>
 
-              <div className="space-y-2.5">
-                {mockAvailableEvidences.map((e) => {
-                  const isChecked = selectedIds.includes(e.id);
-                  return (
-                    <div
-                      key={e.id}
-                      onClick={() => toggleSelect(e.id)}
-                      className={cn(
-                        'p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all',
-                        isChecked
-                          ? 'bg-[#F7F2FF] border-purple-200 text-[#261331]'
-                          : 'bg-white border-[#E9E1F4] text-[#6F607D]'
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            'w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold transition-colors',
-                            isChecked ? 'tal-btn-primary text-white' : 'border border-slate-300'
-                          )}
-                        >
-                          {isChecked && <Check className="w-3.5 h-3.5" />}
+              {isLoading ? (
+                <LoadingSkeleton rows={3} />
+              ) : (
+                <div className="space-y-2.5">
+                  {mockAvailableEvidences.map((e) => {
+                    const isChecked = selectedIds.includes(e.id);
+                    return (
+                      <div
+                        key={e.id}
+                        onClick={() => toggleSelect(e.id)}
+                        className={cn(
+                          'p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all',
+                          isChecked
+                            ? 'bg-[#F7F2FF] border-purple-200 text-[#261331]'
+                            : 'bg-white border-[#E9E1F4] text-[#6F607D]'
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={cn(
+                              'w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold transition-colors',
+                              isChecked ? 'tal-btn-primary text-white' : 'border border-slate-300'
+                            )}
+                          >
+                            {isChecked && <Check className="w-3.5 h-3.5" />}
+                          </div>
+                          <span className="text-xs font-bold">{e.title}</span>
                         </div>
-                        <span className="text-xs font-bold">{e.title}</span>
+                        <span className="text-[10px] text-[#9584A7]">{e.category}</span>
                       </div>
-                      <span className="text-[10px] text-[#9584A7]">{e.category}</span>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Verification Ready Card */}

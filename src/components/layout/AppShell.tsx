@@ -9,9 +9,7 @@ import { MobileNav } from './MobileNav';
 import { DemoAccessBanner } from './DemoAccessBanner';
 import { ForbiddenState } from '../common/ForbiddenState';
 import { LoadingSkeleton } from '../common/LoadingSkeleton';
-import { PageLoadingCover } from '../common/PageLoadingCover';
 import { CircularLogoSpinner } from '../common/CircularLogoSpinner';
-import { usePathname, useSearchParams } from 'next/navigation';
 import { X } from 'lucide-react';
 
 interface AppShellProps {
@@ -31,43 +29,10 @@ export const AppShell: React.FC<AppShellProps> = ({
   loadingMessage,
   loadingSubMessage,
 }) => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isMounted, setIsMounted] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    // When route finishes changing, fade out cover smoothly
-    const t = setTimeout(() => {
-      setIsNavigating(false);
-    }, 280);
-    return () => clearTimeout(t);
-  }, [pathname, searchParams]);
-
-  useEffect(() => {
-    const handleDocumentClick = (e: MouseEvent) => {
-      const target = (e.target as HTMLElement).closest('a');
-      if (!target) return;
-      const href = target.getAttribute('href');
-      if (
-        href &&
-        href.startsWith('/') &&
-        !href.startsWith('#') &&
-        !target.hasAttribute('download') &&
-        target.getAttribute('target') !== '_blank'
-      ) {
-        if (href !== pathname) {
-          setIsNavigating(true);
-        }
-      }
-    };
-
-    document.addEventListener('click', handleDocumentClick, { capture: true });
-    return () => document.removeEventListener('click', handleDocumentClick, { capture: true });
-  }, [pathname]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -193,14 +158,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             onOpenMobileMenu={() => setIsMobileDrawerOpen(true)}
           />
 
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-20 md:pb-8 relative min-h-[calc(100vh-140px)]">
-            {/* Smooth Page Loading Cover covering the page when loading or navigating */}
-            <PageLoadingCover
-              isVisible={isNavigating || Boolean(isPageLoading)}
-              message={loadingMessage || (isNavigating ? 'Membuka Halaman...' : 'Memuat Data Halaman...')}
-              subMessage={loadingSubMessage || 'Menyiapkan data portofolio dan asesmen terbaru.'}
-            />
-
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-20 md:pb-8 relative">
             {isForbidden ? (
               <ForbiddenState
                 requiredRole={expectedRole}
