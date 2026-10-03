@@ -35,6 +35,14 @@ async function ensureCsrfToken(): Promise<string> {
 }
 
 export interface IAdminClassService {
+  getCachedClasses(filters?: {
+    academicYear?: string;
+    gradeLevel?: string;
+    status?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): AdminClass[];
   listClasses(filters?: {
     academicYear?: string;
     gradeLevel?: string;
@@ -107,10 +115,15 @@ class AdminClassServiceImpl implements IAdminClassService {
       if (filters?.limit) params.append('limit', String(filters.limit));
       if (filters?.offset) params.append('offset', String(filters.offset));
 
+      if (typeof window !== 'undefined' && !window.navigator.onLine) {
+        throw new Error('Offline');
+      }
+
       const res = await fetch(`${API_BASE}/api/v1/admin/classes?${params.toString()}`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(200),
       });
 
       if (res.ok) {
@@ -118,9 +131,20 @@ class AdminClassServiceImpl implements IAdminClassService {
         return Array.isArray(body) ? body : (body.classes || []);
       }
     } catch {
-      // Backend unavailable; fallback
+      // Backend unavailable or offline; fallback
     }
 
+    return this.getCachedClasses(filters);
+  }
+
+  public getCachedClasses(filters?: {
+    academicYear?: string;
+    gradeLevel?: string;
+    status?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): AdminClass[] {
     let items = [...FALLBACK_CLASSES];
     if (filters?.gradeLevel && filters.gradeLevel !== 'all') {
       items = items.filter((c) => c.gradeLevel === filters.gradeLevel);

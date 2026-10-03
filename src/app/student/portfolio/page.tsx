@@ -18,19 +18,24 @@ import { useRouter } from 'next/navigation';
 import { cn } from '../../../lib/utils';
 import { LoadingSkeleton } from '../../../components/common/LoadingSkeleton';
 import { EmptyState } from '../../../components/common/EmptyState';
+import { useOffline } from '../../../context/OfflineContext';
 
 export default function StudentPortfolioPage() {
-  const [items, setItems] = useState<PortfolioItem[]>([]);
+  const [items, setItems] = useState<PortfolioItem[]>(() => portfolioService.getCachedItems());
   const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'submitted' | 'revision_requested'>('all');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const { isOffline } = useOffline();
 
   const fetchItems = async () => {
-    setIsLoading(true);
-    const data = await portfolioService.getPortfolioItems({
+    const filter = {
       status: statusFilter === 'all' ? undefined : (statusFilter as PortfolioStatus),
-    });
+    };
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      setItems(portfolioService.getCachedItems(filter));
+      return;
+    }
+    const data = await portfolioService.getPortfolioItems(filter);
     setItems(data);
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -95,13 +100,23 @@ export default function StudentPortfolioPage() {
             <span className="px-4 py-1.5 rounded-full bg-[#FAF5FF] border border-[#E9E1F4] text-[#A78BFA] font-bold text-xs">
               Semester 5
             </span>
-            <Link
-              href="/student/portfolio/new"
-              className="px-5 py-2.5 rounded-xl tal-btn-primary font-bold text-xs inline-flex items-center gap-2"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>Tambah Karya</span>
-            </Link>
+            {isOffline ? (
+              <span
+                title="Aksi penambahan karya dinonaktifkan dalam mode offline"
+                className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs inline-flex items-center gap-2 cursor-not-allowed border border-slate-200"
+              >
+                <PlusCircle className="w-4 h-4 text-slate-400" />
+                <span>Tambah Karya (Offline)</span>
+              </span>
+            ) : (
+              <Link
+                href="/student/portfolio/new"
+                className="px-5 py-2.5 rounded-xl tal-btn-primary font-bold text-xs inline-flex items-center gap-2"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Tambah Karya</span>
+              </Link>
+            )}
           </div>
         </div>
 

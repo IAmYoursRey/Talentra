@@ -36,6 +36,15 @@ async function ensureCsrfToken(): Promise<string> {
 }
 
 export interface IAdminUserService {
+  getCachedUsers(filters?: {
+    role?: string;
+    status?: string;
+    classId?: string;
+    gradeLevel?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): AdminUser[];
   listUsers(filters?: {
     role?: string;
     status?: string;
@@ -74,20 +83,46 @@ class AdminUserServiceImpl implements IAdminUserService {
       if (filters?.limit) params.append('limit', String(filters.limit));
       if (filters?.offset) params.append('offset', String(filters.offset));
 
+      if (typeof window !== 'undefined' && !window.navigator.onLine) {
+        throw new Error('Offline');
+      }
+
       const res = await fetch(`${API_BASE}/api/v1/admin/users?${params.toString()}`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(200),
       });
 
       if (res.ok) {
         return await res.json();
       }
     } catch {
-      // Backend unavailable; fallback to mock
+      // Backend unavailable or offline; fallback to mock
     }
 
-    // Mock fallback
+    return this.getCachedUsers(filters).length ? {
+      items: this.getCachedUsers(filters),
+      total: this.getCachedUsers(filters).length,
+      limit: filters?.limit || 50,
+      offset: filters?.offset || 0,
+    } : {
+      items: [],
+      total: 0,
+      limit: filters?.limit || 50,
+      offset: filters?.offset || 0,
+    };
+  }
+
+  public getCachedUsers(filters?: {
+    role?: string;
+    status?: string;
+    classId?: string;
+    gradeLevel?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): AdminUser[] {
     let items: AdminUser[] = MOCK_ALL_USERS.map((u) => ({
       id: u.id,
       schoolId: 'sch-smkn1-cibinong',
@@ -120,13 +155,7 @@ class AdminUserServiceImpl implements IAdminUserService {
           u.maskedIdentifier.toLowerCase().includes(q)
       );
     }
-
-    return {
-      items,
-      total: items.length,
-      limit: filters?.limit || 50,
-      offset: filters?.offset || 0,
-    };
+    return items;
   }
 
   public async getUser(userId: string): Promise<AdminUser | null> {

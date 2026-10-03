@@ -21,15 +21,19 @@ import {
 import Link from 'next/link';
 import { cn } from '../../../../lib/utils';
 
+import { MOCK_CANONICAL_TAGS } from '../../../../mocks/canonical-tags.mock';
+import { useOffline } from '../../../../context/OfflineContext';
+
 export default function NewPortfolioPage() {
   const router = useRouter();
+  const { isOffline } = useOffline();
 
   // Form fields matching 08-Student-Upload-HF.svg
   const [title, setTitle] = useState('');
   const [role, setRole] = useState('');
   const [problemSolved, setProblemSolved] = useState('');
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(['tag-1', 'tag-2', 'tag-3']);
-  const [availableTags, setAvailableTags] = useState<CanonicalTag[]>([]);
+  const [availableTags, setAvailableTags] = useState<CanonicalTag[]>(() => MOCK_CANONICAL_TAGS);
 
   // Evidence mode: file vs link
   const [evidenceMode, setEvidenceMode] = useState<'file' | 'link'>('file');
@@ -37,20 +41,23 @@ export default function NewPortfolioPage() {
   const [linkUrl, setLinkUrl] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingTags, setIsLoadingTags] = useState(true);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
+    let active = true;
     portfolioService
       .getCanonicalTags()
       .then((tags) => {
-        setAvailableTags(tags);
-        if (tags.length >= 3 && selectedTagIds.length === 0) {
-          setSelectedTagIds(tags.slice(0, 3).map((t) => t.id));
+        if (active && tags.length > 0) {
+          setAvailableTags(tags);
         }
       })
-      .catch(() => null)
-      .finally(() => setIsLoadingTags(false));
+      .catch(() => null);
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const toggleTag = (tagId: string) => {

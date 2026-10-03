@@ -21,13 +21,12 @@ import {
 import Link from 'next/link';
 
 export default function AdminDashboardPage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     analyticsService
       .getSchoolMetrics()
-      .catch(() => null)
-      .finally(() => setIsLoading(false));
+      .catch(() => null);
   }, []);
 
   const topDomains = [

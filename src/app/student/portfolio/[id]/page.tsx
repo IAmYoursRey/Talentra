@@ -28,27 +28,29 @@ export default function StudentPortfolioDetailPage() {
   const router = useRouter();
   const id = params?.id as string;
 
-  const [item, setItem] = useState<PortfolioItem | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [item, setItem] = useState<PortfolioItem | null>(() => {
+    return portfolioService.getCachedItems().find((p) => p.id === id) || null;
+  });
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   // Revision resubmit inline state
   const [isEditingRevision, setIsEditingRevision] = useState(false);
-  const [revisedDescription, setRevisedDescription] = useState('');
+  const [revisedDescription, setRevisedDescription] = useState(() => {
+    return portfolioService.getCachedItems().find((p) => p.id === id)?.description || '';
+  });
   const [isResubmitting, setIsResubmitting] = useState(false);
   const [resubmitSuccess, setResubmitSuccess] = useState(false);
 
   const fetchDetail = async () => {
     if (!id) return;
-    setIsLoading(true);
     const data = await portfolioService.getPortfolioItemById(id);
-    if (!data) {
+    if (!data && !item) {
       setErrorMsg('Portofolio karya tidak ditemukan.');
-    } else {
+    } else if (data) {
       setItem(data);
       setRevisedDescription(data.description);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {

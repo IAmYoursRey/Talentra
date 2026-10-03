@@ -11,6 +11,7 @@ import { MOCK_RUBRIC_DIMENSIONS } from '../mocks/soft-skills-rubric.mock';
 import { ensureCsrfToken } from '../lib/csrf';
 
 export interface IReviewService {
+  getCachedQueue(filter?: ReviewQueueFilter): PortfolioItem[];
   getReviewQueue(filter?: ReviewQueueFilter): Promise<PortfolioItem[]>;
   getReviewItemById(id: string): Promise<PortfolioItem | null>;
   getRubricDimensions(): Promise<SoftSkillRubricDimension[]>;
@@ -132,42 +133,7 @@ export class HTTPReviewService implements IReviewService {
     };
   }
 
-  public async getReviewQueue(filter?: ReviewQueueFilter): Promise<PortfolioItem[]> {
-    try {
-      const params = new URLSearchParams();
-      if (filter?.className && filter.className !== 'all') {
-        params.append('class', filter.className);
-      }
-      if (filter?.tag && filter.tag !== 'all') {
-        params.append('tag', filter.tag);
-      }
-      if (filter?.search && filter.search.trim()) {
-        params.append('search', filter.search.trim());
-      }
-      if (filter?.sortBy) {
-        params.append('sortBy', filter.sortBy);
-      }
-
-      const url = `${API_BASE}/api/v1/teacher/reviews${params.toString() ? `?${params.toString()}` : ''}`;
-      const res = await fetch(url, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        },
-        signal: AbortSignal.timeout(1000),
-      });
-
-      if (res.ok) {
-        const json = await res.json();
-        const rawItems = json.items || [];
-        return rawItems.map(mapQueueItemToPortfolioItem);
-      }
-    } catch {
-      // Backend unreachable; gracefully fallback to mock
-    }
-
-    // Mock fallback
+  public getCachedQueue(filter?: ReviewQueueFilter): PortfolioItem[] {
     let items = mockAppState.getPortfolioItems();
     if (filter?.status && filter.status !== 'all') {
       items = items.filter((item) => item.status === filter.status);
@@ -207,7 +173,51 @@ export class HTTPReviewService implements IReviewService {
     return items;
   }
 
+  public async getReviewQueue(filter?: ReviewQueueFilter): Promise<PortfolioItem[]> {
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      return this.getCachedQueue(filter);
+    }
+    try {
+      const params = new URLSearchParams();
+      if (filter?.className && filter.className !== 'all') {
+        params.append('class', filter.className);
+      }
+      if (filter?.tag && filter.tag !== 'all') {
+        params.append('tag', filter.tag);
+      }
+      if (filter?.search && filter.search.trim()) {
+        params.append('search', filter.search.trim());
+      }
+      if (filter?.sortBy) {
+        params.append('sortBy', filter.sortBy);
+      }
+
+      const url = `${API_BASE}/api/v1/teacher/reviews${params.toString() ? `?${params.toString()}` : ''}`;
+      const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
+        signal: AbortSignal.timeout(200),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const rawItems = json.items || [];
+        return rawItems.map(mapQueueItemToPortfolioItem);
+      }
+    } catch {
+      // Backend unreachable; gracefully fallback to mock
+    }
+
+    return this.getCachedQueue(filter);
+  }
+
   public async getReviewItemById(id: string): Promise<PortfolioItem | null> {
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      return mockAppState.getPortfolioItemById(id) || null;
+    }
     try {
       const res = await fetch(`${API_BASE}/api/v1/teacher/reviews/${id}`, {
         method: 'GET',
@@ -215,6 +225,7 @@ export class HTTPReviewService implements IReviewService {
         headers: {
           'Accept': 'application/json',
         },
+        signal: AbortSignal.timeout(200),
       });
 
       if (res.ok) {

@@ -15,18 +15,22 @@ interface EvidenceStrengthItem {
 }
 
 export default function StudentSkillsPage() {
-  const [snapshot, setSnapshot] = useState<SkillSnapshot | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [snapshot, setSnapshot] = useState<SkillSnapshot | null>(() => skillService.getCachedSkillSnapshot());
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let active = true;
     const loadSkillData = async () => {
-      setIsLoading(true);
       const data = await skillService.getStudentSkillSnapshot();
-      setSnapshot(data);
-      setIsLoading(false);
+      if (active) {
+        setSnapshot(data);
+      }
     };
 
     loadSkillData();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const strengths: EvidenceStrengthItem[] = [

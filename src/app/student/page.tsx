@@ -28,24 +28,28 @@ import {
 import Link from 'next/link';
 
 export default function StudentDashboardPage() {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [portfolios, setPortfolios] = useState<PortfolioItem[]>([]);
-  const [skillSnapshot, setSkillSnapshot] = useState<SkillSnapshot | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(() => authService.getCurrentUser());
+  const [portfolios, setPortfolios] = useState<PortfolioItem[]>(() => portfolioService.getCachedItems());
+  const [skillSnapshot, setSkillSnapshot] = useState<SkillSnapshot | null>(() => skillService.getCachedSkillSnapshot());
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let active = true;
     const loadDashboardData = async () => {
       const session = await authService.getCurrentSession();
-      setUser(session.user);
+      if (!active) return;
+      if (session.user) setUser(session.user);
 
       const [items, skills] = await Promise.all([
         portfolioService.getPortfolioItems(),
         skillService.getStudentSkillSnapshot(session.user?.id),
       ]);
 
-      setPortfolios(items);
-      setSkillSnapshot(skills);
-      setIsLoading(false);
+      if (active) {
+        setPortfolios(items);
+        setSkillSnapshot(skills);
+        setIsLoading(false);
+      }
     };
 
     loadDashboardData();

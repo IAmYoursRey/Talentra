@@ -4,6 +4,7 @@ import { MOCK_CANONICAL_TAGS } from '../mocks/canonical-tags.mock';
 import { ensureCsrfToken } from '../lib/csrf';
 
 export interface IPortfolioService {
+  getCachedItems(filter?: PortfolioFilter): PortfolioItem[];
   getPortfolioItems(filter?: PortfolioFilter): Promise<PortfolioItem[]>;
   getPortfolioItemById(id: string): Promise<PortfolioItem | null>;
   getCanonicalTags(): Promise<CanonicalTag[]>;
@@ -105,59 +106,7 @@ class HTTPPortfolioService implements IPortfolioService {
     });
   }
 
-  public async getCanonicalTags(): Promise<CanonicalTag[]> {
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/skill-tags`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(1000),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.items && Array.isArray(data.items)) {
-          return data.items.map((item: any) => ({
-            id: item.code,
-            label: item.label,
-            category: item.category,
-            description: item.description,
-          }));
-        }
-      }
-    } catch (e) {
-      // Fallback gracefully to mock tags
-    }
-    return [...MOCK_CANONICAL_TAGS];
-  }
-
-  public async getPortfolioItems(filter?: PortfolioFilter): Promise<PortfolioItem[]> {
-    try {
-      const params = new URLSearchParams();
-      if (filter) {
-        if (filter.status && filter.status !== 'all') params.append('status', filter.status);
-        if (filter.tag && filter.tag !== 'all') params.append('tag', filter.tag);
-        if (filter.activityType && filter.activityType !== 'all') params.append('activityType', filter.activityType);
-        if (filter.search && filter.search.trim()) params.append('search', filter.search.trim());
-        if (filter.sortBy) params.append('sortBy', filter.sortBy);
-      }
-
-      const res = await fetch(`${API_BASE}/api/v1/student/portfolio?${params.toString()}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        signal: AbortSignal.timeout(1000),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.items && Array.isArray(data.items)) {
-          return data.items.map(mapDocToPortfolioItem);
-        }
-      }
-    } catch (e) {
-      // Fallback to mock state if backend not running
-    }
-
-    // Mock fallback
+  public getCachedItems(filter?: PortfolioFilter): PortfolioItem[] {
     let items = mockAppState.getPortfolioItems();
     const currentUser = mockAppState.getCurrentUser();
     if (currentUser.role === 'student') {
@@ -191,13 +140,77 @@ class HTTPPortfolioService implements IPortfolioService {
     return items;
   }
 
+  public async getCanonicalTags(): Promise<CanonicalTag[]> {
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      return [...MOCK_CANONICAL_TAGS];
+    }
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/skill-tags`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(200),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.items && Array.isArray(data.items)) {
+          return data.items.map((item: any) => ({
+            id: item.code,
+            label: item.label,
+            category: item.category,
+            description: item.description,
+          }));
+        }
+      }
+    } catch (e) {
+      // Fallback gracefully to mock tags
+    }
+    return [...MOCK_CANONICAL_TAGS];
+  }
+
+  public async getPortfolioItems(filter?: PortfolioFilter): Promise<PortfolioItem[]> {
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      return this.getCachedItems(filter);
+    }
+    try {
+      const params = new URLSearchParams();
+      if (filter) {
+        if (filter.status && filter.status !== 'all') params.append('status', filter.status);
+        if (filter.tag && filter.tag !== 'all') params.append('tag', filter.tag);
+        if (filter.activityType && filter.activityType !== 'all') params.append('activityType', filter.activityType);
+        if (filter.search && filter.search.trim()) params.append('search', filter.search.trim());
+        if (filter.sortBy) params.append('sortBy', filter.sortBy);
+      }
+
+      const res = await fetch(`${API_BASE}/api/v1/student/portfolio?${params.toString()}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        signal: AbortSignal.timeout(200),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.items && Array.isArray(data.items)) {
+          return data.items.map(mapDocToPortfolioItem);
+        }
+      }
+    } catch (e) {
+      // Fallback to mock state if backend not running
+    }
+
+    return this.getCachedItems(filter);
+  }
+
   public async getPortfolioItemById(id: string): Promise<PortfolioItem | null> {
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      return mockAppState.getPortfolioItemById(id) || null;
+    }
     try {
       const res = await fetch(`${API_BASE}/api/v1/student/portfolio/${id}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        signal: AbortSignal.timeout(1000),
+        signal: AbortSignal.timeout(200),
       });
 
       if (res.ok) {

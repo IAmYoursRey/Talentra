@@ -31,11 +31,13 @@ import {
   Shield,
   Edit2,
 } from 'lucide-react';
+import { useOffline } from '../../../context/OfflineContext';
 
 export default function AdminClassesPage() {
-  const [classes, setClasses] = useState<AdminClass[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [classes, setClasses] = useState<AdminClass[]>(() => adminClassService.getCachedClasses({ status: 'active' }));
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const { isOffline } = useOffline();
 
   // Filters
   const [search, setSearch] = useState('');
@@ -75,7 +77,6 @@ export default function AdminClassesPage() {
   });
 
   const loadClasses = useCallback(async () => {
-    setIsLoading(true);
     setErrorMsg(null);
     try {
       const data = await adminClassService.listClasses({
@@ -85,10 +86,13 @@ export default function AdminClassesPage() {
       });
       setClasses(data);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Gagal memuat rombongan belajar.';
-      setErrorMsg(msg);
-    } finally {
-      setIsLoading(false);
+      if (typeof window !== 'undefined' && !window.navigator.onLine) {
+        setClasses(adminClassService.getCachedClasses({
+          gradeLevel: gradeFilter !== 'all' ? gradeFilter : undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          search: search.trim() || undefined,
+        }));
+      }
     }
   }, [gradeFilter, statusFilter, search]);
 

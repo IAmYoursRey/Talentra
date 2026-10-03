@@ -17,19 +17,16 @@ import { recommendationService } from '../../../services/recommendation.service'
 import { RecommendationResponse } from '../../../types/recommendation.types';
 
 export default function StudentCareerPage() {
-  const [data, setData] = useState<RecommendationResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<RecommendationResponse | null>(() => recommendationService.getCachedRecommendations());
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedPathIndex, setSelectedPathIndex] = useState(0);
 
   const loadData = useCallback(async () => {
-    setIsLoading(true);
     try {
       const res = await recommendationService.getStudentRecommendations();
       setData(res);
     } catch {
       // Fallback
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 

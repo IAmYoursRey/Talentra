@@ -23,6 +23,8 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+import { OfflineProvider } from '../context/OfflineContext';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,10 +41,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800">
-        <Suspense fallback={null}>
-          <TopProgressBar />
-        </Suspense>
-        {children}
+        <OfflineProvider>
+          <Suspense fallback={null}>
+            <TopProgressBar />
+          </Suspense>
+          {children}
+        </OfflineProvider>
       </body>
     </html>
   );

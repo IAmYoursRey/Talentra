@@ -8,9 +8,8 @@ import { Header } from './Header';
 import { MobileNav } from './MobileNav';
 import { DemoAccessBanner } from './DemoAccessBanner';
 import { ForbiddenState } from '../common/ForbiddenState';
-import { LoadingSkeleton } from '../common/LoadingSkeleton';
-import { CircularLogoSpinner } from '../common/CircularLogoSpinner';
-import { X } from 'lucide-react';
+import { X, WifiOff } from 'lucide-react';
+import { useOffline } from '../../context/OfflineContext';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -21,6 +20,45 @@ interface AppShellProps {
   loadingSubMessage?: string;
 }
 
+const getFallbackUser = (expectedRole?: UserRole): UserProfile => {
+  if (typeof window !== 'undefined') {
+    const cached = authService.getCurrentUser();
+    if (cached) return cached;
+  }
+  if (expectedRole === 'teacher') {
+    return {
+      id: 'teacher-demo',
+      name: 'Guru Demo',
+      role: 'teacher',
+      email: 'guru.demo@sekolah.sch.id',
+      schoolName: 'SMKN 1 Jakarta',
+      maskedIdentifier: 'NUPTK 1985***',
+      title: 'Pembimbing Portofolio & Kejuruan',
+    };
+  }
+  if (expectedRole === 'admin') {
+    return {
+      id: 'admin-demo',
+      name: 'Admin Demo',
+      role: 'admin',
+      email: 'admin.demo@sekolah.sch.id',
+      schoolName: 'SMKN 1 Jakarta',
+      maskedIdentifier: 'NPSN 2010***',
+      title: 'Administrator Sekolah & IT',
+    };
+  }
+  return {
+    id: 'student-demo',
+    name: 'Dimas Pratama',
+    role: 'student',
+    email: 'dimas.pratama@siswa.sch.id',
+    schoolName: 'SMKN 1 Jakarta',
+    maskedIdentifier: 'NISN 008***',
+    grade: 'XII',
+    className: 'XII RPL 1',
+  };
+};
+
 export const AppShell: React.FC<AppShellProps> = ({
   children,
   pageTitle,
@@ -29,76 +67,39 @@ export const AppShell: React.FC<AppShellProps> = ({
   loadingMessage,
   loadingSubMessage,
 }) => {
-  const [isMounted, setIsMounted] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<UserProfile>(() => getFallbackUser(expectedRole));
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const { isOffline } = useOffline();
 
   useEffect(() => {
-    setIsMounted(true);
     let active = true;
 
-    const cached = authService.getCurrentUser();
-    if (cached) {
-      setCurrentUser(cached);
-      setIsLoading(false);
-    }
-
-    authService.getCurrentSession().then((session) => {
-      if (active) {
-        if (session.user) {
-          setCurrentUser(session.user);
-        }
-        setIsLoading(false);
+    if (typeof window !== 'undefined') {
+      const cached = authService.getCurrentUser();
+      if (cached && active) {
+        setCurrentUser(cached);
       }
-    });
 
-    // Safety timeout: never block navigation for more than 400ms
-    const timer = setTimeout(() => {
-      if (active) {
-        setIsLoading(false);
-      }
-    }, 400);
-
-    const unsubscribe = authService.subscribeSession(() => {
       authService.getCurrentSession().then((session) => {
         if (active && session.user) {
           setCurrentUser(session.user);
         }
       });
-    });
 
-    return () => {
-      active = false;
-      clearTimeout(timer);
-      unsubscribe();
-    };
+      const unsubscribe = authService.subscribeSession(() => {
+        authService.getCurrentSession().then((session) => {
+          if (active && session.user) {
+            setCurrentUser(session.user);
+          }
+        });
+      });
+
+      return () => {
+        active = false;
+        unsubscribe();
+      };
+    }
   }, []);
-
-  if (!isMounted || isLoading || !currentUser) {
-    return (
-      <div
-        role="status"
-        aria-label="Memuat sesi aplikasi..."
-        className="min-h-screen bg-[#FCFBFF] flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-150"
-      >
-        <div className="relative flex flex-col items-center max-w-sm text-center space-y-5">
-          <CircularLogoSpinner size="lg" />
-          <div className="space-y-1.5">
-            <h2 className="text-base font-extrabold text-[#261331] tracking-tight">
-              Memuat Sesi...
-            </h2>
-            <p className="text-xs text-[#6F607D]">
-              Menyiapkan data portofolio, analitik, dan hak akses.
-            </p>
-          </div>
-          <div className="w-48 h-1.5 bg-purple-100 rounded-full overflow-hidden relative">
-            <div className="absolute top-0 bottom-0 left-0 w-2/3 bg-gradient-to-r from-[#6D28D9] to-[#C084FC] rounded-full animate-indeterminate" />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const handleLogout = async () => {
     await authService.logout();
@@ -111,6 +112,33 @@ export const AppShell: React.FC<AppShellProps> = ({
     <div className="h-screen max-h-screen w-screen bg-[#FCFBFF] flex flex-col font-sans text-[#261331] antialiased overflow-hidden selection:bg-[#6D28D9] selection:text-white">
       {/* Top Demo Access Banner */}
       <DemoAccessBanner />
+
+      {/* Offline Status Notification */}
+      {isOffline && (
+        <aside
+          role="status"
+          className="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white text-xs font-semibold px-4 py-2 flex items-center justify-between shadow-xs sticky top-0 z-40 backdrop-blur-md animate-in fade-in"
+        >
+          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full justify-between">
+            <div className="flex items-center gap-2">
+              <WifiOff className="w-4 h-4 text-amber-200 shrink-0 animate-pulse" />
+              <span>
+                <strong>Mode Offline (Luring):</strong> Menampilkan data tersimpan. Seluruh halaman tetap dapat Anda tinjau; aksi perubahan data dinonaktifkan sementara hingga terhubung kembali.
+              </span>
+            </div>
+            <span className="text-[10px] uppercase font-black bg-amber-900/30 px-2 py-0.5 rounded-full border border-amber-300/40 shrink-0">
+              Tersimpan Lokal
+            </span>
+          </div>
+        </aside>
+      )}
+
+      {/* Local Page Loading Progress Bar (Non-blocking) */}
+      {isPageLoading && (
+        <div className="w-full h-1 bg-purple-100 overflow-hidden relative shrink-0 z-30">
+          <div className="absolute top-0 bottom-0 left-0 w-2/3 bg-gradient-to-r from-[#6D28D9] to-[#C084FC] rounded-full animate-indeterminate" />
+        </div>
+      )}
 
       <div className="flex-1 flex min-h-0 overflow-hidden relative">
         {/* Desktop Sidebar */}

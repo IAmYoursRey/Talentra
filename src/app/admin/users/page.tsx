@@ -33,12 +33,14 @@ import {
   Edit,
   Lock,
 } from 'lucide-react';
+import { useOffline } from '../../../context/OfflineContext';
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [classes, setClasses] = useState<AdminClass[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [users, setUsers] = useState<AdminUser[]>(() => adminUserService.getCachedUsers());
+  const [classes, setClasses] = useState<AdminClass[]>(() => adminClassService.getCachedClasses({ status: 'active' }));
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const { isOffline } = useOffline();
 
   // Filters
   const [search, setSearch] = useState('');
@@ -80,7 +82,6 @@ export default function AdminUsersPage() {
   });
 
   const loadData = useCallback(async () => {
-    setIsLoading(true);
     setErrorMsg(null);
     try {
       const [userRes, classList] = await Promise.all([
@@ -95,10 +96,15 @@ export default function AdminUsersPage() {
       setUsers(userRes.items);
       setClasses(classList);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Gagal memuat data pengguna dari server.';
-      setErrorMsg(msg);
-    } finally {
-      setIsLoading(false);
+      // Keep existing users if offline or network error
+      if (typeof window !== 'undefined' && !window.navigator.onLine) {
+        setUsers(adminUserService.getCachedUsers({
+          role: roleFilter !== 'all' ? roleFilter : undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          classId: classFilter !== 'all' ? classFilter : undefined,
+          search: search.trim() || undefined,
+        }));
+      }
     }
   }, [roleFilter, statusFilter, classFilter, search]);
 

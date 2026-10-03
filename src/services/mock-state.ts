@@ -13,7 +13,28 @@ class MockAppState {
   private rubricAssessmentsMap: Map<string, RubricAssessment[]> = new Map();
   private listeners: Set<() => void> = new Set();
 
-  private constructor() {}
+  private constructor() {
+    if (typeof window !== 'undefined') {
+      try {
+        const storedPortfolios = localStorage.getItem('talentra_offline_portfolios');
+        if (storedPortfolios) {
+          const parsed = JSON.parse(storedPortfolios);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            this.portfolioItems = parsed;
+          }
+        }
+        const storedRubrics = localStorage.getItem('talentra_offline_rubrics');
+        if (storedRubrics) {
+          const parsed = JSON.parse(storedRubrics);
+          Object.entries(parsed).forEach(([k, v]) => {
+            this.rubricAssessmentsMap.set(k, v as RubricAssessment[]);
+          });
+        }
+      } catch {
+        // Fallback to default mock items
+      }
+    }
+  }
 
   public static getInstance(): MockAppState {
     if (!MockAppState.instance) {
@@ -28,6 +49,18 @@ class MockAppState {
   }
 
   private notify(): void {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('talentra_offline_portfolios', JSON.stringify(this.portfolioItems));
+        const rubricObj: Record<string, RubricAssessment[]> = {};
+        this.rubricAssessmentsMap.forEach((v, k) => {
+          rubricObj[k] = v;
+        });
+        localStorage.setItem('talentra_offline_rubrics', JSON.stringify(rubricObj));
+      } catch {
+        // Ignore localStorage quota errors
+      }
+    }
     this.listeners.forEach((listener) => listener());
   }
 

@@ -15,12 +15,15 @@ import {
   ChevronRight,
   ShieldCheck,
   Loader2,
+  WifiOff,
+  Lock,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { useOffline } from '../../../context/OfflineContext';
 
 export default function TeacherReviewQueuePage() {
-  const [queue, setQueue] = useState<PortfolioItem[]>([]);
-  const [selectedId, setSelectedId] = useState<string>('p-1');
+  const [queue, setQueue] = useState<PortfolioItem[]>(() => reviewService.getCachedQueue());
+  const [selectedId, setSelectedId] = useState<string>(() => reviewService.getCachedQueue()[0]?.id || 'p-1');
   const [rubricScores, setRubricScores] = useState<Record<string, number>>({
     Initiative: 4,
     Collaboration: 5,
@@ -31,19 +34,23 @@ export default function TeacherReviewQueuePage() {
   const [actionNotice, setActionNotice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingAction, setSubmittingAction] = useState<'endorse' | 'revision' | 'reject' | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const { isOffline } = useOffline();
 
   useEffect(() => {
+    let active = true;
     reviewService
       .getReviewQueue()
       .then((items) => {
-        if (items && items.length > 0) {
+        if (active && items && items.length > 0) {
           setQueue(items);
-          setSelectedId(items[0].id);
         }
       })
-      .catch(() => null)
-      .finally(() => setIsLoading(false));
+      .catch(() => null);
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const fallbackQueue = [
@@ -288,11 +295,18 @@ export default function TeacherReviewQueuePage() {
             </div>
 
             {/* Action Buttons matching 13-Teacher-Approval-HF.svg */}
+            {isOffline && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
+                <WifiOff className="w-4 h-4 shrink-0 text-amber-600" />
+                <span>Mode Offline: Karya dan bukti tetap dapat ditinjau; aksi validasi dinonaktifkan sementara.</span>
+              </div>
+            )}
             <div className="pt-2 flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => handleAction('reject')}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isOffline}
+                title={isOffline ? 'Aksi dinonaktifkan dalam mode offline' : undefined}
                 className="px-5 py-2.5 rounded-xl tal-btn-rose font-bold text-xs inline-flex items-center gap-1.5 disabled:opacity-50"
               >
                 {submittingAction === 'reject' && <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />}
@@ -301,7 +315,8 @@ export default function TeacherReviewQueuePage() {
               <button
                 type="button"
                 onClick={() => handleAction('revision')}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isOffline}
+                title={isOffline ? 'Aksi dinonaktifkan dalam mode offline' : undefined}
                 className="px-5 py-2.5 rounded-xl tal-btn-amber font-bold text-xs inline-flex items-center gap-1.5 disabled:opacity-50"
               >
                 {submittingAction === 'revision' && <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />}
@@ -310,7 +325,8 @@ export default function TeacherReviewQueuePage() {
               <button
                 type="button"
                 onClick={() => handleAction('endorse')}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isOffline}
+                title={isOffline ? 'Aksi dinonaktifkan dalam mode offline' : undefined}
                 className="flex-1 py-2.5 rounded-xl tal-btn-emerald font-bold text-xs flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {submittingAction === 'endorse' ? (

@@ -20,13 +20,13 @@ import {
 import Link from 'next/link';
 
 export default function TeacherDashboardPage() {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [queueItems, setQueueItems] = useState<PortfolioItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(() => authService.getCurrentUser());
+  const [queueItems, setQueueItems] = useState<PortfolioItem[]>(() => reviewService.getCachedQueue());
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchTeacherData = async () => {
     const session = await authService.getCurrentSession();
-    setUser(session.user);
+    if (session.user) setUser(session.user);
 
     const items = await reviewService.getReviewQueue();
     setQueueItems(items);

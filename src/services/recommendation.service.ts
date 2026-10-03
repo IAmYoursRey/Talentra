@@ -5,6 +5,7 @@ import {
 import { ensureCsrfToken } from '../lib/csrf';
 
 export interface IRecommendationService {
+  getCachedRecommendations(): RecommendationResponse;
   getStudentRecommendations(forceRefresh?: boolean): Promise<RecommendationResponse>;
   refreshStudentRecommendations(): Promise<RecommendationResponse>;
   generateProfessionalDescription(portfolioId: string, forceRegenerate?: boolean): Promise<ProfessionalDescriptionResponse>;
@@ -16,25 +17,7 @@ const API_BASE =
   (typeof window === 'undefined' ? (process.env.API_BASE_URL || 'http://127.0.0.1:8000') : '');
 
 export class HTTPRecommendationService implements IRecommendationService {
-  public async getStudentRecommendations(forceRefresh = false): Promise<RecommendationResponse> {
-    try {
-      const url = `${API_BASE}/api/v1/student/recommendations${forceRefresh ? '?force_refresh=true' : ''}`;
-      const res = await fetch(url, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        },
-        signal: AbortSignal.timeout(1000),
-      });
-
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch {
-      // Fallback to instant mock response
-    }
-
+  public getCachedRecommendations(): RecommendationResponse {
     return {
       snapshotId: 'rec_snap_demo',
       generatedAt: new Date().toISOString(),
@@ -126,6 +109,31 @@ export class HTTPRecommendationService implements IRecommendationService {
       ],
       disclaimer: 'Rekomendasi bersifat panduan eksploratif berbasis karya nyata tervalidasi dan bukan prediksi masa depan mutlak.',
     };
+  }
+
+  public async getStudentRecommendations(forceRefresh = false): Promise<RecommendationResponse> {
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      return this.getCachedRecommendations();
+    }
+    try {
+      const url = `${API_BASE}/api/v1/student/recommendations${forceRefresh ? '?force_refresh=true' : ''}`;
+      const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
+        signal: AbortSignal.timeout(200),
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // Fallback to instant mock response
+    }
+
+    return this.getCachedRecommendations();
   }
 
   public async refreshStudentRecommendations(): Promise<RecommendationResponse> {

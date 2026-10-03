@@ -28,13 +28,14 @@ import {
   Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useOffline } from '../../../../context/OfflineContext';
 
 export default function TeacherReviewDetailPage() {
+  const { isOffline } = useOffline();
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
 
-  const [item, setItem] = useState<PortfolioItem | null>(null);
   const [rubricDimensions, setRubricDimensions] = useState<SoftSkillRubricDimension[]>([]);
   const [rubricValues, setRubricValues] = useState<Record<string, 1 | 2 | 3 | 4 | 5>>({
     initiative: 4,
@@ -45,7 +46,10 @@ export default function TeacherReviewDetailPage() {
   });
 
   const [feedbackNote, setFeedbackNote] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [item, setItem] = useState<PortfolioItem | null>(() => {
+    return reviewService.getCachedQueue().find((p) => p.id === id) || null;
+  });
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingAction, setSubmittingAction] = useState<DecisionAction | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -57,22 +61,22 @@ export default function TeacherReviewDetailPage() {
 
   const fetchItemAndRubric = async () => {
     if (!id) return;
-    setIsLoading(true);
     const [data, rubrics] = await Promise.all([
       reviewService.getReviewItemById(id),
       reviewService.getRubricDimensions(),
     ]);
 
-    if (!data) {
+    if (!data && !item) {
       setErrorMsg('Portofolio karya tidak ditemukan.');
-    } else {
+    } else if (data) {
       setItem(data);
       if (data.teacherFeedback) {
         setFeedbackNote(data.teacherFeedback);
       }
     }
-    setRubricDimensions(rubrics);
-    setIsLoading(false);
+    if (rubrics && rubrics.length > 0) {
+      setRubricDimensions(rubrics);
+    }
   };
 
   useEffect(() => {
@@ -298,10 +302,17 @@ export default function TeacherReviewDetailPage() {
                     Keputusan Validasi:
                   </p>
 
+                  {isOffline && (
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl text-amber-700 dark:text-amber-300 text-xs flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                      <span>Mode Offline: Karya dapat ditinjau, namun aksi keputusan memerlukan internet.</span>
+                    </div>
+                  )}
+
                   {/* Endorse Button (Green) */}
                   <button
                     type="button"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isOffline}
                     onClick={handleEndorse}
                     className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl tal-btn-emerald font-bold text-xs sm:text-sm disabled:opacity-50"
                   >
@@ -321,7 +332,7 @@ export default function TeacherReviewDetailPage() {
                   {/* Request Revision Button (Amber) */}
                   <button
                     type="button"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isOffline}
                     onClick={handleRequestRevision}
                     className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl tal-btn-amber font-bold text-xs sm:text-sm disabled:opacity-50"
                   >
@@ -341,7 +352,7 @@ export default function TeacherReviewDetailPage() {
                   {/* Reject Button (Red - triggers confirmation dialog) */}
                   <button
                     type="button"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isOffline}
                     onClick={() => setIsRejectDialogOpen(true)}
                     className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl tal-btn-rose font-bold text-xs disabled:opacity-50"
                   >

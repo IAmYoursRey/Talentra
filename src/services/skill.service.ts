@@ -2,6 +2,7 @@ import { SkillRadarPoint, SkillSnapshot, SkillDetail, SkillContributor } from '.
 import { mockAppState } from './mock-state';
 
 export interface ISkillService {
+  getCachedSkillSnapshot(studentId?: string): SkillSnapshot;
   getStudentSkillSnapshot(studentId?: string): Promise<SkillSnapshot>;
   getSkillDetail(skillName: string, studentId?: string): Promise<SkillDetail | null>;
   subscribeSkills(callback: () => void): () => void;
@@ -19,54 +20,7 @@ export class HTTPSkillService implements ISkillService {
     };
   }
 
-  public async getStudentSkillSnapshot(studentId?: string): Promise<SkillSnapshot> {
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/student/skills`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        },
-        signal: AbortSignal.timeout(1000),
-      });
-
-      if (res.ok) {
-        const json = await res.json();
-        const rawRadar = json.radar || [];
-        const rawRubrics = json.teacherRubrics || [];
-
-        const radarPoints: SkillRadarPoint[] = rawRadar.map((r: any) => ({
-          skill: r.displayName || r.dimension,
-          dimensionCode: r.dimension,
-          score: r.score,
-          fullMark: r.fullMark || 100,
-          approvedEvidenceCount: r.evidenceCount || 0,
-        }));
-
-        const sortedSkills = [...radarPoints]
-          .filter((p) => p.score > 0)
-          .sort((a, b) => b.score - a.score);
-
-        const topSkills = sortedSkills.slice(0, 3).map((s) => ({
-          name: s.skill,
-          score: s.score,
-          level: s.score >= 80 ? 'Tingkat Mahir' : s.score >= 60 ? 'Tingkat Menengah' : 'Tingkat Dasar',
-        }));
-
-        return {
-          scoringVersion: json.scoringVersion || 'approved-evidence-count-v1',
-          radarPoints,
-          topSkills: topSkills.length > 0 ? topSkills : [{ name: 'Belum Ada Bukti Disetujui', score: 0, level: 'Menunggu Validasi' }],
-          totalApprovedEvidence: json.approvedEvidenceCount || 0,
-          lastCalculatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-          teacherRubrics: rawRubrics,
-        };
-      }
-    } catch {
-      // Backend unreachable; gracefully fallback to mock
-    }
-
-    // Mock fallback
+  public getCachedSkillSnapshot(studentId?: string): SkillSnapshot {
     const targetStudentId = studentId || mockAppState.getCurrentUser().id;
     const approvedItems = mockAppState
       .getPortfolioItems()
@@ -126,7 +80,10 @@ export class HTTPSkillService implements ISkillService {
     };
   }
 
-  public async getSkillDetail(skillName: string, studentId?: string): Promise<SkillDetail | null> {
+  public async getStudentSkillSnapshot(studentId?: string): Promise<SkillSnapshot> {
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      return this.getCachedSkillSnapshot(studentId);
+    }
     try {
       const res = await fetch(`${API_BASE}/api/v1/student/skills`, {
         method: 'GET',
@@ -134,7 +91,60 @@ export class HTTPSkillService implements ISkillService {
         headers: {
           'Accept': 'application/json',
         },
-        signal: AbortSignal.timeout(1000),
+        signal: AbortSignal.timeout(200),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const rawRadar = json.radar || [];
+        const rawRubrics = json.teacherRubrics || [];
+
+        const radarPoints: SkillRadarPoint[] = rawRadar.map((r: any) => ({
+          skill: r.displayName || r.dimension,
+          dimensionCode: r.dimension,
+          score: r.score,
+          fullMark: r.fullMark || 100,
+          approvedEvidenceCount: r.evidenceCount || 0,
+        }));
+
+        const sortedSkills = [...radarPoints]
+          .filter((p) => p.score > 0)
+          .sort((a, b) => b.score - a.score);
+
+        const topSkills = sortedSkills.slice(0, 3).map((s) => ({
+          name: s.skill,
+          score: s.score,
+          level: s.score >= 80 ? 'Tingkat Mahir' : s.score >= 60 ? 'Tingkat Menengah' : 'Tingkat Dasar',
+        }));
+
+        return {
+          scoringVersion: json.scoringVersion || 'approved-evidence-count-v1',
+          radarPoints,
+          topSkills: topSkills.length > 0 ? topSkills : [{ name: 'Belum Ada Bukti Disetujui', score: 0, level: 'Menunggu Validasi' }],
+          totalApprovedEvidence: json.approvedEvidenceCount || 0,
+          lastCalculatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          teacherRubrics: rawRubrics,
+        };
+      }
+    } catch {
+      // Backend unreachable; gracefully fallback to mock
+    }
+
+    return this.getCachedSkillSnapshot(studentId);
+  }
+
+  public async getSkillDetail(skillName: string, studentId?: string): Promise<SkillDetail | null> {
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      // offline fast path
+    }
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/student/skills`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
+        signal: AbortSignal.timeout(200),
       });
 
       if (res.ok) {
