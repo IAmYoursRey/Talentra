@@ -313,7 +313,7 @@ export default function LoginPage() {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-[#261331] truncate">Alya Rahma Azzahra</span>
+                        <span className="text-xs font-bold text-[#261331] truncate">Siswa Demo</span>
                         <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-blue-100 text-blue-700 rounded-md">SISWA</span>
                       </div>
                       <p className="text-[11px] text-[#6F607D] truncate">NISN: 0081234567 • XII RPL 1</p>
@@ -368,7 +368,7 @@ export default function LoginPage() {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-[#261331] truncate">Budi Santoso, S.Kom</span>
+                        <span className="text-xs font-bold text-[#261331] truncate">Guru Demo</span>
                         <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-md">GURU</span>
                       </div>
                       <p className="text-[11px] text-[#6F607D] truncate">NIP: 19850101... • Pembimbing 3 Kelas</p>
@@ -423,7 +423,7 @@ export default function LoginPage() {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-[#261331] truncate">Raihan Ansari</span>
+                        <span className="text-xs font-bold text-[#261331] truncate">Admin Demo</span>
                         <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-purple-100 text-purple-800 rounded-md">ADMIN</span>
                       </div>
                       <p className="text-[11px] text-[#6F607D] truncate">Admin Sekolah • SMKN 1 Jakarta</p>

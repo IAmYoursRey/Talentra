@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '../../../../components/layout/AppShell';
 import { portfolioService } from '../../../../services/portfolio.service';
+import { authService } from '../../../../services/auth.service';
 import { CanonicalTag, EvidenceSource } from '../../../../types/portfolio.types';
 import {
   ArrowLeft,
@@ -100,9 +101,9 @@ export default function NewPortfolioPage() {
         tags: selectedTagIds,
         evidence,
         status: 'submitted',
-        studentId: 'student-demo',
-        studentName: 'Raihan Ansari',
-        studentClass: 'XII IPA 2',
+        studentId: authService.getCurrentUser()?.id || 'student-demo',
+        studentName: authService.getCurrentUser()?.name || 'Dimas Pratama',
+        studentClass: authService.getCurrentUser()?.className || 'XII RPL 1',
       });
 
       router.push('/student/portfolio');

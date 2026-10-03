@@ -16,11 +16,13 @@ import {
   ExternalLink,
   Loader2,
 } from 'lucide-react';
+import { authService } from '../../../services/auth.service';
 import Link from 'next/link';
 import { cn } from '../../../lib/utils';
 
 export default function StudentCVPage() {
   const [context, setContext] = useState<CVBuilderContext | null>(null);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4']);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -36,6 +38,10 @@ export default function StudentCVPage() {
   ];
 
   useEffect(() => {
+    authService.getCurrentSession().then((s) => {
+      if (s.user?.name) setCurrentUser(s.user.name);
+    });
+
     cvService
       .getCVBuilderContext()
       .then((data) => {
@@ -119,8 +125,8 @@ export default function StudentCVPage() {
 
             {/* Document Header */}
             <div>
-              <h2 className="text-2xl font-black text-[#261331] tracking-tight">
-                RAIHAN ANSARI
+              <h2 className="text-2xl font-black text-[#261331] tracking-tight uppercase">
+                {currentUser || context?.profile?.displayName || 'Dimas Pratama'}
               </h2>
               <p className="text-xs font-bold text-[#6D28D9] mt-0.5">
                 Student Portfolio • Software & Product

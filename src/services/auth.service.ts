@@ -13,6 +13,7 @@ export interface AuthResult {
 
 export interface IAuthService {
   getCurrentSession(): Promise<SessionState>;
+  getCurrentUser(): UserProfile | null;
   login(identifier: string, password?: string): Promise<AuthResult>;
   demoLogin(role: UserRole): Promise<AuthResult>;
   switchRole(role: UserRole): Promise<UserProfile>;
@@ -42,9 +43,13 @@ interface ApiUserResponse {
 }
 
 function mapUserResponseToProfile(raw: ApiUserResponse): UserProfile {
+  let displayName = raw.displayName;
+  if (displayName === 'Raihan Ansari' || raw.email === 'raihanansari6678@gmail.com') {
+    displayName = 'Admin Demo';
+  }
   return {
     id: raw.id,
-    name: raw.displayName,
+    name: displayName,
     role: raw.role,
     email: raw.email,
     schoolName: raw.school?.name || 'Sekolah TALENTRA',
@@ -74,6 +79,10 @@ class AuthService implements IAuthService {
     return () => {
       this.subscribers.delete(callback);
     };
+  }
+
+  public getCurrentUser(): UserProfile | null {
+    return this.inMemoryUser;
   }
 
   public async getCurrentSession(): Promise<SessionState> {

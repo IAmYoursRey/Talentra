@@ -114,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
           {
             id: 'n3',
             title: 'Pengajuan Karya Baru',
-            message: 'Alya Rahma mengajukan karya baru yang memerlukan asesmen rubrik.',
+            message: 'Siswa Demo mengajukan karya baru yang memerlukan asesmen rubrik.',
             time: '10 menit yang lalu',
             type: 'alert',
           },
@@ -182,7 +182,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
               type="button"
               onClick={() => handleSwitchDemoRole('student')}
               disabled={Boolean(switchingRole)}
-              title="Masuk Akun Siswa (Alya)"
+              title="Masuk Akun Siswa Demo"
               className={cn(
                 'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'student'
@@ -191,13 +191,13 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
               )}
             >
               {switchingRole === 'student' && <Loader2 className="w-3 h-3 animate-spin" />}
-              <span>Siswa</span>
+              <span>Siswa Demo</span>
             </button>
             <button
               type="button"
               onClick={() => handleSwitchDemoRole('teacher')}
               disabled={Boolean(switchingRole)}
-              title="Masuk Akun Guru (Budi)"
+              title="Masuk Akun Guru Demo"
               className={cn(
                 'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'teacher'
@@ -206,13 +206,13 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
               )}
             >
               {switchingRole === 'teacher' && <Loader2 className="w-3 h-3 animate-spin" />}
-              <span>Guru</span>
+              <span>Guru Demo</span>
             </button>
             <button
               type="button"
               onClick={() => handleSwitchDemoRole('admin')}
               disabled={Boolean(switchingRole)}
-              title="Masuk Akun Admin (Raihan)"
+              title="Masuk Akun Admin Demo"
               className={cn(
                 'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'admin'
@@ -221,7 +221,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
               )}
             >
               {switchingRole === 'admin' && <Loader2 className="w-3 h-3 animate-spin" />}
-              <span>Admin</span>
+              <span>Admin Demo</span>
             </button>
           </div>
 

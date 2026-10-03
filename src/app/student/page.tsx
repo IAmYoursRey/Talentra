@@ -77,7 +77,7 @@ export default function StudentDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#261331] tracking-tight">
-              Selamat pagi, {user?.name.split(' ')[0] || 'Raihan'}
+              Selamat pagi, {user?.name.split(' ')[0] || 'Siswa'}
             </h1>
             <p className="text-sm text-[#6F607D] mt-1">
               Jejak karya kamu makin kuat. Lanjutkan momentum minggu ini.

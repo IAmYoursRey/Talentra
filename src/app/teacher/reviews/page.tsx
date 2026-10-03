@@ -35,10 +35,10 @@ export default function TeacherReviewQueuePage() {
   const fallbackQueue = [
     {
       id: 'p-1',
-      studentName: 'Raihan Ansari',
+      studentName: 'Dimas Pratama',
       studentClass: 'XII IPA 2',
       title: 'Website Waste2Wisdom',
-      initials: 'RA',
+      initials: 'DP',
       desc: 'Connecting waste, ideas, and local impact.',
       tags: ['WebDev', 'ProblemSolving', 'Teamwork'],
     },

@@ -40,7 +40,7 @@ export default function VerificationPage() {
         // Fallback verified result for demo token
         setData({
           status: 'verified',
-          studentName: 'Raihan Ansari',
+          studentName: 'Dimas Pratama',
           schoolName: 'SMAN 1 Ngoro',
           graduationYear: 2027,
           competencies: ['Web Development', 'Leadership', 'Communication'],
@@ -132,7 +132,7 @@ export default function VerificationPage() {
               <div className="flex items-center justify-between py-1.5 border-b border-[#E9E1F4]">
                 <span className="font-semibold text-[#6F607D]">Nama siswa</span>
                 <span className="font-bold text-sm text-[#261331]">
-                  {data?.studentDisplayName || 'Raihan Ansari'}
+                  {data?.studentDisplayName || 'Dimas Pratama'}
                 </span>
               </div>
 

@@ -2,9 +2,9 @@ import { UserProfile } from '../types/auth.types';
 
 export const MOCK_STUDENT: UserProfile = {
   id: 'usr_std_001',
-  name: 'Alya Rahma Azzahra',
+  name: 'Siswa Demo',
   role: 'student',
-  email: 'alya.rahma@student.talentra.id',
+  email: 'siswa.demo@talentra.id',
   schoolName: 'SMA Negeri 1 Teladan Jakarta',
   maskedIdentifier: 'NISN: *******321',
   className: 'XII RPL 1',
@@ -14,9 +14,9 @@ export const MOCK_STUDENT: UserProfile = {
 
 export const MOCK_TEACHER: UserProfile = {
   id: 'usr_tch_002',
-  name: 'Budi Santoso, S.Kom., M.Kom.',
+  name: 'Guru Demo',
   role: 'teacher',
-  email: 'budi.santoso@guru.talentra.id',
+  email: 'guru.demo@talentra.id',
   schoolName: 'SMA Negeri 1 Teladan Jakarta',
   maskedIdentifier: 'NIP: *******789',
   title: 'Guru Pembimbing & Validator RPL',
@@ -25,22 +25,22 @@ export const MOCK_TEACHER: UserProfile = {
 
 export const MOCK_ADMIN: UserProfile = {
   id: 'usr_adm_003',
-  name: 'Dra. Hj. Ratna Juwita, M.Pd.',
+  name: 'Admin Demo',
   role: 'admin',
-  email: 'admin.kurikulum@teladan.sch.id',
+  email: 'admin.demo@talentra.id',
   schoolName: 'SMA Negeri 1 Teladan Jakarta',
   maskedIdentifier: 'NPSN: *******543',
-  title: 'Koordinator Talenta & Kurikulum Sekolah',
+  title: 'Administrator Sekolah TALENTRA',
   avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
 };
 
 export const MOCK_ADMIN_RAIHAN: UserProfile = {
   id: 'usr_adm_raihan',
-  name: 'Raihan Ansari',
+  name: 'Admin Demo',
   role: 'admin',
-  email: 'raihanansari6678@gmail.com',
+  email: 'admin.demo@talentra.id',
   schoolName: 'SMA Negeri 1 Teladan Jakarta',
-  maskedIdentifier: 'EMAIL: *******6678@gmail.com',
+  maskedIdentifier: 'EMAIL: *******demo@talentra.id',
   title: 'Administrator Sekolah TALENTRA',
   avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
 };

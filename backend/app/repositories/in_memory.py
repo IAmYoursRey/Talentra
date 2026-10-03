@@ -128,7 +128,7 @@ class InMemoryIdentityRepository(IdentityRepository):
             school_id=demo_school.id,
             role=UserRole.ADMIN,
             status=UserStatus.ACTIVE,
-            display_name="Raihan Ansari",
+            display_name="Admin Demo",
             email="raihanansari6678@gmail.com",
             title="Administrator Sekolah TALENTRA",
             masked_identifier="EMAIL: *******6678@gmail.com",

@@ -214,7 +214,7 @@ async def seed_development_data(session_factory: async_sessionmaker[AsyncSession
                 school_id=school_id,
                 role="admin",
                 status="active",
-                display_name="Raihan Ansari",
+                display_name="Admin Demo",
                 email="raihanansari6678@gmail.com",
                 created_at=datetime.now(timezone.utc),
                 updated_at=datetime.now(timezone.utc),

@@ -20,7 +20,7 @@ export default function TeacherHistoryPage() {
     {
       id: 'h-1',
       date: '12 Sep 2026',
-      studentName: 'Raihan Ansari',
+      studentName: 'Dimas Pratama',
       projectTitle: 'Waste2Wisdom',
       status: 'endorsed',
     },

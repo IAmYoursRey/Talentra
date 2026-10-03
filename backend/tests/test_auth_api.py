@@ -99,7 +99,7 @@ async def test_raihan_admin_email_login_success():
         data = res.json()
         assert data["redirectTo"] == "/admin"
         assert data["user"]["role"] == "admin"
-        assert data["user"]["displayName"] == "Raihan Ansari"
+        assert data["user"]["displayName"] == "Admin Demo"
         assert data["user"]["email"] == "raihanansari6678@gmail.com"
         assert "talentra_session" in res.cookies
 

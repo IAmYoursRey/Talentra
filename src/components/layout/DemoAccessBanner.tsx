@@ -61,7 +61,7 @@ export const DemoAccessBanner: React.FC = () => {
           <span className="tracking-wide">AKUN DEMO AKTIF:</span>
         </span>
         <span className="text-slate-300">
-          <strong className="text-white">{currentUser?.name || 'Alya Rahma'}</strong> ({currentUser?.maskedIdentifier || 'NISN 008***'})
+          <strong className="text-white">{currentUser?.name || 'Siswa Demo'}</strong> ({currentUser?.maskedIdentifier || 'NISN 008***'})
         </span>
       </div>
 
@@ -84,7 +84,7 @@ export const DemoAccessBanner: React.FC = () => {
           ) : (
             <User className="w-3 h-3" />
           )}
-          <span>{switchingRole === 'student' ? 'Memuat...' : 'Siswa (Alya)'}</span>
+          <span>{switchingRole === 'student' ? 'Memuat...' : 'Siswa Demo'}</span>
           {currentRole === 'student' && !switchingRole && <Check className="w-3 h-3 ml-0.5" />}
         </button>
 
@@ -104,7 +104,7 @@ export const DemoAccessBanner: React.FC = () => {
           ) : (
             <GraduationCap className="w-3 h-3" />
           )}
-          <span>{switchingRole === 'teacher' ? 'Memuat...' : 'Guru (Budi)'}</span>
+          <span>{switchingRole === 'teacher' ? 'Memuat...' : 'Guru Demo'}</span>
           {currentRole === 'teacher' && !switchingRole && <Check className="w-3 h-3 ml-0.5" />}
         </button>
 
@@ -124,7 +124,7 @@ export const DemoAccessBanner: React.FC = () => {
           ) : (
             <ShieldCheck className="w-3 h-3" />
           )}
-          <span>{switchingRole === 'admin' ? 'Memuat...' : 'Admin (Raihan)'}</span>
+          <span>{switchingRole === 'admin' ? 'Memuat...' : 'Admin Demo'}</span>
           {currentRole === 'admin' && !switchingRole && <Check className="w-3 h-3 ml-0.5" />}
         </button>
       </div>

@@ -41,8 +41,8 @@ export default function TeacherDashboardPage() {
   const priorityQueue = [
     {
       id: 'p-1',
-      initials: 'RA',
-      name: 'Raihan Ansari',
+      initials: 'DP',
+      name: 'Dimas Pratama',
       project: 'Waste2Wisdom',
       class: 'XII IPA 2',
     },
