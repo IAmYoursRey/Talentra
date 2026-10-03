@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { authService } from '../../services/auth.service';
 import { UserRole, UserProfile } from '../../types/auth.types';
 import { useRouter } from 'next/navigation';
-import { Sparkles, User, GraduationCap, ShieldCheck, Check } from 'lucide-react';
+import { Sparkles, User, GraduationCap, ShieldCheck, Check, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export const DemoAccessBanner: React.FC = () => {
@@ -33,16 +33,20 @@ export const DemoAccessBanner: React.FC = () => {
     return unsubscribe;
   }, [isDemoAllowed]);
 
+  const [switchingRole, setSwitchingRole] = useState<UserRole | null>(null);
+
   if (!isDemoAllowed) {
     return null;
   }
 
   const handleRoleSwitch = async (role: UserRole) => {
+    if (switchingRole || role === currentRole) return;
+    setSwitchingRole(role);
     try {
       const res = await authService.demoLogin(role);
       router.push(res.redirectTo);
     } catch {
-      // Incurred error during role switch
+      setSwitchingRole(null);
     }
   };
 
@@ -67,46 +71,61 @@ export const DemoAccessBanner: React.FC = () => {
         <button
           type="button"
           onClick={() => handleRoleSwitch('student')}
+          disabled={Boolean(switchingRole)}
           className={cn(
-            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer',
+            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer disabled:opacity-50',
             currentRole === 'student'
               ? 'bg-brand-500 text-white shadow-2xs font-bold'
               : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
           )}
         >
-          <User className="w-3 h-3" />
-          <span>Siswa (Alya)</span>
-          {currentRole === 'student' && <Check className="w-3 h-3 ml-0.5" />}
+          {switchingRole === 'student' ? (
+            <Loader2 className="w-3 h-3 animate-spin text-white" />
+          ) : (
+            <User className="w-3 h-3" />
+          )}
+          <span>{switchingRole === 'student' ? 'Memuat...' : 'Siswa (Alya)'}</span>
+          {currentRole === 'student' && !switchingRole && <Check className="w-3 h-3 ml-0.5" />}
         </button>
 
         <button
           type="button"
           onClick={() => handleRoleSwitch('teacher')}
+          disabled={Boolean(switchingRole)}
           className={cn(
-            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer',
+            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer disabled:opacity-50',
             currentRole === 'teacher'
               ? 'bg-growth-600 text-white shadow-2xs font-bold'
               : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
           )}
         >
-          <GraduationCap className="w-3 h-3" />
-          <span>Guru (Budi)</span>
-          {currentRole === 'teacher' && <Check className="w-3 h-3 ml-0.5" />}
+          {switchingRole === 'teacher' ? (
+            <Loader2 className="w-3 h-3 animate-spin text-white" />
+          ) : (
+            <GraduationCap className="w-3 h-3" />
+          )}
+          <span>{switchingRole === 'teacher' ? 'Memuat...' : 'Guru (Budi)'}</span>
+          {currentRole === 'teacher' && !switchingRole && <Check className="w-3 h-3 ml-0.5" />}
         </button>
 
         <button
           type="button"
           onClick={() => handleRoleSwitch('admin')}
+          disabled={Boolean(switchingRole)}
           className={cn(
-            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer',
+            'inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer disabled:opacity-50',
             currentRole === 'admin'
               ? 'bg-intelligence-600 text-white shadow-2xs font-bold'
               : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
           )}
         >
-          <ShieldCheck className="w-3 h-3" />
-          <span>Admin (Raihan)</span>
-          {currentRole === 'admin' && <Check className="w-3 h-3 ml-0.5" />}
+          {switchingRole === 'admin' ? (
+            <Loader2 className="w-3 h-3 animate-spin text-white" />
+          ) : (
+            <ShieldCheck className="w-3 h-3" />
+          )}
+          <span>{switchingRole === 'admin' ? 'Memuat...' : 'Admin (Raihan)'}</span>
+          {currentRole === 'admin' && !switchingRole && <Check className="w-3 h-3 ml-0.5" />}
         </button>
       </div>
     </aside>

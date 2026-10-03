@@ -81,6 +81,23 @@ body {
   outline-offset: 2px;
 }
 
+/* Indeterminate progress bar animation */
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(40%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-indeterminate {
+  animation: indeterminate 1.4s infinite cubic-bezier(0.65, 0.815, 0.735, 0.395);
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,

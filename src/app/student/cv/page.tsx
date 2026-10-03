@@ -14,6 +14,7 @@ import {
   Check,
   Sparkles,
   ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '../../../lib/utils';
@@ -266,8 +267,17 @@ export default function StudentCVPage() {
                 disabled={isGenerating}
                 className="w-full py-3.5 rounded-xl tal-btn-primary font-bold text-sm shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform disabled:opacity-50"
               >
-                <FileCheck2 className="w-4 h-4" />
-                <span>{isGenerating ? 'Menerbitkan CV...' : 'Generate CV PDF'}</span>
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Menerbitkan CV...</span>
+                  </>
+                ) : (
+                  <>
+                    <FileCheck2 className="w-4 h-4" />
+                    <span>Generate CV PDF</span>
+                  </>
+                )}
               </button>
 
               {generatedCv && (

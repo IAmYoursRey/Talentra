@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
 import './globals.css';
+import { TopProgressBar } from '../components/common/TopProgressBar';
 
 export const metadata: Metadata = {
   title: 'TALENTRA.ID — Portofolio Digital Pintar Siswa',
@@ -37,6 +39,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800">
+        <Suspense fallback={null}>
+          <TopProgressBar />
+        </Suspense>
         {children}
       </body>
     </html>

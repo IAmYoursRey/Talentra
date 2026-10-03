@@ -129,6 +129,7 @@ export default function StudentDashboardPage() {
             value={approvedWorks}
             subtext="+3 semester ini"
             icon={CheckCircle2}
+            href="/student/portfolio"
           />
           <MetricCard
             indexNumber={2}
@@ -136,6 +137,7 @@ export default function StudentDashboardPage() {
             value={mappedSkills}
             subtext="6 skill kuat"
             icon={Radar}
+            href="/student/skills"
           />
           <MetricCard
             indexNumber={3}
@@ -143,6 +145,7 @@ export default function StudentDashboardPage() {
             value={`${cvReadiness}%`}
             subtext="Siap dilengkapi"
             icon={FileCheck2}
+            href="/student/cv"
           />
           <MetricCard
             indexNumber={4}
@@ -150,6 +153,7 @@ export default function StudentDashboardPage() {
             value={recommendationCount}
             subtext="Diperbarui"
             icon={Sparkles}
+            href="/student/career"
           />
         </div>
 

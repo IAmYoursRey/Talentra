@@ -25,6 +25,7 @@ import {
   Layers,
   FileCheck2,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -46,6 +47,7 @@ export default function TeacherReviewDetailPage() {
   const [feedbackNote, setFeedbackNote] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingAction, setSubmittingAction] = useState<DecisionAction | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [actionSuccessBanner, setActionSuccessBanner] = useState('');
 
@@ -84,6 +86,7 @@ export default function TeacherReviewDetailPage() {
   const executeDecision = async (action: DecisionAction, note?: string) => {
     if (!item) return;
     setIsSubmitting(true);
+    setSubmittingAction(action);
     setErrorMsg('');
 
     try {
@@ -115,6 +118,7 @@ export default function TeacherReviewDetailPage() {
       setErrorMsg(err.message || 'Gagal menyimpan keputusan validasi.');
     } finally {
       setIsSubmitting(false);
+      setSubmittingAction(null);
     }
   };
 
@@ -301,8 +305,17 @@ export default function TeacherReviewDetailPage() {
                     onClick={handleEndorse}
                     className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-endorse-500 hover:bg-endorse-600 text-white font-semibold text-xs sm:text-sm transition-colors shadow-xs focus:ring-2 focus:ring-endorse-500 disabled:opacity-50"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Setujui Portofolio (Endorse / ACC)</span>
+                    {submittingAction === 'endorse' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                        <span>Memproses ACC...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Setujui Portofolio (Endorse / ACC)</span>
+                      </>
+                    )}
                   </button>
 
                   {/* Request Revision Button (Amber) */}
@@ -312,8 +325,17 @@ export default function TeacherReviewDetailPage() {
                     onClick={handleRequestRevision}
                     className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-revision-500 hover:bg-revision-600 text-white font-semibold text-xs sm:text-sm transition-colors shadow-xs focus:ring-2 focus:ring-revision-500 disabled:opacity-50"
                   >
-                    <AlertTriangle className="w-4 h-4" />
-                    <span>Minta Perbaikan (Request Revision)</span>
+                    {submittingAction === 'request_revision' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                        <span>Mengirim Catatan Revisi...</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>Minta Perbaikan (Request Revision)</span>
+                      </>
+                    )}
                   </button>
 
                   {/* Reject Button (Red - triggers confirmation dialog) */}
@@ -323,8 +345,17 @@ export default function TeacherReviewDetailPage() {
                     onClick={() => setIsRejectDialogOpen(true)}
                     className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-reject-200 bg-reject-50 hover:bg-reject-100 text-reject-700 font-semibold text-xs transition-colors focus:ring-2 focus:ring-reject-500 disabled:opacity-50"
                   >
-                    <XCircle className="w-4 h-4" />
-                    <span>Tolak Portofolio (Reject)</span>
+                    {submittingAction === 'reject' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-reject-700" />
+                        <span>Menolak Portofolio...</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-4 h-4" />
+                        <span>Tolak Portofolio (Reject)</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

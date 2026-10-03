@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, X, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface ConfirmDialogProps {
@@ -110,12 +110,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             onClick={onConfirm}
             disabled={isSubmitting}
             className={cn(
-              'px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-xs focus:outline-none focus:ring-2 focus:ring-offset-1',
+              'px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-xs focus:outline-none focus:ring-2 focus:ring-offset-1 inline-flex items-center gap-1.5',
               currentVariant.btn,
               isSubmitting && 'opacity-60 cursor-not-allowed'
             )}
           >
-            {isSubmitting ? 'Memproses...' : confirmLabel}
+            {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />}
+            <span>{isSubmitting ? 'Memproses...' : confirmLabel}</span>
           </button>
         </div>
       </div>

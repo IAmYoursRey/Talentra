@@ -102,6 +102,7 @@ export default function TeacherDashboardPage() {
             value="18"
             subtext="+5 hari ini"
             icon={Inbox}
+            href="/teacher/reviews"
           />
           <MetricCard
             indexNumber={2}
@@ -109,6 +110,7 @@ export default function TeacherDashboardPage() {
             value="146"
             subtext="semester ini"
             icon={CheckCircle2}
+            href="/teacher/history"
           />
           <MetricCard
             indexNumber={3}
@@ -116,6 +118,7 @@ export default function TeacherDashboardPage() {
             value="3"
             subtext="92 siswa"
             icon={School}
+            href="/teacher/classes"
           />
         </div>
 

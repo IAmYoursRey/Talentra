@@ -64,6 +64,7 @@ export default function AdminDashboardPage() {
             value="842"
             subtext="+6.2%"
             icon={GraduationCap}
+            href="/admin/users"
           />
           <MetricCard
             indexNumber={2}
@@ -71,6 +72,7 @@ export default function AdminDashboardPage() {
             value="2,481"
             subtext="+184"
             icon={CheckCircle2}
+            href="/admin/heatmap"
           />
           <MetricCard
             indexNumber={3}
@@ -78,6 +80,7 @@ export default function AdminDashboardPage() {
             value="54"
             subtext="92% aktif"
             icon={Users}
+            href="/admin/users"
           />
           <MetricCard
             indexNumber={4}
@@ -85,6 +88,7 @@ export default function AdminDashboardPage() {
             value="316"
             subtext="+31 bulan ini"
             icon={FileCheck2}
+            href="/admin/classes"
           />
         </div>
 

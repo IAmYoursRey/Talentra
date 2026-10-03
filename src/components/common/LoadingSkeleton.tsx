@@ -13,7 +13,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ className, row
         <div
           key={i}
           className={cn(
-            'bg-slate-200/80 rounded-md',
+            'bg-gradient-to-r from-purple-100/70 via-purple-50/90 to-purple-100/70 rounded-xl',
             i === 0 ? 'h-6 w-1/3 mb-4' : 'h-4',
             i === 1 ? 'w-full' : '',
             i === 2 ? 'w-4/5' : '',

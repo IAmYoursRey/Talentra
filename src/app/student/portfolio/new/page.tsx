@@ -15,6 +15,7 @@ import {
   Sparkles,
   Send,
   FileText,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '../../../../lib/utils';
@@ -300,8 +301,17 @@ export default function NewPortfolioPage() {
               disabled={isSubmitting}
               className="w-full py-3.5 rounded-xl tal-btn-primary font-bold text-sm shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform disabled:opacity-50"
             >
-              <Send className="w-4 h-4" />
-              <span>{isSubmitting ? 'Mengirim...' : 'Kirim ke guru'}</span>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Mengirim Karya...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>Kirim ke guru</span>
+                </>
+              )}
             </button>
           </form>
 

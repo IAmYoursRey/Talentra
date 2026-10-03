@@ -17,8 +17,10 @@ import {
   Clock,
   ExternalLink,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { cn } from '../../lib/utils';
 
 interface HeaderProps {
@@ -36,10 +38,12 @@ interface NotificationItem {
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobileMenu }) => {
+  const router = useRouter();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [unreadNotif, setUnreadNotif] = useState(true);
+  const [switchingRole, setSwitchingRole] = useState<UserRole | null>(null);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -76,11 +80,13 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
   };
 
   const handleSwitchDemoRole = async (targetRole: UserRole) => {
+    if (switchingRole || targetRole === currentUser.role) return;
+    setSwitchingRole(targetRole);
     try {
       const res = await authService.demoLogin(targetRole);
-      window.location.href = res.redirectTo;
+      router.push(res.redirectTo);
     } catch {
-      // Fallback
+      setSwitchingRole(null);
     }
   };
 
@@ -175,41 +181,47 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
             <button
               type="button"
               onClick={() => handleSwitchDemoRole('student')}
+              disabled={Boolean(switchingRole)}
               title="Masuk Akun Siswa (Alya)"
               className={cn(
-                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all',
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'student'
                   ? 'bg-[#6D28D9] text-white shadow-2xs'
                   : 'text-purple-700 hover:bg-purple-100'
               )}
             >
-              Siswa
+              {switchingRole === 'student' && <Loader2 className="w-3 h-3 animate-spin" />}
+              <span>Siswa</span>
             </button>
             <button
               type="button"
               onClick={() => handleSwitchDemoRole('teacher')}
+              disabled={Boolean(switchingRole)}
               title="Masuk Akun Guru (Budi)"
               className={cn(
-                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all',
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'teacher'
                   ? 'bg-growth-600 text-white shadow-2xs'
                   : 'text-purple-700 hover:bg-purple-100'
               )}
             >
-              Guru
+              {switchingRole === 'teacher' && <Loader2 className="w-3 h-3 animate-spin" />}
+              <span>Guru</span>
             </button>
             <button
               type="button"
               onClick={() => handleSwitchDemoRole('admin')}
+              disabled={Boolean(switchingRole)}
               title="Masuk Akun Admin (Raihan)"
               className={cn(
-                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all',
+                'px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 disabled:opacity-50',
                 currentUser.role === 'admin'
                   ? 'bg-intelligence-600 text-white shadow-2xs'
                   : 'text-purple-700 hover:bg-purple-100'
               )}
             >
-              Admin
+              {switchingRole === 'admin' && <Loader2 className="w-3 h-3 animate-spin" />}
+              <span>Admin</span>
             </button>
           </div>
 
@@ -375,14 +387,16 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, title, onOpenMobile
                         key={r}
                         type="button"
                         onClick={() => handleSwitchDemoRole(r)}
+                        disabled={Boolean(switchingRole)}
                         className={cn(
-                          'py-1 px-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center capitalize',
+                          'py-1 px-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center capitalize inline-flex items-center justify-center gap-1 disabled:opacity-50',
                           currentUser.role === r
                             ? 'bg-brand-500 text-white border-brand-500'
                             : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
                         )}
                       >
-                        {r === 'student' ? 'Siswa' : r === 'teacher' ? 'Guru' : 'Admin'}
+                        {switchingRole === r && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+                        <span>{r === 'student' ? 'Siswa' : r === 'teacher' ? 'Guru' : 'Admin'}</span>
                       </button>
                     ))}
                   </div>

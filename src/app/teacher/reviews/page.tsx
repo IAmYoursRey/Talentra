@@ -14,6 +14,7 @@ import {
   Check,
   ChevronRight,
   ShieldCheck,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -29,6 +30,7 @@ export default function TeacherReviewQueuePage() {
   const [teacherNotes, setTeacherNotes] = useState('Tambahkan dokumentasi proses testing.');
   const [actionNotice, setActionNotice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingAction, setSubmittingAction] = useState<'endorse' | 'revision' | 'reject' | null>(null);
 
   const fallbackQueue = [
     {
@@ -81,9 +83,12 @@ export default function TeacherReviewQueuePage() {
   const currentItem = fallbackQueue.find((q) => q.id === selectedId) || fallbackQueue[0];
 
   const handleAction = (decision: 'endorse' | 'revision' | 'reject') => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
+    setSubmittingAction(decision);
     setTimeout(() => {
       setIsSubmitting(false);
+      setSubmittingAction(null);
       if (decision === 'endorse') {
         setActionNotice(`Karya "${currentItem.title}" berhasil di-Endorse dan diproyeksikan ke Skill Map siswa.`);
       } else if (decision === 'revision') {
@@ -92,7 +97,7 @@ export default function TeacherReviewQueuePage() {
         setActionNotice(`Karya "${currentItem.title}" telah ditolak dengan catatan.`);
       }
       setTimeout(() => setActionNotice(''), 4000);
-    }, 500);
+    }, 600);
   };
 
   return (
@@ -274,26 +279,37 @@ export default function TeacherReviewQueuePage() {
                 type="button"
                 onClick={() => handleAction('reject')}
                 disabled={isSubmitting}
-                className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition-colors"
+                className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
               >
-                Tolak
+                {submittingAction === 'reject' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{submittingAction === 'reject' ? 'Menolak...' : 'Tolak'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleAction('revision')}
                 disabled={isSubmitting}
-                className="px-5 py-2.5 rounded-xl border border-amber-200 text-amber-700 hover:bg-amber-50 font-bold text-xs transition-colors"
+                className="px-5 py-2.5 rounded-xl border border-amber-200 text-amber-700 hover:bg-amber-50 font-bold text-xs transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
               >
-                Minta revisi
+                {submittingAction === 'revision' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{submittingAction === 'revision' ? 'Mengirim...' : 'Minta revisi'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleAction('endorse')}
                 disabled={isSubmitting}
-                className="flex-1 py-2.5 rounded-xl tal-btn-primary font-bold text-xs shadow-md flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-xl tal-btn-primary font-bold text-xs shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Check className="w-4 h-4" />
-                <span>Endorse karya</span>
+                {submittingAction === 'endorse' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Memproses Endorse...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Endorse karya</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

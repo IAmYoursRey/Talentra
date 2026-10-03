@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { authService } from '../../services/auth.service';
-import { X, Lock, CheckCircle2, AlertCircle, Eye, EyeOff, KeyRound } from 'lucide-react';
+import { X, Lock, CheckCircle2, AlertCircle, Eye, EyeOff, KeyRound, Loader2 } from 'lucide-react';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -190,7 +190,11 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
               disabled={isLoading}
               className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:bg-brand-300 text-white text-xs font-semibold shadow-xs transition-colors"
             >
-              <Lock className="w-3.5 h-3.5" />
+              {isLoading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+              ) : (
+                <Lock className="w-3.5 h-3.5" />
+              )}
               <span>{isLoading ? 'Menyimpan...' : 'Perbarui Kata Sandi'}</span>
             </button>
           </div>

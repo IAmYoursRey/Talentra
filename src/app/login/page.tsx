@@ -18,8 +18,11 @@ import {
   FileCheck2,
   User,
   GraduationCap,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+
+type SubmittingTarget = 'student' | 'teacher' | 'admin' | 'form' | null;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,6 +30,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingTarget, setSubmittingTarget] = useState<SubmittingTarget>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [showFlowModal, setShowFlowModal] = useState(false);
 
@@ -38,6 +42,7 @@ export default function LoginPage() {
     }
     setErrorMsg('');
     setIsSubmitting(true);
+    setSubmittingTarget('form');
 
     try {
       const res = await authService.login(identifier, password);
@@ -46,11 +51,14 @@ export default function LoginPage() {
       const msg = err instanceof Error ? err.message : 'ID pengguna atau kata sandi tidak sesuai.';
       setErrorMsg(msg);
       setIsSubmitting(false);
+      setSubmittingTarget(null);
     }
   };
 
   const handleQuickRole = async (role: UserRole) => {
+    if (submittingTarget) return;
     setIsSubmitting(true);
+    setSubmittingTarget(role);
     setErrorMsg('');
     const demoCreds: Record<UserRole, { id: string; pwd: string }> = {
       student: { id: '0081234567', pwd: 'PasswordSiswa123!' },
@@ -69,6 +77,7 @@ export default function LoginPage() {
       const msg = err instanceof Error ? err.message : 'Gagal mengakses akun demo.';
       setErrorMsg(msg);
       setIsSubmitting(false);
+      setSubmittingTarget(null);
     }
   };
 
@@ -122,11 +131,19 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => handleQuickRole('student')}
-                  disabled={isSubmitting}
-                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center gap-1.5"
+                  disabled={Boolean(submittingTarget)}
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Masuk Akun Demo (1-Klik)</span>
+                  {submittingTarget === 'student' ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 text-amber-300" />
+                  )}
+                  <span>
+                    {submittingTarget === 'student'
+                      ? 'Memuat Akun Siswa...'
+                      : 'Masuk Akun Demo (1-Klik)'}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -232,11 +249,20 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={Boolean(submittingTarget)}
                 className="w-full py-3.5 px-4 rounded-xl tal-btn-primary font-bold text-sm tracking-wide shadow-md flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
               >
-                <span>{isSubmitting ? 'Memproses...' : 'Masuk ke TALENTRA'}</span>
-                <ArrowRight className="w-4 h-4" />
+                {submittingTarget === 'form' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Memvalidasi Sesi...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Masuk ke TALENTRA</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </form>
 
@@ -259,10 +285,31 @@ export default function LoginPage() {
               {/* 3 Dedicated Demo Account Cards */}
               <div className="space-y-2.5">
                 {/* 1. Akun Siswa */}
-                <div className="bg-[#FAF7FD] hover:bg-[#F3E8FF] border border-[#E9E1F4] hover:border-[#8B5CF6] rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleQuickRole('student')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleQuickRole('student');
+                    }
+                  }}
+                  className={cn(
+                    'bg-[#FAF7FD] hover:bg-[#F3E8FF] border rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#8B5CF6]',
+                    submittingTarget === 'student'
+                      ? 'border-[#8B5CF6] ring-2 ring-purple-200 bg-[#F3E8FF]'
+                      : 'border-[#E9E1F4] hover:border-[#8B5CF6]',
+                    Boolean(submittingTarget && submittingTarget !== 'student') && 'opacity-60 pointer-events-none'
+                  )}
+                >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-purple-100 text-[#6D28D9] flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
-                      <User className="w-5 h-5" />
+                      {submittingTarget === 'student' ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-[#6D28D9]" />
+                      ) : (
+                        <User className="w-5 h-5" />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -272,22 +319,52 @@ export default function LoginPage() {
                       <p className="text-[11px] text-[#6F607D] truncate">NISN: 0081234567 • XII RPL 1</p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickRole('student')}
-                    disabled={isSubmitting}
-                    className="px-3.5 py-2 rounded-xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                  <div
+                    className={cn(
+                      'px-3.5 py-2 rounded-xl text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1.5',
+                      submittingTarget === 'student' ? 'bg-[#5B21B6]' : 'bg-[#6D28D9] group-hover:bg-[#5B21B6]'
+                    )}
                   >
-                    <span>Masuk</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                    {submittingTarget === 'student' ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                        <span>Memuat...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Masuk</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* 2. Akun Guru */}
-                <div className="bg-[#FAF7FD] hover:bg-[#ECFDF5] border border-[#E9E1F4] hover:border-emerald-400 rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleQuickRole('teacher')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleQuickRole('teacher');
+                    }
+                  }}
+                  className={cn(
+                    'bg-[#FAF7FD] hover:bg-[#ECFDF5] border rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500',
+                    submittingTarget === 'teacher'
+                      ? 'border-emerald-500 ring-2 ring-emerald-200 bg-[#ECFDF5]'
+                      : 'border-[#E9E1F4] hover:border-emerald-400',
+                    Boolean(submittingTarget && submittingTarget !== 'teacher') && 'opacity-60 pointer-events-none'
+                  )}
+                >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
-                      <GraduationCap className="w-5 h-5" />
+                      {submittingTarget === 'teacher' ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-emerald-700" />
+                      ) : (
+                        <GraduationCap className="w-5 h-5" />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -297,22 +374,52 @@ export default function LoginPage() {
                       <p className="text-[11px] text-[#6F607D] truncate">NIP: 19850101... • Pembimbing 3 Kelas</p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickRole('teacher')}
-                    disabled={isSubmitting}
-                    className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                  <div
+                    className={cn(
+                      'px-3.5 py-2 rounded-xl text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1.5',
+                      submittingTarget === 'teacher' ? 'bg-emerald-700' : 'bg-emerald-600 group-hover:bg-emerald-700'
+                    )}
                   >
-                    <span>Masuk</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                    {submittingTarget === 'teacher' ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                        <span>Memuat...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Masuk</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* 3. Akun Admin */}
-                <div className="bg-[#FAF7FD] hover:bg-[#F3E8FF] border border-[#E9E1F4] hover:border-purple-400 rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleQuickRole('admin')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleQuickRole('admin');
+                    }
+                  }}
+                  className={cn(
+                    'bg-[#FAF7FD] hover:bg-[#F3E8FF] border rounded-2xl p-3.5 transition-all shadow-xs flex items-center justify-between gap-3 group cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-500',
+                    submittingTarget === 'admin'
+                      ? 'border-purple-500 ring-2 ring-purple-200 bg-[#F3E8FF]'
+                      : 'border-[#E9E1F4] hover:border-purple-400',
+                    Boolean(submittingTarget && submittingTarget !== 'admin') && 'opacity-60 pointer-events-none'
+                  )}
+                >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-purple-100 text-[#9333EA] flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
-                      <ShieldCheck className="w-5 h-5" />
+                      {submittingTarget === 'admin' ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-[#9333EA]" />
+                      ) : (
+                        <ShieldCheck className="w-5 h-5" />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -322,15 +429,24 @@ export default function LoginPage() {
                       <p className="text-[11px] text-[#6F607D] truncate">Admin Sekolah • SMKN 1 Jakarta</p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickRole('admin')}
-                    disabled={isSubmitting}
-                    className="px-3.5 py-2 rounded-xl bg-[#9333EA] hover:bg-[#7E22CE] text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                  <div
+                    className={cn(
+                      'px-3.5 py-2 rounded-xl text-white text-xs font-bold shadow-xs transition-all shrink-0 flex items-center gap-1.5',
+                      submittingTarget === 'admin' ? 'bg-[#7E22CE]' : 'bg-[#9333EA] group-hover:bg-[#7E22CE]'
+                    )}
                   >
-                    <span>Masuk</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                    {submittingTarget === 'admin' ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                        <span>Memuat...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Masuk</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

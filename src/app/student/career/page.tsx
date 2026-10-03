@@ -100,48 +100,62 @@ export default function StudentCareerPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Recommendations List (7 cols) */}
           <div className="lg:col-span-7 space-y-4">
-            {defaultPaths.map((path, idx) => (
-              <div
-                key={path.rank}
-                onClick={() => setSelectedPathIndex(idx)}
-                className={`bg-white rounded-[18px] border p-6 shadow-[0_4px_16px_rgba(76,29,149,0.06)] hover:shadow-[0_8px_24px_rgba(76,29,149,0.12)] transition-all cursor-pointer tal-card-hover ${
-                  selectedPathIndex === idx ? 'border-[#8B5CF6] ring-2 ring-purple-100' : 'border-[#E9E1F4]'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <span className="w-8 h-8 rounded-xl bg-[#F3E8FF] text-[#6D28D9] font-black text-sm flex items-center justify-center shrink-0">
-                      {path.rank}
-                    </span>
-                    <div>
-                      <h3 className="text-base font-extrabold text-[#261331]">
-                        {path.title}
-                      </h3>
-                      <p className="text-xs text-[#6F607D] mt-0.5">
-                        {path.category}
-                      </p>
+            {isLoading ? (
+              <div className="bg-white rounded-[18px] border border-[#E9E1F4] p-6 shadow-[0_4px_16px_rgba(76,29,149,0.06)]">
+                <LoadingSkeleton rows={4} />
+              </div>
+            ) : (
+              defaultPaths.map((path, idx) => (
+                <div
+                  key={path.rank}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedPathIndex(idx)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedPathIndex(idx);
+                    }
+                  }}
+                  className={`bg-white rounded-[18px] border p-6 shadow-[0_4px_16px_rgba(76,29,149,0.06)] hover:shadow-[0_8px_24px_rgba(76,29,149,0.12)] transition-all cursor-pointer tal-card-hover focus-visible:ring-2 focus-visible:ring-[#8B5CF6] ${
+                    selectedPathIndex === idx ? 'border-[#8B5CF6] ring-2 ring-purple-100' : 'border-[#E9E1F4]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <span className="w-8 h-8 rounded-xl bg-[#F3E8FF] text-[#6D28D9] font-black text-sm flex items-center justify-center shrink-0">
+                        {path.rank}
+                      </span>
+                      <div>
+                        <h3 className="text-base font-extrabold text-[#261331]">
+                          {path.title}
+                        </h3>
+                        <p className="text-xs text-[#6F607D] mt-0.5">
+                          {path.category}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="text-xl font-black text-[#6D28D9]">
+                        {path.match}%
+                      </span>
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-xl font-black text-[#6D28D9]">
-                      {path.match}%
-                    </span>
+                  <div className="mt-4 pt-3 border-t border-[#E9E1F4] flex items-center justify-between text-xs">
+                    <Link
+                      href="/student/portfolio"
+                      className="font-bold text-[#6D28D9] hover:text-[#8B5CF6] inline-flex items-center gap-1"
+                    >
+                      <span>Lihat evidence</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                    <span className="text-[11px] text-[#9584A7]">Provenansi tervalidasi</span>
                   </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-[#E9E1F4] flex items-center justify-between text-xs">
-                  <Link
-                    href="/student/portfolio"
-                    className="font-bold text-[#6D28D9] hover:text-[#8B5CF6] inline-flex items-center gap-1"
-                  >
-                    <span>Lihat evidence</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                  <span className="text-[11px] text-[#9584A7]">Provenansi tervalidasi</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Right Column: Grounded Rationale Card (5 cols) */}
