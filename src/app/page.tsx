@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '../services/auth.service';
+import { CircularLogoSpinner } from '../components/common/CircularLogoSpinner';
 
 export default function HomePage() {
   const router = useRouter();
@@ -26,14 +27,7 @@ export default function HomePage() {
       className="min-h-screen bg-[#FCFBFF] flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-150"
     >
       <div className="relative flex flex-col items-center max-w-sm text-center space-y-5">
-        <div className="relative w-20 h-20 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-[#6D28D9] via-[#8B5CF6] to-[#C084FC] opacity-30 blur-xl animate-pulse" />
-          <div className="absolute -inset-1.5 rounded-[28px] border-2 border-transparent border-t-[#8B5CF6] border-r-[#C084FC] animate-spin" />
-          <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2E1065] via-[#4C1D95] to-[#6D28D9] flex items-center justify-center font-black text-white text-2xl shadow-xl shadow-purple-950/20 border border-purple-400/30">
-            T
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#C084FC] ring-2 ring-[#2E1065]" />
-          </div>
-        </div>
+        <CircularLogoSpinner size="lg" />
         <div className="space-y-1.5">
           <h2 className="text-base font-extrabold text-[#261331] tracking-tight">
             Mengarahkan ke TALENTRA.ID...

@@ -10,6 +10,7 @@ import { DemoAccessBanner } from './DemoAccessBanner';
 import { ForbiddenState } from '../common/ForbiddenState';
 import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { PageLoadingCover } from '../common/PageLoadingCover';
+import { CircularLogoSpinner } from '../common/CircularLogoSpinner';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { X } from 'lucide-react';
 
@@ -32,9 +33,10 @@ export const AppShell: React.FC<AppShellProps> = ({
 }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isMounted, setIsMounted] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => authService.getCurrentUser());
-  const [isLoading, setIsLoading] = useState(() => !authService.getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
@@ -68,38 +70,47 @@ export const AppShell: React.FC<AppShellProps> = ({
   }, [pathname]);
 
   useEffect(() => {
-    let isMounted = true;
+    setIsMounted(true);
+    let active = true;
+
+    const cached = authService.getCurrentUser();
+    if (cached) {
+      setCurrentUser(cached);
+      setIsLoading(false);
+    }
 
     authService.getCurrentSession().then((session) => {
-      if (isMounted) {
-        setCurrentUser(session.user);
+      if (active) {
+        if (session.user) {
+          setCurrentUser(session.user);
+        }
         setIsLoading(false);
       }
     });
 
     // Safety timeout: never block navigation for more than 400ms
     const timer = setTimeout(() => {
-      if (isMounted) {
+      if (active) {
         setIsLoading(false);
       }
     }, 400);
 
     const unsubscribe = authService.subscribeSession(() => {
       authService.getCurrentSession().then((session) => {
-        if (isMounted) {
+        if (active && session.user) {
           setCurrentUser(session.user);
         }
       });
     });
 
     return () => {
-      isMounted = false;
+      active = false;
       clearTimeout(timer);
       unsubscribe();
     };
   }, []);
 
-  if (isLoading || !currentUser) {
+  if (!isMounted || isLoading || !currentUser) {
     return (
       <div
         role="status"
@@ -107,14 +118,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         className="min-h-screen bg-[#FCFBFF] flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-150"
       >
         <div className="relative flex flex-col items-center max-w-sm text-center space-y-5">
-          <div className="relative w-20 h-20 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-[#6D28D9] via-[#8B5CF6] to-[#C084FC] opacity-30 blur-xl animate-pulse" />
-            <div className="absolute -inset-1.5 rounded-[28px] border-2 border-transparent border-t-[#8B5CF6] border-r-[#C084FC] animate-spin" />
-            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2E1065] via-[#4C1D95] to-[#6D28D9] flex items-center justify-center font-black text-white text-2xl shadow-xl shadow-purple-950/20 border border-purple-400/30">
-              T
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#C084FC] ring-2 ring-[#2E1065]" />
-            </div>
-          </div>
+          <CircularLogoSpinner size="lg" />
           <div className="space-y-1.5">
             <h2 className="text-base font-extrabold text-[#261331] tracking-tight">
               Memuat Sesi...
